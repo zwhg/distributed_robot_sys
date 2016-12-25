@@ -1,4 +1,4 @@
-
+新建文件夹 distributed_robot_sys,进如该文件夹，git clone ...
 
 a_robot_platform 功能说明
 src/中包含客户端和服务器
@@ -28,6 +28,10 @@ publish:
 广播odom->base_link的tf变换
 
 src/client 中qt_client为qt上位机程序。可用qt(community)版本直接打开
+功能：
+1.tcp 连接server 端口号9527
+2.键盘控制指令下发，wasd，zxcv
+
 
 
 
