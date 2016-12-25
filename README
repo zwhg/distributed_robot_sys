@@ -1,0 +1,34 @@
+
+
+a_robot_platform 功能说明
+src/中包含客户端和服务器
+
+###所有参数需定义在common/modbus.h与common/modbus.cpp中
+###添加参数，还需修改server/uartodompthread.cpp中的DoPthread()函数
+### 读取参数modbus.get()/set()(全局变量，可直接引用)
+
+包a_robot_platform含两个节点
+1、main_uart_laser
+
+input arg: /dev/ttyUSBx
+通过串口，解析雷神激光数据.
+publish:
+发布雷达消息sensor_msgs::LaserScan，主题scan，坐标系laser_link.
+subscribe:
+订阅std_msgs::Int32消息，主题main_uart_laser/startOrstop(1是start，控制激光开关).
+
+2、main_uart_odom
+input arg: /dev/ttyUSBx
+通过串口，与机器人本体相连，实时控制机器人各项参数.
+作为tcp服务器，与客户端相连，端口号9527，客户端可定时查看已定义的数据类型.
+
+publish:
+发布nav_msgs::Odometry消息,主题odom,坐标系odom,子坐标系base_link;
+发布sensor_msgs::Imu消息，主题imu,坐标系imu_link
+广播odom->base_link的tf变换
+
+src/client 中qt_client为qt上位机程序。可用qt(community)版本直接打开
+
+
+
+
