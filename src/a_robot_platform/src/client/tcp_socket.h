@@ -4,8 +4,8 @@
 
 #include <QtNetwork/QTcpSocket>
 #include <QObject>
+#include "../../common/paras.h"
 #include "../../common/modbus.h"
-#include "../../common/paramodbus.h"
 
 namespace zw {
 
@@ -24,7 +24,7 @@ namespace zw {
        Q_OBJECT
 
        public:
-           ParaModbus m_paraModbus ;
+           Modbus m_modbus ;
            bool doConnect;
            ConnectStatus m_connectStatus;
            std::string host ;

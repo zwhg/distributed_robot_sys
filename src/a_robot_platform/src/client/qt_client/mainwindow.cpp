@@ -2,7 +2,7 @@
 #include "ui_mainwindow.h"
 #include <QTimer>
 #include <QString>
-#include "../../common/modbus.h"
+#include "../../common/paras.h"
 
 
 
@@ -14,6 +14,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
 {
     ui->setupUi(this);
+    ui->lEdit_ip->setText(QString::fromStdString(zw::SERVER_IP));
 
     m_tcpSocketClient->host =ui->lEdit_ip->text().toStdString();
     m_tcpSocketClient->port =ui->lEdit_port->text().toUShort();
@@ -79,7 +80,7 @@ void MainWindow::on_cmdTimerUpdate(void)
         m_tcpSocketClient->SendMsg(msgInfo);
     }
 
-    msgInfo={zw::R_HOLDING_REGISTER,5,zw::MSG_CONTROL,nullptr};
+    msgInfo={zw::R_HOLDING_REGISTER,2,zw::MSG_CONTROL,nullptr};
     m_tcpSocketClient->SendMsg(msgInfo);
 
     msgInfo={zw::R_HOLDING_REGISTER,6,zw::MSG_IMU,nullptr};
@@ -98,9 +99,10 @@ void MainWindow::KeyControlMsgRefalsh(const zw::KeyControlMsg & kMsg)
 
 void MainWindow::MsgControlRefalsh(void)
 {
+    zw::Paras m_para;
     int32_t dat[2];
     zw::ParaGetSet  packInfo = {zw::R_HOLDING_REGISTER,2,zw::MSG_CONTROL,dat};
-    zw::modbus.GetAddressValue(packInfo);
+    m_para.GetAddressValue(packInfo);
     zw::Float2Int32 ff;
     ff.i=dat[0];
     ui->lbl_vel_ret->setText(QString::number(ff.f,'f',2));
@@ -110,15 +112,16 @@ void MainWindow::MsgControlRefalsh(void)
 
 void MainWindow::MsgImuRefalsh(void)
 {
+    zw::Paras m_para;
     int32_t dat[6];
     zw::ParaGetSet  packInfo = {zw::R_HOLDING_REGISTER,6,zw::MSG_IMU,dat};
-    zw::modbus.GetAddressValue(packInfo);
+    m_para.GetAddressValue(packInfo);
     ui->lbl_acc_x->setText(QString::number(dat[0]));
     ui->lbl_acc_y->setText(QString::number(dat[1]));
     ui->lbl_acc_z->setText(QString::number(dat[2]));
     ui->lbl_gyr_x->setText(QString::number(dat[3]));
-    ui->lbl_gyr_x->setText(QString::number(dat[4]));
-    ui->lbl_gyr_x->setText(QString::number(dat[5]));
+    ui->lbl_gyr_y->setText(QString::number(dat[4]));
+    ui->lbl_gyr_z->setText(QString::number(dat[5]));
 }
 
 void MainWindow::on_pBtn_start2connect_clicked(bool checked)

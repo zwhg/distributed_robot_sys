@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE QtCreatorProject>
-<!-- Written by QtCreator 4.0.2, 2016-12-26T13:42:26. -->
+<!-- Written by QtCreator 4.0.2, 2016-12-26T20:56:46. -->
 <qtcreator>
  <data>
   <variable>EnvironmentId</variable>
-  <value type="QByteArray">{0cb0c9f7-23d4-4113-b2c7-fe8ae5519f13}</value>
+  <value type="QByteArray">{10c01acb-c6ce-4650-9e00-da179f054328}</value>
  </data>
  <data>
   <variable>ProjectExplorer.Project.ActiveTarget</variable>
@@ -69,7 +69,7 @@
     <valuelist type="QVariantList" key="CMake.Configuration">
      <value type="QString">CMAKE_BUILD_TYPE:STRING=Debug</value>
     </valuelist>
-    <value type="QString" key="ProjectExplorer.BuildConfiguration.BuildDirectory">/home/hustac/distributed_robot_sys/temp/build-src-Desktop_Qt_5_7_0_GCC_64bit-Debug</value>
+    <value type="QString" key="ProjectExplorer.BuildConfiguration.BuildDirectory">/home/zw/distributed_robot_sys/temp/build-src-Desktop_Qt_5_7_0_GCC_64bit-Debug</value>
     <valuemap type="QVariantMap" key="ProjectExplorer.BuildConfiguration.BuildStepList.0">
      <valuemap type="QVariantMap" key="ProjectExplorer.BuildStepList.Step.0">
       <value type="QString" key="CMakeProjectManager.MakeStep.AdditionalArguments"></value>
@@ -167,7 +167,7 @@
     <value type="QString" key="CMakeProjectManager.CMakeRunConfiguation.Title">main_uart_laser</value>
     <value type="QString" key="CMakeProjectManager.CMakeRunConfiguration.Arguments"></value>
     <value type="QString" key="CMakeProjectManager.CMakeRunConfiguration.UserWorkingDirectory"></value>
-    <value type="QString" key="CMakeProjectManager.CMakeRunConfiguration.UserWorkingDirectory.default">/home/hustac/distributed_robot_sys/temp/build-src-Desktop_Qt_5_7_0_GCC_64bit-Debug/devel/lib/a_robot_platform</value>
+    <value type="QString" key="CMakeProjectManager.CMakeRunConfiguration.UserWorkingDirectory.default">/home/zw/distributed_robot_sys/temp/build-src-Desktop_Qt_5_7_0_GCC_64bit-Debug/devel/lib/a_robot_platform</value>
     <value type="int" key="PE.EnvironmentAspect.Base">2</value>
     <valuelist type="QVariantList" key="PE.EnvironmentAspect.Changes"/>
     <value type="QString" key="ProjectExplorer.ProjectConfiguration.DefaultDisplayName">main_uart_laser</value>
@@ -222,9 +222,9 @@
     </valuelist>
     <value type="QString" key="CMakeProjectManager.CMakeRunConfiguation.Title">main_uart_odom</value>
     <value type="QString" key="CMakeProjectManager.CMakeRunConfiguration.Arguments"></value>
-    <value type="bool" key="CMakeProjectManager.CMakeRunConfiguration.UseTerminal">true</value>
+    <value type="bool" key="CMakeProjectManager.CMakeRunConfiguration.UseTerminal">false</value>
     <value type="QString" key="CMakeProjectManager.CMakeRunConfiguration.UserWorkingDirectory"></value>
-    <value type="QString" key="CMakeProjectManager.CMakeRunConfiguration.UserWorkingDirectory.default">/home/hustac/distributed_robot_sys/temp/build-src-Desktop_Qt_5_7_0_GCC_64bit-Debug/devel/lib/a_robot_platform</value>
+    <value type="QString" key="CMakeProjectManager.CMakeRunConfiguration.UserWorkingDirectory.default">/home/zw/distributed_robot_sys/temp/build-src-Desktop_Qt_5_7_0_GCC_64bit-Debug/devel/lib/a_robot_platform</value>
     <value type="int" key="PE.EnvironmentAspect.Base">2</value>
     <valuelist type="QVariantList" key="PE.EnvironmentAspect.Changes"/>
     <value type="QString" key="ProjectExplorer.ProjectConfiguration.DefaultDisplayName">main_uart_odom</value>

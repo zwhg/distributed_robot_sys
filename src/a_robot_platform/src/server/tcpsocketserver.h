@@ -5,7 +5,7 @@
 #include <QtNetwork/QTcpSocket>
 #include <QtNetwork/QTcpServer>
 
-#include "../common/paramodbus.h"
+#include "../common/modbus.h"
 
 namespace zw {
 
@@ -14,7 +14,7 @@ class TcpSocketServer : public QObject
   Q_OBJECT
 
 private:
-    ParaModbus m_paraModbus;
+    Modbus m_modbus;
     QTcpServer *m_listenSocket;
     QTcpSocket *m_readWriteSocket;
 
