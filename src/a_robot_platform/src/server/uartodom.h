@@ -23,6 +23,9 @@ public:
   virtual	void *DoPthread(void);
   virtual	void Analysis(uint8_t *buf, int nRet);
 
+private:
+  void SendVelControl(void);
+
 };
 
 

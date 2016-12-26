@@ -30,6 +30,7 @@ public:
   ~UartOdomPthread();
 
 private:
+  static void timerCallback(const ros::TimerEvent &e);
   static void *MyPthread(void *temp);
 
   virtual	void *DoPthread(void);

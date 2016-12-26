@@ -67,6 +67,7 @@ void MainWindow::on_xTimerUpdate(void)
         break;
     }
     KeyControlMsgRefalsh(m_keyControl->kMsg);
+    MsgImuRefalsh();
 }
 
 void MainWindow::on_cmdTimerUpdate(void)
@@ -107,7 +108,18 @@ void MainWindow::MsgControlRefalsh(void)
     ui->lbl_ome_ret->setText(QString::number(ff.f,'f',2));
 }
 
-
+void MainWindow::MsgImuRefalsh(void)
+{
+    int32_t dat[6];
+    zw::ParaGetSet  packInfo = {zw::R_HOLDING_REGISTER,6,zw::MSG_IMU,dat};
+    zw::modbus.GetAddressValue(packInfo);
+    ui->lbl_acc_x->setText(QString::number(dat[0]));
+    ui->lbl_acc_y->setText(QString::number(dat[1]));
+    ui->lbl_acc_z->setText(QString::number(dat[2]));
+    ui->lbl_gyr_x->setText(QString::number(dat[3]));
+    ui->lbl_gyr_x->setText(QString::number(dat[4]));
+    ui->lbl_gyr_x->setText(QString::number(dat[5]));
+}
 
 void MainWindow::on_pBtn_start2connect_clicked(bool checked)
 {

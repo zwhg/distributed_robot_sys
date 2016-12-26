@@ -13,6 +13,7 @@ find_package(catkin REQUIRED COMPONENTS
  tf
 )
 
+set (CMAKE_PREFIX_PATH /home/hustac/Qt5.7.0/5.7/gcc_64)
 find_package(Qt5Widgets REQUIRED)
 
 

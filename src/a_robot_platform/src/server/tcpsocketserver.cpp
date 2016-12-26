@@ -50,13 +50,13 @@ void TcpSocketServer::on_ReadyRead(void)
         else if(packInfo.fuc == W_MULTI_REGISTER){
             modbus.SetAddressValue(packInfo);
 
-            int32_t dat[2];
-            zw::ParaGetSet  packInfo = {zw::R_HOLDING_REGISTER,2,zw::CONTROL,dat};
-            modbus.GetAddressValue(packInfo);
-            zw::Float2Int32 ff1,ff2;
-            ff1.i=dat[0];
-            ff2.i=dat[1];
-            qDebug () <<ff1.f<<ff2.f;
+//            int32_t dat[2];
+//            zw::ParaGetSet  packInfo = {zw::R_HOLDING_REGISTER,2,zw::CONTROL,dat};
+//            modbus.GetAddressValue(packInfo);
+//            zw::Float2Int32 ff1,ff2;
+//            ff1.i=dat[0];
+//            ff2.i=dat[1];
+//            qDebug () <<ff1.f<<ff2.f;
         }
         delete packInfo.data;
         packInfo={0,0,0,nullptr};

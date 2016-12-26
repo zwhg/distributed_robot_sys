@@ -6,6 +6,8 @@ extern zw::UartOdom m_uartOdom;
 namespace zw {
 
 
+
+
 UartOdomPthread::UartOdomPthread()
 {
   pthread_create(&id,NULL,MyPthread,(void *)this);
@@ -60,6 +62,8 @@ void *UartOdomPthread::DoPthread(void)
   double delta_y ;
   double delta_th ;
   tf:: TransformBroadcaster odom_broadcaster;
+
+  //ros::Timer timer=n.createTimer(ros::Duration(0.02),timerCallback,false);
 
   ros::Rate loop_rate(50);
   while(ros::ok())
@@ -134,6 +138,11 @@ void *UartOdomPthread::DoPthread(void)
     starts = ends;
     loop_rate.sleep();
   }
+}
+
+void UartOdomPthread::timerCallback(const ros::TimerEvent &e)
+{
+
 }
 
 

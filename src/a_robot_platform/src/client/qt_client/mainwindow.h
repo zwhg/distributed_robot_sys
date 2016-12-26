@@ -33,6 +33,7 @@ private slots:
 private :
     void KeyControlMsgRefalsh(const zw::KeyControlMsg & kMsg);
     void MsgControlRefalsh(void);
+    void MsgImuRefalsh(void);
 
 private:
     Ui::MainWindow *ui;

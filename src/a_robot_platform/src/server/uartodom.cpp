@@ -31,7 +31,8 @@ void *UartOdom::DoPthread(void)
     {
       Analysis(data_buf, nRet);
     }
-    usleep(30000);
+  //  SendVelControl();
+    usleep(20000);
   }
 }
 
@@ -59,13 +60,14 @@ void UartOdom::Analysis(uint8_t *arry, int nRet)
         else if(packInfo.fuc == W_MULTI_REGISTER){
             modbus.SetAddressValue(packInfo);
 
-//            int32_t dat[2];
-//            zw::ParaGetSet  packInfo = {zw::R_HOLDING_REGISTER,2,zw::CONTROL,dat};
-//            modbus.GetAddressValue(packInfo);
+            int32_t dat[6];
+            zw::ParaGetSet  packInfo = {zw::R_HOLDING_REGISTER,6,zw::MSG_IMU,dat};
+            modbus.GetAddressValue(packInfo);
 //            zw::Float2Int32 ff1,ff2;
 //            ff1.i=dat[0];
 //            ff2.i=dat[1];
 //            qDebug () <<ff1.f<<ff2.f;
+            qDebug()<<dat[0]<<dat[1]<<dat[2]<<dat[3]<<dat[4]<<dat[5];
         }
         delete packInfo.data;
         packInfo={0,0,0,nullptr};
@@ -74,6 +76,23 @@ void UartOdom::Analysis(uint8_t *arry, int nRet)
         buf.remove(0,startIndex);
         startIndex=0;
     }
+}
+
+
+void UartOdom::SendVelControl(void)
+{
+    int32_t car_msg[2];
+    ParaGetSet car_para={R_HOLDING_REGISTER,2,CONTROL,car_msg};
+    modbus.GetAddressValue(car_para);
+    ParaModbus m_paraModbus;
+    car_para.fuc=W_MULTI_REGISTER;
+    int32_t size=FIXEDLENGTH +car_para.len*4;
+    byte* msg =new byte[size];
+    if(size!=m_paraModbus.PackParas(car_para,msg))
+        qDebug () <<"Error in pack size!";
+    else
+        write(fd,(char*)msg ,size);
+    delete msg;
 }
 
 }

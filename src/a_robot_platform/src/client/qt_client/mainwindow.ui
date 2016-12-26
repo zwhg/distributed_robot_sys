@@ -326,19 +326,6 @@
       <item row="1" column="1">
        <layout class="QHBoxLayout" name="horizontalLayout_7">
         <item>
-         <widget class="QLabel" name="lbl_gyr">
-          <property name="styleSheet">
-           <string notr="true"/>
-          </property>
-          <property name="text">
-           <string>gyr (rad/s)</string>
-          </property>
-          <property name="alignment">
-           <set>Qt::AlignCenter</set>
-          </property>
-         </widget>
-        </item>
-        <item>
          <widget class="QLabel" name="lbl_acc">
           <property name="layoutDirection">
            <enum>Qt::RightToLeft</enum>
@@ -351,12 +338,25 @@
           </property>
          </widget>
         </item>
+        <item>
+         <widget class="QLabel" name="lbl_gyr">
+          <property name="styleSheet">
+           <string notr="true"/>
+          </property>
+          <property name="text">
+           <string>gyr (rad/s)</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
+        </item>
        </layout>
       </item>
       <item row="2" column="1">
        <layout class="QHBoxLayout" name="horizontalLayout_8">
         <item>
-         <widget class="QLabel" name="lbl_gyr_x">
+         <widget class="QLabel" name="lbl_acc_x">
           <property name="styleSheet">
            <string notr="true">rgb:(255, 0, 0);</string>
           </property>
@@ -369,7 +369,7 @@
          </widget>
         </item>
         <item>
-         <widget class="QLabel" name="lbl_acc_x">
+         <widget class="QLabel" name="lbl_gyr_x">
           <property name="styleSheet">
            <string notr="true">rgb:(255, 0, 0);</string>
           </property>
@@ -386,7 +386,7 @@
       <item row="3" column="1">
        <layout class="QHBoxLayout" name="horizontalLayout_9">
         <item>
-         <widget class="QLabel" name="lbl_gyr_y">
+         <widget class="QLabel" name="lbl_acc_y">
           <property name="styleSheet">
            <string notr="true">rgb:(255, 0, 0);</string>
           </property>
@@ -399,7 +399,7 @@
          </widget>
         </item>
         <item>
-         <widget class="QLabel" name="lbl_acc_y">
+         <widget class="QLabel" name="lbl_gyr_y">
           <property name="styleSheet">
            <string notr="true">rgb:(255, 0, 0);</string>
           </property>
@@ -416,7 +416,7 @@
       <item row="4" column="1">
        <layout class="QHBoxLayout" name="horizontalLayout_10">
         <item>
-         <widget class="QLabel" name="lbl_gyr_z">
+         <widget class="QLabel" name="lbl_acc_z">
           <property name="styleSheet">
            <string notr="true">rgb:(255, 0, 0);</string>
           </property>
@@ -429,7 +429,7 @@
          </widget>
         </item>
         <item>
-         <widget class="QLabel" name="lbl_acc_z">
+         <widget class="QLabel" name="lbl_gyr_z">
           <property name="styleSheet">
            <string notr="true">rgb:(255, 0, 0);</string>
           </property>
@@ -636,7 +636,7 @@
      <x>0</x>
      <y>0</y>
      <width>1024</width>
-     <height>25</height>
+     <height>20</height>
     </rect>
    </property>
   </widget>

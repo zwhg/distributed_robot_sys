@@ -1,5 +1,5 @@
 #include "paramodbus.h"
-#include <qdebug.h>
+
 
 
 namespace zw {
@@ -147,6 +147,19 @@ bool ParaModbus::UnPackparas(const byte* inMsg, int32_t& startIndex,int32_t endI
         }
     }
     return false ;
+}
+
+
+void ParaModbus::SendParas(const ParaGetSet & packInfo ,void write(const char* msg,int64_t size))
+{
+    int32_t size=FIXEDLENGTH +packInfo.len*4;
+    byte* msg =new byte[size];
+    if(size!=PackParas(packInfo,msg))
+        qDebug () <<"Error in pack size!";
+    else
+        //this->m_readWriteSocket->write((char*)msg ,size);
+        write((char*)msg ,(int64_t)size);
+    delete msg;
 }
 
 uint16_t ParaModbus::CalculateCRC16ByTable(const byte buf[], int32_t start,int32_t end)
