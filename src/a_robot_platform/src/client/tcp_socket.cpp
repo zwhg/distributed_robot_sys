@@ -100,10 +100,10 @@ namespace zw{
         while(m_modbus.UnPackparas((const byte*)buf.data(),startIndex ,endIndex, packInfo))
         {
 
-            if(packInfo.fuc == R_HOLDING_REGISTER){
+            if(packInfo.fuc == R_REGISTER){
                 packInfo.data = new int32_t[packInfo.len];
                 m_para.GetAddressValue(packInfo);
-                packInfo.fuc=W_MULTI_REGISTER;
+                packInfo.fuc=W_REGISTER;
                 int32_t size=FIXEDLENGTH +packInfo.len*4;
                 byte* msg =new byte[size];
                 if(size!=m_modbus.PackParas(packInfo,msg))
@@ -111,7 +111,7 @@ namespace zw{
                 else
                     SendMsg(msg ,size);
                 delete msg;
-            }else if(packInfo.fuc == W_MULTI_REGISTER){
+            }else if(packInfo.fuc == W_REGISTER){
                 m_para.SetAddressValue(packInfo);
                // qDebug()<<"read success!";
             }
@@ -136,18 +136,27 @@ namespace zw{
     bool TcpSocket::SendMsg(ParaGetSet &packInfo)
     {
         bool res =false;
-        Paras m_para;
-        packInfo.data = new int32_t[packInfo.len];
-        m_para.GetAddressValue(packInfo);
-        int32_t size=FIXEDLENGTH +packInfo.len*4;
-        byte* msg =new byte[size];
+        int32_t size;
+        byte *msg;
+        if(packInfo.fuc == R_REGISTER){
+            size=FIXEDLENGTH;
+            msg =new byte[size];
+        }else if(packInfo.fuc == W_REGISTER){
+            Paras m_para;
+            packInfo.data = new int32_t[packInfo.len];
+            m_para.GetAddressValue(packInfo);
+            size=FIXEDLENGTH +packInfo.len*4;
+            msg =new byte[size];
+        }
+
         if(size!=m_modbus.PackParas(packInfo,msg)){
             qDebug()<<"Error in pack size!";
         }else{
             res=SendMsg(msg ,size);
         }
         delete msg;
-        delete packInfo.data;
+        if(packInfo.fuc == W_REGISTER)
+            delete packInfo.data;
      return res;
     }
 }

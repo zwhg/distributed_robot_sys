@@ -30,7 +30,7 @@ namespace zw {
     {
         Float2Int32 f2is,f2io;
         int32_t dat[2];
-        ParaGetSet packInfo={W_MULTI_REGISTER,2, CONTROL,dat};
+        ParaGetSet packInfo={W_REGISTER,2, CONTROL,dat};
         Paras m_para;
         if(keyControl) {
             if (((keyFlag & 0x01) == 0x00) && ((keyFlag & 0x02) == 0x00))  //既没有按前进，也没有按后退
@@ -70,7 +70,7 @@ namespace zw {
             m_para.SetAddressValue(packInfo);
             keyFlag=0x00;
         }
-        packInfo={R_HOLDING_REGISTER,2, MSG_CONTROL,dat};
+        packInfo={R_REGISTER,2, MSG_CONTROL,dat};
         m_para.GetAddressValue(packInfo);
         f2is.i=dat[0];
         f2io.i=dat[1];

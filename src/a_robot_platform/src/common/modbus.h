@@ -28,8 +28,8 @@ typedef struct
 
 typedef enum
 {
-     R_HOLDING_REGISTER =0x03,
-     W_MULTI_REGISTER =0x10,
+     R_REGISTER =0x03,
+     W_REGISTER =0x10,
      NULL1
 }FunctionCode;
 

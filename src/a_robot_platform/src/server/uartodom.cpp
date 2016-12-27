@@ -34,18 +34,18 @@ void *UartOdom::DoPthread(void)
     {
       Analysis(data_buf, nRet);
     }
-//  SendVelControl();
+    SendVelControl();
 //    Paras m_para;
 //    int32_t dat[6]={i*10,-i*10,i*5,i+2,-i,i++};
-//    ParaGetSet packInfo={W_MULTI_REGISTER,6, MSG_IMU,dat};
+//    ParaGetSet packInfo={W_REGISTER,6, MSG_IMU,dat};
 //    m_para.SetAddressValue(packInfo);
 //    Float2Int32 fi,fy;
 //    fi.f=3.2+i;
 //    fy.f=-2.6+i/65535.0;
 //    int32_t tmp[2]={fi.i,fy.i};
-//    ParaGetSet tmpInfo={W_MULTI_REGISTER,2, MSG_CONTROL,tmp};
+//    ParaGetSet tmpInfo={W_REGISTER,2, MSG_CONTROL,tmp};
 //    m_para.SetAddressValue(tmpInfo);
-    usleep(20000);
+//    usleep(20000);
   }
 }
 
@@ -59,10 +59,10 @@ void UartOdom::Analysis(uint8_t *arry, int nRet)
     Paras m_para;
     while(m_modbus.UnPackparas((const byte*)buf.data(),startIndex ,endIndex, packInfo))
     {
-        if(packInfo.fuc == R_HOLDING_REGISTER){
+        if(packInfo.fuc == R_REGISTER){
             packInfo.data=new int32_t[packInfo.len];
             m_para.GetAddressValue(packInfo);
-            packInfo.fuc=W_MULTI_REGISTER;
+            packInfo.fuc=W_REGISTER;
             int32_t size=FIXEDLENGTH +packInfo.len*4;
             byte* msg =new byte[size];
             if(size!=m_modbus.PackParas(packInfo,msg))
@@ -71,11 +71,11 @@ void UartOdom::Analysis(uint8_t *arry, int nRet)
                 write(fd,(char*)msg ,size);
             delete msg;
         }
-        else if(packInfo.fuc == W_MULTI_REGISTER){
+        else if(packInfo.fuc == W_REGISTER){
             m_para.SetAddressValue(packInfo);
 
             int32_t dat[6];
-            zw::ParaGetSet  packInfo = {zw::R_HOLDING_REGISTER,6,zw::MSG_IMU,dat};
+            zw::ParaGetSet  packInfo = {zw::R_REGISTER,6,zw::MSG_IMU,dat};
             m_para.GetAddressValue(packInfo);
 //            zw::Float2Int32 ff1,ff2;
 //            ff1.i=dat[0];
@@ -97,10 +97,10 @@ void UartOdom::SendVelControl(void)
 {
     Paras m_para;
     int32_t car_msg[2];
-    ParaGetSet car_para={R_HOLDING_REGISTER,2,CONTROL,car_msg};
+    ParaGetSet car_para={R_REGISTER,2,CONTROL,car_msg};
     m_para.GetAddressValue(car_para);
     Modbus m_modbus;
-    car_para.fuc=W_MULTI_REGISTER;
+    car_para.fuc=W_REGISTER;
     int32_t size=FIXEDLENGTH +car_para.len*4;
     byte* msg =new byte[size];
     if(size!=m_modbus.PackParas(car_para,msg))

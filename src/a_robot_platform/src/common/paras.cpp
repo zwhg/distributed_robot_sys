@@ -56,58 +56,52 @@ Paras::~Paras()
 
 bool Paras::SetAddressValue(const ParaGetSet &para)
 {
-    uint16_t i,j;
-    bool hit=false;
-
-    pthread_mutex_lock(&g_tMutex);
-    for(i=0,j=0; (i<dataTableLen)&&(j<para.len); i++)
+    if(para.len>0)
     {
-        if (dataTable[i].addr == para.addr+j)
+        uint16_t i,j;
+        for(i=0;i<dataTableLen;i++)
         {
-            dataTable[i].val=para.data[j++];
-            hit=true;
-        }
-        else
-        {
-            if(hit)
-            {
-                if(j!=para.len)
-                    hit=!hit;
-                break;
-            }
+             if(dataTable[i].addr == para.addr)
+             {
+                uint16_t end=i+para.len;
+                if((end<=dataTableLen)&&
+                   (dataTable[end-1].addr == (para.addr+para.len-1))){
+                    pthread_mutex_lock(&g_tMutex);
+                    for(j=i;j<end;j++)
+                        dataTable[j].val=para.data[j-i];
+                    pthread_mutex_unlock(&g_tMutex);
+                    return true;
+                }else
+                    return false;
+             }
         }
     }
-    pthread_mutex_unlock(&g_tMutex);
-
-    return hit;
+    return false;
 }
 
 bool Paras::GetAddressValue(ParaGetSet &para)
 {
-    uint16_t i,j;
-    bool hit=false;
-
-    pthread_mutex_lock(&g_tMutex);
-    for(i=0,j=0; (i<dataTableLen)&&(j<para.len); i++)
+    if(para.len>0)
     {
-        if (dataTable[i].addr == para.addr+j)
+        uint16_t i,j;
+        for(i=0;i<dataTableLen;i++)
         {
-            para.data[j++]=dataTable[i].val;
-            hit=true;
-        }
-        else
-        {
-            if(hit)
-            {
-                if(j!=para.len)
-                    hit =!hit;
-                break;
-            }
+             if(dataTable[i].addr == para.addr)
+             {
+                uint16_t end=i+para.len;
+                if((end<=dataTableLen)&&
+                   (dataTable[end-1].addr == (para.addr+para.len-1))){
+                    pthread_mutex_lock(&g_tMutex);
+                    for(j=i;j<end;j++)
+                        para.data[j-i]=dataTable[j].val;
+                    pthread_mutex_unlock(&g_tMutex);
+                    return true;
+                }else
+                    return false;
+             }
         }
     }
-    pthread_mutex_unlock(&g_tMutex);
-
-    return hit;
+    return false;
 }
 }
 

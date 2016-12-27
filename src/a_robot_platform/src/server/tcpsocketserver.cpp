@@ -35,10 +35,10 @@ void TcpSocketServer::on_ReadyRead(void)
     Paras m_para;
     while(m_modbus.UnPackparas((const byte*)buf.data(),startIndex ,endIndex, packInfo))
     {
-        if(packInfo.fuc == R_HOLDING_REGISTER){
+        if(packInfo.fuc == R_REGISTER){
             packInfo.data=new int32_t[packInfo.len];
             m_para.GetAddressValue(packInfo);
-            packInfo.fuc=W_MULTI_REGISTER;
+            packInfo.fuc=W_REGISTER;
             int32_t size=FIXEDLENGTH +packInfo.len*4;
             byte* msg =new byte[size];
             if(size!=m_modbus.PackParas(packInfo,msg))
@@ -47,11 +47,11 @@ void TcpSocketServer::on_ReadyRead(void)
                 this->m_readWriteSocket->write((char*)msg ,size);
             delete msg;
         }
-        else if(packInfo.fuc == W_MULTI_REGISTER){
+        else if(packInfo.fuc == W_REGISTER){
             m_para.SetAddressValue(packInfo);
 
 //            int32_t dat[2];
-//            zw::ParaGetSet  packInfo = {zw::R_HOLDING_REGISTER,2,zw::CONTROL,dat};
+//            zw::ParaGetSet  packInfo = {zw::R_REGISTER,2,zw::CONTROL,dat};
 //            modbus.GetAddressValue(packInfo);
 //            zw::Float2Int32 ff1,ff2;
 //            ff1.i=dat[0];

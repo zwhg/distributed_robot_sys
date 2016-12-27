@@ -76,14 +76,14 @@ void MainWindow::on_cmdTimerUpdate(void)
     zw::ParaGetSet msgInfo;
 
     if(m_keyControl->keyControl){
-        msgInfo={zw::W_MULTI_REGISTER,2,zw::CONTROL,nullptr};
+        msgInfo={zw::W_REGISTER,2,zw::CONTROL,nullptr};
         m_tcpSocketClient->SendMsg(msgInfo);
     }
 
-    msgInfo={zw::R_HOLDING_REGISTER,2,zw::MSG_CONTROL,nullptr};
+    msgInfo={zw::R_REGISTER,2,zw::MSG_CONTROL,nullptr};
     m_tcpSocketClient->SendMsg(msgInfo);
 
-    msgInfo={zw::R_HOLDING_REGISTER,6,zw::MSG_IMU,nullptr};
+    msgInfo={zw::R_REGISTER,6,zw::MSG_IMU,nullptr};
     m_tcpSocketClient->SendMsg(msgInfo);
 }
 
@@ -101,7 +101,7 @@ void MainWindow::MsgControlRefalsh(void)
 {
     zw::Paras m_para;
     int32_t dat[2];
-    zw::ParaGetSet  packInfo = {zw::R_HOLDING_REGISTER,2,zw::MSG_CONTROL,dat};
+    zw::ParaGetSet  packInfo = {zw::R_REGISTER,2,zw::MSG_CONTROL,dat};
     m_para.GetAddressValue(packInfo);
     zw::Float2Int32 ff;
     ff.i=dat[0];
@@ -114,7 +114,7 @@ void MainWindow::MsgImuRefalsh(void)
 {
     zw::Paras m_para;
     int32_t dat[6];
-    zw::ParaGetSet  packInfo = {zw::R_HOLDING_REGISTER,6,zw::MSG_IMU,dat};
+    zw::ParaGetSet  packInfo = {zw::R_REGISTER,6,zw::MSG_IMU,dat};
     m_para.GetAddressValue(packInfo);
     ui->lbl_acc_x->setText(QString::number(dat[0]));
     ui->lbl_acc_y->setText(QString::number(dat[1]));

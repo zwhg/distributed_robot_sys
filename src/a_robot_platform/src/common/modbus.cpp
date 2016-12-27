@@ -39,12 +39,13 @@ uint16_t Modbus::PackParas(const ParaGetSet& info ,byte outmsg[])
         h2int16.i=info.addr;
         outmsg[i++]=h2int16.b[0];
         outmsg[i++]=h2int16.b[1];
-        for(uint32_t j=0; j<info.len; j++)
-        {
-            outmsg[i++]=*((byte*)(info.data+j)+0);
-            outmsg[i++]=*((byte*)(info.data+j)+1);
-            outmsg[i++]=*((byte*)(info.data+j)+2);
-            outmsg[i++]=*((byte*)(info.data+j)+3);
+        if(info.fuc==W_REGISTER){
+            for(uint32_t j=0; j<info.len; j++){
+                outmsg[i++]=*((byte*)(info.data+j)+0);
+                outmsg[i++]=*((byte*)(info.data+j)+1);
+                outmsg[i++]=*((byte*)(info.data+j)+2);
+                outmsg[i++]=*((byte*)(info.data+j)+3);
+            }
         }
     }
     else
@@ -55,15 +56,21 @@ uint16_t Modbus::PackParas(const ParaGetSet& info ,byte outmsg[])
         h2int16.i=info.addr;
         outmsg[i++]=h2int16.b[1];
         outmsg[i++]=h2int16.b[0];
-        for(uint32_t j=0; j<info.len; j++)
-        {
-            outmsg[i++]=*((byte*)(info.data+j)+3);
-            outmsg[i++]=*((byte*)(info.data+j)+2);
-            outmsg[i++]=*((byte*)(info.data+j)+1);
-            outmsg[i++]=*((byte*)(info.data+j)+0);
+        if(info.fuc==W_REGISTER){
+            for(uint32_t j=0; j<info.len; j++){
+                outmsg[i++]=*((byte*)(info.data+j)+3);
+                outmsg[i++]=*((byte*)(info.data+j)+2);
+                outmsg[i++]=*((byte*)(info.data+j)+1);
+                outmsg[i++]=*((byte*)(info.data+j)+0);
+            }
         }
     }
-   uint16_t crc=CalculateCRC16ByTable(outmsg, CRC_OFFSET, CRC_OFFSET+2+info.len*4);
+   uint16_t crc=0x00;
+   if(info.fuc==R_REGISTER)
+        crc=CalculateCRC16ByTable(outmsg, CRC_OFFSET, CRC_OFFSET+2);
+   else if(info.fuc ==W_REGISTER)
+        crc=CalculateCRC16ByTable(outmsg, CRC_OFFSET, CRC_OFFSET+2+info.len*4);
+
    outmsg[i++] = (byte)(crc & 0xff);
    outmsg[i++] = (byte)(crc >> 8);
    outmsg[i++] =TAIL;
@@ -74,6 +81,8 @@ bool Modbus::UnPackparas(const byte* inMsg, int32_t& startIndex,int32_t endIndex
 {
     static ModbusMsg info;
     static uint8_t status=0;
+    uint16_t dat_len=0;
+
     if(endIndex >= SOCKETBUFMAX )
     {
         qDebug()<<"Recevie too much data !";
@@ -92,7 +101,7 @@ bool Modbus::UnPackparas(const byte* inMsg, int32_t& startIndex,int32_t endIndex
         }
         case 1:{ //get function code ,and check the function code
                 info.pack.fuc = inMsg[startIndex++];
-                if( (info.pack.fuc == R_HOLDING_REGISTER) ||(info.pack.fuc == W_MULTI_REGISTER))
+                if( (info.pack.fuc == R_REGISTER) ||(info.pack.fuc == W_REGISTER))
                     status++;
                 else
                     status =0;  //return inital status
@@ -102,6 +111,13 @@ bool Modbus::UnPackparas(const byte* inMsg, int32_t& startIndex,int32_t endIndex
             if(startIndex +1 < endIndex){
                 info.pack.len= ((uint16_t)((((uint16_t)inMsg[startIndex+1]&0x00ff)<<8 )|
                                       ((uint16_t)inMsg[startIndex]&0x00ff) ));
+                if(info.pack.fuc == R_REGISTER)
+                    dat_len=0;
+                else if(info.pack.fuc == W_REGISTER)
+                    dat_len=info.pack.len;
+                else
+                    status=0;
+
                 if(info.pack.len > EFLMAX_BYTE){
                     status =0;
                     startIndex ++;
@@ -115,7 +131,7 @@ bool Modbus::UnPackparas(const byte* inMsg, int32_t& startIndex,int32_t endIndex
             break;
         }
         case 3:{ //check tail
-            int32_t tailIndex= (int32_t)(startIndex+2+info.pack.len*4+2) ;
+            int32_t tailIndex=(int32_t)(startIndex+2+dat_len*4+2);
             if(tailIndex < endIndex){
                 if(inMsg[tailIndex] ==info.tail)
                     status++;
@@ -127,7 +143,7 @@ bool Modbus::UnPackparas(const byte* inMsg, int32_t& startIndex,int32_t endIndex
             break;
         }
         case 4:{ //check crc
-            int32_t crcIndex = (int32_t)(startIndex+2+info.pack.len*4);
+            int32_t crcIndex= (int32_t)(startIndex+2+dat_len*4);
             uint16_t crc16 = (uint16_t) ((((uint16_t)inMsg[crcIndex+1]&0x00ff)<<8 )|
                                          ((uint16_t)inMsg[crcIndex]&0x00ff));
             if( CalculateCRC16ByTable(inMsg, startIndex, crcIndex)==crc16 )
@@ -140,9 +156,9 @@ bool Modbus::UnPackparas(const byte* inMsg, int32_t& startIndex,int32_t endIndex
             info.pack.addr =  (int16_t) ((((uint16_t)inMsg[startIndex+1]&0x00ff)<<8 )|
                                       ((uint16_t)inMsg[startIndex]&0x00ff));
             startIndex +=2;
-            if(info.pack.fuc ==R_HOLDING_REGISTER){
+            if(info.pack.fuc ==R_REGISTER){
                 ;
-            }else if(info.pack.fuc ==W_MULTI_REGISTER){
+            }else if(info.pack.fuc ==W_REGISTER){
                 if(info.pack.len !=0){
                     info.pack.data =new int32_t[info.pack.len];
                     for(uint16_t i=0; i<info.pack.len;i++){

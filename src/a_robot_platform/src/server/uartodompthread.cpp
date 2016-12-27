@@ -75,12 +75,12 @@ void *UartOdomPthread::DoPthread(void)
 
     int32_t car_msg[6];
 
-    ParaGetSet car_para={R_HOLDING_REGISTER,2,MSG_CONTROL,car_msg};
+    ParaGetSet car_para={R_REGISTER,2,MSG_CONTROL,car_msg};
     m_para.GetAddressValue(car_para);
     zw::Float2Int32 mf;
     mf.i= car_msg[0];
     vx =(double)mf.f;
-    car_para={R_HOLDING_REGISTER,6,MSG_IMU,car_msg};
+    car_para={R_REGISTER,6,MSG_IMU,car_msg};
     m_para.GetAddressValue(car_para);
     vth = (double)car_msg[5] * Gyro_Gr;    //gyr_z
     delta_th = vth*dt;
