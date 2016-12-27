@@ -29,8 +29,8 @@
    <widget class="QTabWidget" name="tabWidget">
     <property name="geometry">
      <rect>
-      <x>6</x>
-      <y>9</y>
+      <x>20</x>
+      <y>0</y>
       <width>1011</width>
       <height>901</height>
      </rect>
@@ -54,7 +54,7 @@
       <property name="title">
        <string>IMU</string>
       </property>
-      <widget class="QWidget" name="formLayoutWidget_3">
+      <widget class="QWidget" name="form_3">
        <property name="geometry">
         <rect>
          <x>11</x>
@@ -236,7 +236,7 @@
         <bool>true</bool>
        </property>
       </widget>
-      <widget class="QWidget" name="formLayoutWidget">
+      <widget class="QWidget" name="form">
        <property name="geometry">
         <rect>
          <x>20</x>
@@ -402,7 +402,7 @@
       <property name="title">
        <string>Pose</string>
       </property>
-      <widget class="QWidget" name="formLayoutWidget_5">
+      <widget class="QWidget" name="form_5">
        <property name="geometry">
         <rect>
          <x>200</x>
@@ -487,7 +487,7 @@
         </item>
        </layout>
       </widget>
-      <widget class="QWidget" name="formLayoutWidget_6">
+      <widget class="QWidget" name="form_6">
        <property name="geometry">
         <rect>
          <x>10</x>
@@ -585,75 +585,71 @@
       <property name="title">
        <string>网络配置</string>
       </property>
-      <widget class="QWidget" name="horizontalLayoutWidget">
+      <widget class="QWidget" name="verticalLayoutWidget">
        <property name="geometry">
         <rect>
          <x>20</x>
-         <y>30</y>
-         <width>163</width>
-         <height>147</height>
+         <y>40</y>
+         <width>160</width>
+         <height>125</height>
         </rect>
        </property>
-       <layout class="QHBoxLayout" name="horizontalLayout">
+       <layout class="QVBoxLayout" name="verticalLayout">
         <item>
-         <layout class="QVBoxLayout" name="verticalLayout">
-          <item>
-           <widget class="QPushButton" name="pBtn_start2connect">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="text">
-             <string>connect</string>
-            </property>
-            <property name="checkable">
-             <bool>true</bool>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QLabel" name="lbl_7">
-            <property name="text">
-             <string>IP</string>
-            </property>
-            <property name="alignment">
-             <set>Qt::AlignCenter</set>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QLineEdit" name="lEdit_ip">
-            <property name="text">
-             <string>192.168.1.101</string>
-            </property>
-            <property name="alignment">
-             <set>Qt::AlignCenter</set>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QLabel" name="lbl_8">
-            <property name="text">
-             <string>port</string>
-            </property>
-            <property name="alignment">
-             <set>Qt::AlignCenter</set>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QLineEdit" name="lEdit_port">
-            <property name="text">
-             <string>9527</string>
-            </property>
-            <property name="alignment">
-             <set>Qt::AlignCenter</set>
-            </property>
-           </widget>
-          </item>
-         </layout>
+         <widget class="QPushButton" name="pBtn_start2connect">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="text">
+           <string>connect</string>
+          </property>
+          <property name="checkable">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="lbl_7">
+          <property name="text">
+           <string>IP</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLineEdit" name="lEdit_ip">
+          <property name="text">
+           <string>192.168.1.101</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="lbl_8">
+          <property name="text">
+           <string>port</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLineEdit" name="lEdit_port">
+          <property name="text">
+           <string>9527</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
         </item>
        </layout>
       </widget>
@@ -788,81 +784,13 @@
       <property name="title">
        <string>超声开关</string>
       </property>
-      <widget class="QWidget" name="layoutWidget">
+      <widget class="QWidget" name="">
        <property name="geometry">
         <rect>
-         <x>120</x>
-         <y>29</y>
-         <width>81</width>
-         <height>221</height>
-        </rect>
-       </property>
-       <layout class="QVBoxLayout" name="verticalLayout_4">
-        <item>
-         <widget class="QLabel" name="lb_ultra1">
-          <property name="text">
-           <string>0000</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QLabel" name="lb_ultra2">
-          <property name="text">
-           <string>0000</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QLabel" name="lb_ultra3">
-          <property name="text">
-           <string>0000</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QLabel" name="lb_ultra4">
-          <property name="text">
-           <string>0000</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QLabel" name="lb_ultra5">
-          <property name="text">
-           <string>0000</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QLabel" name="lb_ultra6">
-          <property name="text">
-           <string>0000</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QLabel" name="lb_ultra7">
-          <property name="text">
-           <string>0000</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QLabel" name="lb_ultra8">
-          <property name="text">
-           <string>0000</string>
-          </property>
-         </widget>
-        </item>
-       </layout>
-      </widget>
-      <widget class="QWidget" name="layoutWidget">
-       <property name="geometry">
-        <rect>
-         <x>9</x>
-         <y>28</y>
-         <width>101</width>
-         <height>251</height>
+         <x>10</x>
+         <y>30</y>
+         <width>78</width>
+         <height>239</height>
         </rect>
        </property>
        <layout class="QVBoxLayout" name="verticalLayout_3">
@@ -931,12 +859,80 @@
         </item>
        </layout>
       </widget>
+      <widget class="QWidget" name="">
+       <property name="geometry">
+        <rect>
+         <x>121</x>
+         <y>30</y>
+         <width>71</width>
+         <height>211</height>
+        </rect>
+       </property>
+       <layout class="QVBoxLayout" name="verticalLayout_4">
+        <item>
+         <widget class="QLabel" name="lb_ultra1">
+          <property name="text">
+           <string>0000</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="lb_ultra2">
+          <property name="text">
+           <string>0000</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="lb_ultra3">
+          <property name="text">
+           <string>0000</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="lb_ultra4">
+          <property name="text">
+           <string>0000</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="lb_ultra5">
+          <property name="text">
+           <string>0000</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="lb_ultra6">
+          <property name="text">
+           <string>0000</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="lb_ultra7">
+          <property name="text">
+           <string>0000</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="lb_ultra8">
+          <property name="text">
+           <string>0000</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </widget>
      </widget>
      <widget class="QGroupBox" name="groupBox_6">
       <property name="geometry">
        <rect>
-        <x>789</x>
-        <y>329</y>
+        <x>790</x>
+        <y>340</y>
         <width>211</width>
         <height>121</height>
        </rect>
@@ -971,6 +967,10 @@
        </property>
       </widget>
      </widget>
+     <zorder>label_Ultra</zorder>
+     <zorder>groupBox_5</zorder>
+     <zorder>groupBox_6</zorder>
+     <zorder>layoutWidget</zorder>
     </widget>
    </widget>
   </widget>

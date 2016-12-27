@@ -293,7 +293,7 @@ void UartLaser ::Analysis(uint8_t *buf, int nRet)
       pcurr->flag  = 0;
       memset(pcurr->data, 0, PACKSIZE);
       pcurr = pcurr->next;
-      pthread_mutex_unlock(&tMutex);
+      pthread_mutex_unlock(&tMutex); 
     }
   }
 }

@@ -3,7 +3,7 @@
 #include "../tcp_socket.h"
 #include "../key_control.h"
 #include "../../common/common.h"
-#include "../../common/modbus.h"
+#include "../../common/paras.h"
 
 
 namespace zw {
@@ -28,6 +28,10 @@ namespace zw {
 
     void KeyControl::on_TimerUpdate(void)
     {
+        Float2Int32 f2is,f2io;
+        int32_t dat[2];
+        ParaGetSet packInfo={W_REGISTER,2, CONTROL,dat};
+        Paras m_para;
         if(keyControl) {
             if (((keyFlag & 0x01) == 0x00) && ((keyFlag & 0x02) == 0x00))  //既没有按前进，也没有按后退
             {
@@ -57,17 +61,21 @@ namespace zw {
                        kMsg.e_omega=0;
                 }
             }
-            Float2Int32 f2is,f2io;
             f2is.f=kMsg.e_speed;
             f2io.f=kMsg.e_omega;
-//            f2is.f=0.42;
-//            f2io.f=0.66;
-            int32_t dat[2]={f2is.i,f2io.i};
-            ParaGetSet packInfo={W_MULTI_REGISTER,2, CONTROL,dat};
-            modbus.SetAddressValue(packInfo);
-
+            f2is.f=0.1;
+            f2io.f=0.2;
+            dat[0]=f2is.i;
+            dat[1]=f2io.i;
+            m_para.SetAddressValue(packInfo);
             keyFlag=0x00;
         }
+        packInfo={R_REGISTER,2, MSG_CONTROL,dat};
+        m_para.GetAddressValue(packInfo);
+        f2is.i=dat[0];
+        f2io.i=dat[1];
+        kMsg.a_speed=f2is.f;
+        kMsg.a_omega=f2io.f;
     }
 
 

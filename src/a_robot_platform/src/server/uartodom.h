@@ -3,7 +3,7 @@
 
 #include "uartdriver.h"
 #include "../common/common.h"
-#include "../common/paramodbus.h"
+#include "../common/modbus.h"
 
 namespace zw {
 
@@ -15,13 +15,16 @@ class UartOdom: public UartDriver
 {
 
 public:
-  ParaModbus m_paraModbus;
+  Modbus m_modbus;
 
 public:
   virtual	int32_t StartScan(void);
   virtual	int32_t StopScan(void);
   virtual	void *DoPthread(void);
   virtual	void Analysis(uint8_t *buf, int nRet);
+
+private:
+  void SendVelControl(void);
 
 };
 

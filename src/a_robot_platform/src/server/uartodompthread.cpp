@@ -6,6 +6,8 @@ extern zw::UartOdom m_uartOdom;
 namespace zw {
 
 
+
+
 UartOdomPthread::UartOdomPthread()
 {
   pthread_create(&id,NULL,MyPthread,(void *)this);
@@ -61,7 +63,10 @@ void *UartOdomPthread::DoPthread(void)
   double delta_th ;
   tf:: TransformBroadcaster odom_broadcaster;
 
+  //ros::Timer timer=n.createTimer(ros::Duration(0.02),timerCallback,false);
+
   ros::Rate loop_rate(50);
+  Paras m_para;
   while(ros::ok())
   {
     ros::spinOnce();
@@ -69,14 +74,14 @@ void *UartOdomPthread::DoPthread(void)
     dt =(ends-starts).toSec();
 
     int32_t car_msg[6];
-    ParaGetSet car_para={R_HOLDING_REGISTER,2,MSG_CONTROL,car_msg};
-    modbus.GetAddressValue(car_para);
+
+    ParaGetSet car_para={R_REGISTER,2,MSG_CONTROL,car_msg};
+    m_para.GetAddressValue(car_para);
     zw::Float2Int32 mf;
     mf.i= car_msg[0];
     vx =(double)mf.f;
-
-    car_para={R_HOLDING_REGISTER,6,MSG_IMU,car_msg};
-    modbus.GetAddressValue(car_para);
+    car_para={R_REGISTER,6,MSG_IMU,car_msg};
+    m_para.GetAddressValue(car_para);
     vth = (double)car_msg[5] * Gyro_Gr;    //gyr_z
     delta_th = vth*dt;
     th += delta_th;
@@ -134,6 +139,11 @@ void *UartOdomPthread::DoPthread(void)
     starts = ends;
     loop_rate.sleep();
   }
+}
+
+void UartOdomPthread::timerCallback(const ros::TimerEvent &e)
+{
+
 }
 
 

@@ -13,6 +13,7 @@ find_package(catkin REQUIRED COMPONENTS
  tf
 )
 
+#set (CMAKE_PREFIX_PATH /home/hustac/Qt5.7.0/5.7/gcc_64)
 find_package(Qt5Widgets REQUIRED)
 
 
@@ -45,7 +46,7 @@ include_directories(
 
 add_executable(main_uart_odom src/server/main_uart_odom.cpp
  src/common/modbus.cpp
- src/common/paramodbus.cpp
+ src/common/paras.cpp
  src/server/moc_tcp_server.cpp
  src/server/tcpsocketserver.cpp
  src/server/uartdriver.cpp

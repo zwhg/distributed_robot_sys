@@ -96,22 +96,23 @@ namespace zw{
         int32_t startIndex=0;
         int32_t endIndex = buf.count();
         ParaGetSet  packInfo = {0,0,0,nullptr};
-
-        while(m_paraModbus.UnPackparas((const byte*)buf.data(),startIndex ,endIndex, packInfo))
+        Paras m_para;
+        while(m_modbus.UnPackparas((const byte*)buf.data(),startIndex ,endIndex, packInfo))
         {
-            if(packInfo.fuc == R_HOLDING_REGISTER){
+
+            if(packInfo.fuc == R_REGISTER){
                 packInfo.data = new int32_t[packInfo.len];
-                modbus.GetAddressValue(packInfo);
-                packInfo.fuc=W_MULTI_REGISTER;
+                m_para.GetAddressValue(packInfo);
+                packInfo.fuc=W_REGISTER;
                 int32_t size=FIXEDLENGTH +packInfo.len*4;
                 byte* msg =new byte[size];
-                if(size!=m_paraModbus.PackParas(packInfo,msg))
+                if(size!=m_modbus.PackParas(packInfo,msg))
                     qDebug()<<"Error in pack size!";
                 else
                     SendMsg(msg ,size);
                 delete msg;
-            }else if(packInfo.fuc == W_MULTI_REGISTER){
-                modbus.SetAddressValue(packInfo);
+            }else if(packInfo.fuc == W_REGISTER){
+                m_para.SetAddressValue(packInfo);
                // qDebug()<<"read success!";
             }
             delete packInfo.data;
@@ -135,17 +136,27 @@ namespace zw{
     bool TcpSocket::SendMsg(ParaGetSet &packInfo)
     {
         bool res =false;
-        packInfo.data = new int32_t[packInfo.len];
-        modbus.GetAddressValue(packInfo);
-        int32_t size=FIXEDLENGTH +packInfo.len*4;
-        byte* msg =new byte[size];
-        if(size!=m_paraModbus.PackParas(packInfo,msg)){
+        int32_t size;
+        byte *msg;
+        if(packInfo.fuc == R_REGISTER){
+            size=FIXEDLENGTH;
+            msg =new byte[size];
+        }else if(packInfo.fuc == W_REGISTER){
+            Paras m_para;
+            packInfo.data = new int32_t[packInfo.len];
+            m_para.GetAddressValue(packInfo);
+            size=FIXEDLENGTH +packInfo.len*4;
+            msg =new byte[size];
+        }
+
+        if(size!=m_modbus.PackParas(packInfo,msg)){
             qDebug()<<"Error in pack size!";
         }else{
             res=SendMsg(msg ,size);
         }
         delete msg;
-        delete packInfo.data;
+        if(packInfo.fuc == W_REGISTER)
+            delete packInfo.data;
      return res;
     }
 }

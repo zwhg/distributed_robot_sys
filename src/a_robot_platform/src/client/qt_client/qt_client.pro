@@ -18,15 +18,14 @@ SOURCES += main.cpp\
         mainwindow.cpp \
     ../key_control.cpp \
     ../tcp_socket.cpp \
-    ../../common/paramodbus.cpp \
+    ../../common/paras.cpp \
     ../../common/modbus.cpp
 
 HEADERS  += mainwindow.h \
     ../key_control.h \
     ../tcp_socket.h \
-    ../../common/paramodbus.h \
-    ../../common/modbus.h \
     ../../common/common.h \
+    ../../common/paras.h \
+    ../../common/modbus.h\
     ../../common/use_display.h
-
 FORMS    += mainwindow.ui
