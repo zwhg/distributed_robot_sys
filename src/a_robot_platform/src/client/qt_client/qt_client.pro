@@ -26,6 +26,7 @@ HEADERS  += mainwindow.h \
     ../tcp_socket.h \
     ../../common/paramodbus.h \
     ../../common/modbus.h \
-    ../../common/common.h
+    ../../common/common.h \
+    ../../common/use_display.h
 
 FORMS    += mainwindow.ui

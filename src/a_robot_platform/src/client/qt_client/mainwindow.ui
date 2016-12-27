@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1024</width>
-    <height>684</height>
+    <height>971</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -32,11 +32,11 @@
       <x>6</x>
       <y>9</y>
       <width>1011</width>
-      <height>611</height>
+      <height>901</height>
      </rect>
     </property>
     <property name="currentIndex">
-     <number>2</number>
+     <number>1</number>
     </property>
     <widget class="QWidget" name="tab_3">
      <attribute name="title">
@@ -389,9 +389,6 @@
         </item>
        </layout>
       </widget>
-      <zorder>pBtn_key_control_open</zorder>
-      <zorder>formLayoutWidget</zorder>
-      <zorder>groupBox</zorder>
      </widget>
      <widget class="QGroupBox" name="gBx_Pose">
       <property name="geometry">
@@ -697,15 +694,6 @@
        </property>
       </widget>
      </widget>
-     <zorder>gBx_imu</zorder>
-     <zorder>gBx_control</zorder>
-     <zorder>gBx_Pose</zorder>
-     <zorder></zorder>
-     <zorder></zorder>
-     <zorder></zorder>
-     <zorder>groupBox</zorder>
-     <zorder>groupBox_2</zorder>
-     <zorder>groupBox_3</zorder>
     </widget>
     <widget class="QWidget" name="tab_4">
      <attribute name="title">
@@ -715,9 +703,9 @@
       <property name="geometry">
        <rect>
         <x>10</x>
-        <y>14</y>
+        <y>4</y>
         <width>821</width>
-        <height>551</height>
+        <height>841</height>
        </rect>
       </property>
       <property name="text">
@@ -736,7 +724,7 @@
       <property name="title">
        <string>显示设置</string>
       </property>
-      <widget class="QWidget" name="">
+      <widget class="QWidget" name="layoutWidget">
        <property name="geometry">
         <rect>
          <x>14</x>
@@ -800,7 +788,7 @@
       <property name="title">
        <string>超声开关</string>
       </property>
-      <widget class="QWidget" name="">
+      <widget class="QWidget" name="layoutWidget">
        <property name="geometry">
         <rect>
          <x>120</x>
@@ -868,7 +856,7 @@
         </item>
        </layout>
       </widget>
-      <widget class="QWidget" name="">
+      <widget class="QWidget" name="layoutWidget">
        <property name="geometry">
         <rect>
          <x>9</x>
@@ -961,7 +949,7 @@
         <rect>
          <x>10</x>
          <y>30</y>
-         <width>78</width>
+         <width>101</width>
          <height>21</height>
         </rect>
        </property>
@@ -974,12 +962,12 @@
         <rect>
          <x>10</x>
          <y>80</y>
-         <width>78</width>
+         <width>91</width>
          <height>21</height>
         </rect>
        </property>
        <property name="text">
-        <string>CheckBox</string>
+        <string>障碍轮廓显示</string>
        </property>
       </widget>
      </widget>

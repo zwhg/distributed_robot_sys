@@ -4,7 +4,19 @@
 #include <QMainWindow>
 #include "../tcp_socket.h"
 #include "../key_control.h"
+#include<QMouseEvent>
+#include <QMessageBox>
+#include <QPainter>
+#include <QPixmap>
+#include <QDateTime>
+#include <QTimer>
+#include <QPoint>
+#include <QTableWidget>
+#include<QProgressBar>
 
+#define Myhigh 600
+#define Mywidth 600
+#define  MIDD 720
 
 namespace Ui {
 class MainWindow;
@@ -17,12 +29,17 @@ class MainWindow : public QMainWindow
 public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
+    QPixmap *pixmap;
+    QProgressBar  *ProgressBar;
+    float MyPoint[3600];
+    float ShowPoint[MIDD][2];
 
 protected:
     void keyPressEvent(QKeyEvent *e);
 
 
 private slots:
+    void ShowLaser();
     void on_pBtn_start2connect_clicked(bool checked);
     void on_pBtn_key_control_open_clicked(bool checked);
     void on_lEdit_ip_returnPressed();
