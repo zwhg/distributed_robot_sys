@@ -6,9 +6,6 @@ namespace zw {
 int32_t UartOdom::StartScan(void)
 {
   static uint8_t scanflags = 0;
-
-
-
   createPthread = 1;
   if (scanflags == 0)
   {
@@ -45,7 +42,7 @@ void *UartOdom::DoPthread(void)
 //    int32_t tmp[2]={fi.i,fy.i};
 //    ParaGetSet tmpInfo={W_REGISTER,2, MSG_CONTROL,tmp};
 //    m_para.SetAddressValue(tmpInfo);
-//    usleep(20000);
+      usleep(10000);
   }
 }
 
@@ -57,6 +54,7 @@ void UartOdom::Analysis(uint8_t *arry, int nRet)
     int32_t endIndex = buf.count();
     ParaGetSet packInfo={0,0,0,nullptr};
     Paras m_para;
+
     while(m_modbus.UnPackparas((const byte*)buf.data(),startIndex ,endIndex, packInfo))
     {
         if(packInfo.fuc == R_REGISTER){
@@ -81,11 +79,12 @@ void UartOdom::Analysis(uint8_t *arry, int nRet)
 //            ff1.i=dat[0];
 //            ff2.i=dat[1];
 //            qDebug () <<ff1.f<<ff2.f;
-//            qDebug()<<dat[0]<<dat[1]<<dat[2]<<dat[3]<<dat[4]<<dat[5];
+            qDebug()<<dat[0]<<dat[1]<<dat[2]<<dat[3]<<dat[4]<<dat[5];
         }
         delete packInfo.data;
-        packInfo={0,0,0,nullptr};
+       // packInfo={0,0,0,nullptr};
     }
+
     if(startIndex!=0){
         buf.remove(0,startIndex);
         startIndex=0;

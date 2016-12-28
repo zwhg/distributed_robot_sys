@@ -34,6 +34,7 @@ typedef enum
 }FunctionCode;
 
 
+
 class Modbus
 {
 public:

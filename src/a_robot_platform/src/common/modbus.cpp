@@ -81,7 +81,7 @@ bool Modbus::UnPackparas(const byte* inMsg, int32_t& startIndex,int32_t endIndex
 {
     static ModbusMsg info;
     static uint8_t status=0;
-    uint16_t dat_len=0;
+    static uint16_t dat_len=0;
 
     if(endIndex >= SOCKETBUFMAX )
     {
@@ -137,8 +137,7 @@ bool Modbus::UnPackparas(const byte* inMsg, int32_t& startIndex,int32_t endIndex
                     status++;
                 else
                     status=0;
-            }
-            else
+            }else
                 return false;
             break;
         }

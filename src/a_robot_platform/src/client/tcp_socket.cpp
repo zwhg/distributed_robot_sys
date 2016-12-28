@@ -116,7 +116,7 @@ namespace zw{
                // qDebug()<<"read success!";
             }
             delete packInfo.data;
-            packInfo = {0,0,0,nullptr};
+           // packInfo = {0,0,0,nullptr};
         }
         if(startIndex!=0){
             buf.remove(0,startIndex);

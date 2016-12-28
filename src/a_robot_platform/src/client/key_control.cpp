@@ -63,8 +63,8 @@ namespace zw {
             }
             f2is.f=kMsg.e_speed;
             f2io.f=kMsg.e_omega;
-            f2is.f=0.1;
-            f2io.f=0.2;
+//            f2is.f=0.5;
+//            f2io.f=-0.2;
             dat[0]=f2is.i;
             dat[1]=f2io.i;
             m_para.SetAddressValue(packInfo);
