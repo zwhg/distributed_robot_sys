@@ -26,7 +26,6 @@ void TcpSocketServer::on_ProcessConnection(void)
 
 void TcpSocketServer::on_ReadyRead(void)
 {
-    static QByteArray buf;
     QByteArray arry= this->m_readWriteSocket->readAll();
     buf.append(arry);
 

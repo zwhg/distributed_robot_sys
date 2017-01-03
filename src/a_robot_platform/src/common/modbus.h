@@ -37,6 +37,11 @@ typedef enum
 
 class Modbus
 {
+private:
+    ParaGetSet Info;
+    uint8_t status;
+    uint16_t dat_len;
+
 public:
     Modbus();
     ~Modbus();

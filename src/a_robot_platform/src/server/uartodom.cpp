@@ -48,7 +48,7 @@ void *UartOdom::DoPthread(void)
 
 void UartOdom::Analysis(uint8_t *arry, int nRet)
 {
-    static QByteArray buf;
+
     buf.append((char *)arry,nRet);
 
     int32_t endIndex = buf.count();

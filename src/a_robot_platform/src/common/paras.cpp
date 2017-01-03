@@ -7,7 +7,7 @@ namespace zw {
 
 static uint16_t dataTableLen=0;
 static pthread_mutex_t g_tMutex  = PTHREAD_MUTEX_INITIALIZER;
-static uint8_t p_cnt=0;
+
 
 static volatile zw::ElementTable dataTable[]=
 {
@@ -43,6 +43,7 @@ static volatile zw::ElementTable dataTable[]=
 
 Paras::Paras()
 {
+    static uint8_t p_cnt=0;
     if(p_cnt==0){
     dataTableLen =  (sizeof(dataTable))/(sizeof(uint32_t)+sizeof(uint32_t));
     p_cnt++;

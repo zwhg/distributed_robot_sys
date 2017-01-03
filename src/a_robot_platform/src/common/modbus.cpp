@@ -7,10 +7,11 @@ namespace zw {
 static bool endian=true;
 static uint16_t CRC16_1201_table[256];
 static const uint16_t gx = 0x1021;
-static uint8_t m_cnt=0;
+
 
 Modbus::Modbus()
 {
+     static uint8_t m_cnt=0;
      if(m_cnt==0)
      {
          int16_t a=1 ;
@@ -18,6 +19,8 @@ Modbus::Modbus()
          InitCRC16_1201_table();
          m_cnt++;
      }
+     status=0;
+     dat_len=0;
 }
 
 Modbus::~Modbus()
@@ -79,10 +82,6 @@ uint16_t Modbus::PackParas(const ParaGetSet& info ,byte outmsg[])
 
 bool Modbus::UnPackparas(const byte* inMsg, int32_t& startIndex,int32_t endIndex,ParaGetSet & packInfo)
 {
-    static ParaGetSet Info;
-    static uint8_t status=0;
-    static uint16_t dat_len=0;
-
     if(endIndex >= SOCKETBUFMAX )
     {
         qDebug()<<"Recevie too much data !";
@@ -167,7 +166,10 @@ bool Modbus::UnPackparas(const byte* inMsg, int32_t& startIndex,int32_t endIndex
                 status=0;
                 return false;
             }
-            packInfo=Info;
+            packInfo.addr=Info.addr;
+            packInfo.data=Info.data;
+            packInfo.fuc=Info.fuc;
+            packInfo.len=Info.len;
             startIndex = I+2+1 ;
             status =0;
             return true;

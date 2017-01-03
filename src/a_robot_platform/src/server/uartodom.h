@@ -16,6 +16,8 @@ class UartOdom: public UartDriver
 
 public:
   Modbus m_modbus;
+private:
+  QByteArray buf;
 
 public:
   virtual	int32_t StartScan(void);

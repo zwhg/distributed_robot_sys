@@ -90,7 +90,6 @@ namespace zw{
 
     void TcpSocket::on_ReadyRead(void)
     {
-        static QByteArray buf;
         QByteArray arry= m_tcpClient->readAll();
         buf.append(arry);
 
