@@ -40,6 +40,8 @@ protected:
 
 private slots:
     void ShowLaser();
+    void ShowUltrasonic();
+    void on_ultraAll_clicked();
     void on_pBtn_start2connect_clicked(bool checked);
     void on_pBtn_key_control_open_clicked(bool checked);
     void on_lEdit_ip_returnPressed();
@@ -47,10 +49,13 @@ private slots:
     void on_xTimerUpdate();
     void on_cmdTimerUpdate();
 
+    void on_tableView_activated(const QModelIndex &index);
+
 private :
     void KeyControlMsgRefalsh(const zw::KeyControlMsg & kMsg);
     void MsgControlRefalsh(void);
     void MsgImuRefalsh(void);
+    void ClearData();
 
 private:
     Ui::MainWindow *ui;

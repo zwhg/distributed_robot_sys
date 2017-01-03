@@ -2,7 +2,6 @@
 #include "ui_mainwindow.h"
 #include <QTimer>
 #include <QString>
-
 #include<unistd.h>
 #include<string.h>
 #include<stdio.h>
@@ -24,6 +23,7 @@ MainWindow::MainWindow(QWidget *parent) :
     QTimer *timer = new QTimer(this);
     timer->start(1);
     connect(timer,SIGNAL(timeout()),this,SLOT(ShowLaser()));
+    connect(timer,SIGNAL(timeout()),this,SLOT(ShowUltrasonic()));
     ui->lEdit_ip->setText(QString::fromStdString(zw::SERVER_IP));
     m_tcpSocketClient->host =ui->lEdit_ip->text().toStdString();
     m_tcpSocketClient->port =ui->lEdit_port->text().toUShort();
@@ -52,12 +52,183 @@ MainWindow::~MainWindow()
     this->close();
     delete ui;
 }
+
+void MainWindow::ShowUltrasonic()   //显示超声
+{
+    pixmap->fill(Qt::white);
+    QPainter painter(pixmap);
+//draw  the ultrasonic  Area
+      float dis[8] = {ONE_GRID,2*ONE_GRID,3*ONE_GRID,4*ONE_GRID,4*ONE_GRID,3*ONE_GRID,2*ONE_GRID,ONE_GRID};
+      painter.setBrush(Qt::gray);
+      QPolygonF  polygon1,polygon2,polygon3,polygon4,polygon5,polygon6,polygon7,polygon8;
+      polygon1<<QPointF(ONE_Ultra_X,ONE_Ultra_Y)<<QPointF(ONE_Ultra_X+dis[0],ONE_Ultra_Y-dis[0]*tan(PI/12))
+                    <<QPointF(ONE_Ultra_X+dis[0],ONE_Ultra_Y+dis[0]*tan(PI/12));
+      polygon2<<QPointF(TWO_Ultra_X,TWO_Ultra_Y)<<QPointF(TWO_Ultra_X+dis[1],TWO_Ultra_Y-dis[1]*tan(PI/12))
+                    <<QPointF(TWO_Ultra_X+dis[1],TWO_Ultra_Y+dis[1]*tan(PI/12));
+      polygon3<<QPointF(THREE_Ultra_X,THREE_Ultra_Y)
+                      <<QPointF(THREE_Ultra_X+(dis[2]/cos(PI/12))*cos(atan((Car_Central_Y-THREE_Ultra_Y)/(THREE_Ultra_X-Car_Central_X))-PI/12),
+                                         THREE_Ultra_Y- (dis[2]/cos(PI/12))*sin(atan((Car_Central_Y-THREE_Ultra_Y)/(THREE_Ultra_X-Car_Central_X))-PI/12))
+                      <<QPointF(THREE_Ultra_X+(dis[2]/cos(PI/12))*cos(atan((Car_Central_Y-THREE_Ultra_Y)/(THREE_Ultra_X-Car_Central_X))+PI/12),
+                                         THREE_Ultra_Y- (dis[2]/cos(PI/12))*sin(atan((Car_Central_Y-THREE_Ultra_Y)/(THREE_Ultra_X-Car_Central_X))+PI/12));
+      polygon4<<QPointF(FOUR_Ultra_X,FOUR_Ultra_Y)<<QPointF(FOUR_Ultra_X-dis[3]*tan(PI/12),FOUR_Ultra_Y-dis[3])
+                     <<QPointF(FOUR_Ultra_X+dis[3]*tan(PI/12),FOUR_Ultra_Y-dis[3]);
+      polygon5<<QPointF(FIVE_Ultra_X,FIVE_Ultra_Y)<<QPointF(FIVE_Ultra_X-dis[4]*tan(PI/12),FIVE_Ultra_Y-dis[4])
+                     <<QPointF(FIVE_Ultra_X+dis[4]*tan(PI/12),FIVE_Ultra_Y-dis[4]);
+      polygon6<<QPointF(SIX_Ultra_X,SIX_Ultra_Y)
+                      <<QPointF(SIX_Ultra_X-(dis[5]/cos(PI/12))*cos(atan((SIX_Ultra_Y-Car_Central_Y)/(SIX_Ultra_X-Car_Central_X))+PI/12),
+                                         SIX_Ultra_Y-(dis[5]/cos(PI/12))*sin(atan((SIX_Ultra_Y-Car_Central_Y)/(SIX_Ultra_X-Car_Central_X))+PI/12))
+                      <<QPointF(SIX_Ultra_X-dis[5]/cos(PI/12)*cos(atan((SIX_Ultra_Y-Car_Central_Y)/(SIX_Ultra_X-Car_Central_X))-PI/12),
+                                         SIX_Ultra_Y-(dis[5]/cos(PI/12))*sin(atan((SIX_Ultra_Y-Car_Central_Y)/(SIX_Ultra_X-Car_Central_X))-PI/12));
+      polygon7<<QPointF(SEVEN_Ultra_X,SEVEN_Ultra_Y)<<QPointF(SEVEN_Ultra_X-dis[6],SEVEN_Ultra_Y-dis[6]*tan(PI/12))
+                    <<QPointF(SEVEN_Ultra_X-dis[6],SEVEN_Ultra_Y+dis[6]*tan(PI/12));
+      polygon8<<QPointF(EIGHT_Ultra_X,EIGHT_Ultra_Y)<<QPointF(EIGHT_Ultra_X-dis[7],EIGHT_Ultra_Y-dis[7]*tan(PI/12))
+                    <<QPointF(EIGHT_Ultra_X-dis[7],EIGHT_Ultra_Y+dis[7]*tan(PI/12));
+
+      if(ui->ultra1->isChecked())
+      {
+          if(ui->Ultra_Area->isChecked())
+          {
+             painter.drawPolygon(polygon1,Qt::WindingFill);
+          }
+          ui->lb_ultra1->setText(QString("%1").arg(dis[0]));
+      }else
+      {
+          ui->lb_ultra1->setText("0000");
+      }
+/**********************1#******************************/
+      if(ui->ultra2->isChecked())
+      {
+          if(ui->Ultra_Area->isChecked())
+          {
+             painter.drawPolygon(polygon2,Qt::WindingFill);
+          }
+         ui->lb_ultra2->setText(QString("%1").arg(dis[1]));
+      }else
+      {
+          ui->lb_ultra2->setText("0000");
+      }
+/**********************2#******************************/
+      if(ui->ultra3->isChecked())
+      {
+          if(ui->Ultra_Area->isChecked())
+          {
+             painter.drawPolygon(polygon3,Qt::WindingFill);
+          }
+           ui->lb_ultra3->setText(QString("%1").arg(dis[2]));
+      }else
+      {
+          ui->lb_ultra3->setText("0000");
+      }
+/**********************3#******************************/
+      if(ui->ultra4->isChecked())
+      {
+          if(ui->Ultra_Area->isChecked())
+          {
+             painter.drawPolygon(polygon4,Qt::WindingFill);
+          }
+          ui->lb_ultra4->setText(QString("%1").arg(dis[3]));
+      }else
+      {
+          ui->lb_ultra4->setText("0000");
+      }
+/**********************4#******************************/
+      if(ui->ultra5->isChecked())
+      {
+          if(ui->Ultra_Area->isChecked())
+          {
+             painter.drawPolygon(polygon5,Qt::WindingFill);
+          }
+         ui->lb_ultra5->setText(QString("%1").arg(dis[4]));
+      }else
+      {
+          ui->lb_ultra5->setText("0000");
+      }
+/**********************5#******************************/
+      if(ui->ultra6->isChecked())
+      {
+          if(ui->Ultra_Area->isChecked())
+          {
+             painter.drawPolygon(polygon6,Qt::WindingFill);
+          }
+          ui->lb_ultra6->setText(QString("%1").arg(dis[5]));
+      }else
+      {
+          ui->lb_ultra6->setText("0000");
+      }
+/**********************6#******************************/
+      if(ui->ultra7->isChecked())
+      {
+          if(ui->Ultra_Area->isChecked())
+          {
+             painter.drawPolygon(polygon7,Qt::WindingFill);
+          }
+          ui->lb_ultra7->setText(QString("%1").arg(dis[6]));
+      }else
+      {
+          ui->lb_ultra7->setText("0000");
+      }
+/**********************7#******************************/
+      if(ui->ultra8->isChecked())
+      {
+          if(ui->Ultra_Area->isChecked())
+          {
+             painter.drawPolygon(polygon8,Qt::WindingFill);
+          }
+          ui->lb_ultra8->setText(QString("%1").arg(dis[7]));
+      }else
+      {
+          ui->lb_ultra8->setText("0000");
+      }
+/**********************8#******************************/
+      /**********************************************************************************/
+            //draw the obstacle outline
+           painter.setPen(QPen(Qt::red,2,Qt::DashDotLine,Qt::RoundCap));
+           static const QPointF points[8] = {
+                                                                              QPointF(ONE_Ultra_X + dis[0],ONE_Ultra_Y),
+                                                                              QPointF(TWO_Ultra_X + dis[1],TWO_Ultra_Y),
+                                                                              QPointF(THREE_Ultra_X ,THREE_Ultra_Y),
+                                                                              QPointF(FOUR_Ultra_X,FOUR_Ultra_Y-dis[3]),
+                                                                              QPointF(FIVE_Ultra_X,FIVE_Ultra_Y-dis[4]),
+                                                                              QPointF(SIX_Ultra_X,SIX_Ultra_Y),
+                                                                              QPointF(SEVEN_Ultra_X-dis[6],SEVEN_Ultra_Y),
+                                                                              QPointF(EIGHT_Ultra_X-dis[7],EIGHT_Ultra_Y)
+                                                                    };
+           if(ui->Obsta_OutLine->isChecked())
+                painter.drawPolyline(points,8);
+           printf("atan(1):%f\n",atan(1));
+      /**********************************************************************************/
+      painter.setPen(QPen(Qt::black,1,Qt::DashDotLine,Qt::RoundCap));        //set style of the pen
+      //绘制垂直和水平的虚线
+      for(int i=0;i<=PIXMAP_Y;i=i+ONE_GRID)
+      {
+          painter.drawLine(0,i,PIXMAP_X,i);
+      }
+      for(int j=0;j<=PIXMAP_X;j=j+ONE_GRID)
+      {
+          painter.drawLine(j,0,j,PIXMAP_Y);
+      }
+      //绘制坐标轴
+       painter.setPen(QPen(Qt::green,2,Qt::SolidLine,Qt::RoundCap)); //set style of the pen
+       painter.drawLine(0,PIXMAP_Y,PIXMAP_X,PIXMAP_Y);
+       painter.drawLine(7*ONE_GRID,0,7*ONE_GRID,PIXMAP_Y);
+      //draw the car outline
+        painter.setBrush(Qt::red);
+        painter.drawEllipse(5.425*ONE_GRID,10.425*ONE_GRID,3.15*ONE_GRID,3.15*ONE_GRID);
+     //draw the laser outline
+        painter.setBrush(Qt::black);
+        painter.drawEllipse(6.565*ONE_GRID,11.565*ONE_GRID,0.87*ONE_GRID,0.87*ONE_GRID);
+      ui->label_Ultra->setPixmap(*pixmap);
+}
 void MainWindow::ShowLaser()
 {
     pixmap->fill(Qt::black);
     QPainter painter(pixmap);
     QColor qcolor(108,108,108);
     painter.setPen(qcolor);
+
+    getModeSelect.addButton(ui->rb_all,Show_All);
+    getModeSelect.addButton(ui->rb_2m,Show_2M);
+    getModeSelect.addButton(ui->rb_1m,Show_1M);
 
     temp_x = 25;
     temp_y = 25;
@@ -73,7 +244,7 @@ void MainWindow::ShowLaser()
     QLine qline2(Mywidth/2 +25,Myhigh +25,Mywidth/2 +25,0 +25-10);
     painter.drawLine(qline1);
     painter.drawLine(qline2);
-    ////////////////绘制斜线////////////////////////////////////////
+    ///////////////////////绘制斜线///////////////////////////
     // 将画笔中心点移动至(Mywidth/2,Myhigh/2)
     painter.translate(QPoint(Mywidth/2 +25,Myhigh/2 +25));
     painter.rotate(30);
@@ -156,13 +327,13 @@ void MainWindow::ShowLaser()
              painter.drawPoint(ShowPoint[y][0],ShowPoint[y][1]);
          }else if(getModeSelect.checkedId()==Show_2M)
          {
-             if(distance[y]<=2000)
+             if(distance[y]<=Set_First_Limit)
              {
                  painter.drawPoint(ShowPoint[y][0],ShowPoint[y][1]);
              }
          }else if(getModeSelect.checkedId()==Show_1M)
          {
-             if(distance[y]<=1000)
+             if(distance[y]<=Set_Second_Limit)
              {
                  painter.drawPoint(ShowPoint[y][0],ShowPoint[y][1]);
              }
@@ -351,3 +522,28 @@ void MainWindow::keyPressEvent(QKeyEvent *e)
     if(m_keyControl->keyControl)
         m_keyControl->ControlKeyDown(e);
 }
+void MainWindow::on_ultraAll_clicked()
+{
+    if(ui->ultraAll->isChecked())
+    {
+        ui->ultra1->setChecked(true);
+        ui->ultra2->setChecked(true);
+        ui->ultra3->setChecked(true);
+        ui->ultra4->setChecked(true);
+        ui->ultra5->setChecked(true);
+        ui->ultra6->setChecked(true);
+        ui->ultra7->setChecked(true);
+        ui->ultra8->setChecked(true);
+    }else
+    {
+        ui->ultra1->setChecked(false);
+        ui->ultra2->setChecked(false);
+        ui->ultra3->setChecked(false);
+        ui->ultra4->setChecked(false);
+        ui->ultra5->setChecked(false);
+        ui->ultra6->setChecked(false);
+        ui->ultra7->setChecked(false);
+        ui->ultra8->setChecked(false);
+    }
+}
+
