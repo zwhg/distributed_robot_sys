@@ -6,9 +6,6 @@ namespace zw {
 int32_t UartOdom::StartScan(void)
 {
   static uint8_t scanflags = 0;
-
-
-
   createPthread = 1;
   if (scanflags == 0)
   {
@@ -45,7 +42,7 @@ void *UartOdom::DoPthread(void)
 //    int32_t tmp[2]={fi.i,fy.i};
 //    ParaGetSet tmpInfo={W_REGISTER,2, MSG_CONTROL,tmp};
 //    m_para.SetAddressValue(tmpInfo);
-//    usleep(20000);
+      usleep(40000);
   }
 }
 
@@ -53,42 +50,51 @@ void UartOdom::Analysis(uint8_t *arry, int nRet)
 {
     static QByteArray buf;
     buf.append((char *)arry,nRet);
-    int32_t startIndex=0;
-    int32_t endIndex = buf.count();
-    ParaGetSet packInfo={0,0,0,nullptr};
-    Paras m_para;
-    while(m_modbus.UnPackparas((const byte*)buf.data(),startIndex ,endIndex, packInfo))
-    {
-        if(packInfo.fuc == R_REGISTER){
-            packInfo.data=new int32_t[packInfo.len];
-            m_para.GetAddressValue(packInfo);
-            packInfo.fuc=W_REGISTER;
-            int32_t size=FIXEDLENGTH +packInfo.len*4;
-            byte* msg =new byte[size];
-            if(size!=m_modbus.PackParas(packInfo,msg))
-                qDebug () <<"Error in pack size!";
-            else
-                write(fd,(char*)msg ,size);
-            delete msg;
-        }
-        else if(packInfo.fuc == W_REGISTER){
-            m_para.SetAddressValue(packInfo);
 
-            int32_t dat[6];
-            zw::ParaGetSet  packInfo = {zw::R_REGISTER,6,zw::MSG_IMU,dat};
-            m_para.GetAddressValue(packInfo);
-//            zw::Float2Int32 ff1,ff2;
-//            ff1.i=dat[0];
-//            ff2.i=dat[1];
-//            qDebug () <<ff1.f<<ff2.f;
-//            qDebug()<<dat[0]<<dat[1]<<dat[2]<<dat[3]<<dat[4]<<dat[5];
+    int32_t endIndex = buf.count();
+    if(endIndex >=FIXEDLENGTH){
+        int32_t startIndex=0;
+        ParaGetSet packInfo={0,0,0,nullptr};
+        Paras m_para;
+
+        while(m_modbus.UnPackparas((const byte*)buf.data(),startIndex ,endIndex, packInfo))
+        {
+            if(packInfo.fuc == R_REGISTER){
+                packInfo.data=new int32_t[packInfo.len];
+                m_para.GetAddressValue(packInfo);
+                packInfo.fuc=W_REGISTER;
+                int32_t size=FIXEDLENGTH +packInfo.len*4;
+                byte* msg =new byte[size];
+                if(size!=m_modbus.PackParas(packInfo,msg))
+                    qDebug () <<"Error in pack size!";
+                else
+                    write(fd,(char*)msg ,size);
+                delete msg;
+                delete packInfo.data;
+            } else if(packInfo.fuc == W_REGISTER){
+                m_para.SetAddressValue(packInfo);
+
+                int32_t dat[8];
+                if(packInfo.addr==MSG_Ultrasonic){
+                    zw::ParaGetSet  pack = {zw::R_REGISTER,8,zw::MSG_Ultrasonic,dat};
+                    m_para.GetAddressValue(pack);
+                    zw::Float2Int32 ff[8];
+                   for(int i=0;i<8;i++)
+                   {
+                      ff[i].i = dat[i];
+                   }
+                   qDebug()<<ff[0].f<<ff[1].f<<ff[2].f<<ff[3].f<<ff[4].f<<ff[5].f<<ff[6].f<<ff[7].f;
+                }
+
+        //        qDebug () <<ff1.f<<ff2.f;
+       //         qDebug()<<dat[0]<<dat[1]<<dat[2]<<dat[3]<<dat[4]<<dat[5];
+                delete packInfo.data;
+            }
         }
-        delete packInfo.data;
-        packInfo={0,0,0,nullptr};
-    }
-    if(startIndex!=0){
-        buf.remove(0,startIndex);
-        startIndex=0;
+        if(startIndex!=0){
+            buf.remove(0,startIndex);
+            startIndex=0;
+        }
     }
 }
 

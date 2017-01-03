@@ -118,7 +118,8 @@ int32_t UartDriver::StopScan(void)
 
 void *UartDriver::DoPthread(void)
 {
-
+ uint8_t i=0;
+ i++;
 }
 
 void UartDriver::Analysis(uint8_t *buf, int nRet)

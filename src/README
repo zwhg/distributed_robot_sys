@@ -1,11 +1,9 @@
-新建文件夹 distributed_robot_sys,进如该文件夹，git clone ...
-
 a_robot_platform 功能说明
 src/中包含客户端和服务器
 
 ###所有参数需定义在common/modbus.h与common/modbus.cpp中
 ###添加参数，还需修改server/uartodompthread.cpp中的DoPthread()函数
-### 读取参数modbus.get()/set()(全局变量，可直接引用)
+### 读取参数modbus.get()/set()
 
 包a_robot_platform含两个节点
 1、main_uart_laser

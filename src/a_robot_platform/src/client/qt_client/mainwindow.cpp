@@ -21,7 +21,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->setupUi(this);
     pixmap = new QPixmap(PIXMAP_X,PIXMAP_Y);
     QTimer *timer = new QTimer(this);
-    timer->start(1);
+    timer->start(50);
     connect(timer,SIGNAL(timeout()),this,SLOT(ShowLaser()));
     connect(timer,SIGNAL(timeout()),this,SLOT(ShowUltrasonic()));
     ui->lEdit_ip->setText(QString::fromStdString(zw::SERVER_IP));
@@ -398,6 +398,7 @@ void MainWindow::ShowLaser()
     painter.end();
     ui->label_main->setPixmap(*pixmap);
 }
+
 void MainWindow::on_xTimerUpdate(void)
 {
     switch (m_tcpSocketClient->m_connectStatus) {

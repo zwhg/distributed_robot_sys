@@ -93,34 +93,38 @@ namespace zw{
         static QByteArray buf;
         QByteArray arry= m_tcpClient->readAll();
         buf.append(arry);
-        int32_t startIndex=0;
-        int32_t endIndex = buf.count();
-        ParaGetSet  packInfo = {0,0,0,nullptr};
-        Paras m_para;
-        while(m_modbus.UnPackparas((const byte*)buf.data(),startIndex ,endIndex, packInfo))
-        {
 
-            if(packInfo.fuc == R_REGISTER){
-                packInfo.data = new int32_t[packInfo.len];
-                m_para.GetAddressValue(packInfo);
-                packInfo.fuc=W_REGISTER;
-                int32_t size=FIXEDLENGTH +packInfo.len*4;
-                byte* msg =new byte[size];
-                if(size!=m_modbus.PackParas(packInfo,msg))
-                    qDebug()<<"Error in pack size!";
-                else
-                    SendMsg(msg ,size);
-                delete msg;
-            }else if(packInfo.fuc == W_REGISTER){
-                m_para.SetAddressValue(packInfo);
-               // qDebug()<<"read success!";
+        int32_t endIndex = buf.count();
+        if(endIndex >=FIXEDLENGTH){
+            int32_t startIndex=0;
+            ParaGetSet  packInfo = {0,0,0,nullptr};
+            Paras m_para;
+
+            while(m_modbus.UnPackparas((const byte*)buf.data(),startIndex ,endIndex, packInfo))
+            {
+
+                if(packInfo.fuc == R_REGISTER){
+                    packInfo.data = new int32_t[packInfo.len];
+                    m_para.GetAddressValue(packInfo);
+                    packInfo.fuc=W_REGISTER;
+                    int32_t size=FIXEDLENGTH +packInfo.len*4;
+                    byte* msg =new byte[size];
+                    if(size!=m_modbus.PackParas(packInfo,msg))
+                        qDebug()<<"Error in pack size!";
+                    else
+                        SendMsg(msg ,size);
+                    delete msg;
+                    delete packInfo.data;
+                }else if(packInfo.fuc == W_REGISTER){
+                    m_para.SetAddressValue(packInfo);
+                   // qDebug()<<"read success!";
+                    delete packInfo.data;
+                }
             }
-            delete packInfo.data;
-            packInfo = {0,0,0,nullptr};
-        }
-        if(startIndex!=0){
-            buf.remove(0,startIndex);
-            startIndex=0;
+            if(startIndex!=0){
+                buf.remove(0,startIndex);
+                startIndex=0;
+            }
         }
     }
 

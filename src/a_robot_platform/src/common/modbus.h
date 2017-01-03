@@ -28,10 +28,11 @@ typedef struct
 
 typedef enum
 {
-     R_REGISTER =0x03,
-     W_REGISTER =0x10,
+     R_REGISTER =0x5f,
+     W_REGISTER =0xf5,
      NULL1
 }FunctionCode;
+
 
 
 class Modbus
