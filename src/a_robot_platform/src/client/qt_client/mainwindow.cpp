@@ -195,7 +195,7 @@ void MainWindow::ShowUltrasonic()   //显示超声
                                                                     };
            if(ui->Obsta_OutLine->isChecked())
                 painter.drawPolyline(points,8);
-           printf("atan(1):%f\n",atan(1));
+     //      printf("atan(1):%f\n",atan(1));
       /**********************************************************************************/
       painter.setPen(QPen(Qt::black,1,Qt::DashDotLine,Qt::RoundCap));        //set style of the pen
       //绘制垂直和水平的虚线
