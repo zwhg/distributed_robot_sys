@@ -95,13 +95,13 @@ bool Modbus::UnPackparas(const byte* inMsg, int32_t& startIndex,int32_t endIndex
         switch (status) {
         case 0:{ //find frame head
             if(inMsg[startIndex++]==HEAD)
-                status++;            //go to next status
+                status=1;            //go to next status
             break;
         }
         case 1:{ //get function code ,and check the function code
                 Info.fuc = inMsg[startIndex++];
                 if( (Info.fuc == R_REGISTER) ||(Info.fuc == W_REGISTER))
-                    status++;
+                    status=2;
                 else
                     status =0;  //return inital status
             break;
@@ -119,7 +119,7 @@ bool Modbus::UnPackparas(const byte* inMsg, int32_t& startIndex,int32_t endIndex
                 if(Info.len > EFLMAX_BYTE){
                     status =0;
                 }else{
-                    status++;  
+                    status=3;
                 }
             break;
         }
@@ -127,7 +127,7 @@ bool Modbus::UnPackparas(const byte* inMsg, int32_t& startIndex,int32_t endIndex
             int32_t tailIndex=(int32_t)(startIndex+2+2+dat_len+2);
             if(tailIndex < endIndex){
                 if(inMsg[tailIndex] ==TAIL)
-                    status++;
+                    status=4;
                 else
                     status=0;
             }else
@@ -139,7 +139,7 @@ bool Modbus::UnPackparas(const byte* inMsg, int32_t& startIndex,int32_t endIndex
             uint16_t crc16 = (uint16_t) ((((uint16_t)inMsg[crcIndex+1]&0x00ff)<<8 )|
                                          ((uint16_t)inMsg[crcIndex]&0x00ff));
             if( CalculateCRC16ByTable(inMsg, startIndex+2, crcIndex)==crc16 )
-                status++;
+                status=5;
             else
                 status=0;
             break;
@@ -173,6 +173,7 @@ bool Modbus::UnPackparas(const byte* inMsg, int32_t& startIndex,int32_t endIndex
             return true;
         }
         default:
+            status =0;
             break;
         }
     }

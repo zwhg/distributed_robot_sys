@@ -118,7 +118,11 @@ namespace zw{
                 }else if(packInfo.fuc == W_REGISTER){
                     m_para.SetAddressValue(packInfo);
                    // qDebug()<<"read success!";
-                    delete packInfo.data;
+                    if(packInfo.data!=nullptr)
+                    {
+                       delete packInfo.data;
+                       packInfo.data=nullptr;
+                    }
                 }
             }
             if(startIndex!=0){

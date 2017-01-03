@@ -88,7 +88,11 @@ void UartOdom::Analysis(uint8_t *arry, int nRet)
 
         //        qDebug () <<ff1.f<<ff2.f;
        //         qDebug()<<dat[0]<<dat[1]<<dat[2]<<dat[3]<<dat[4]<<dat[5];
-                delete packInfo.data;
+                if(packInfo.data!=nullptr)
+                {
+                   delete packInfo.data;
+                   packInfo.data=nullptr;
+                }
             }
         }
         if(startIndex!=0){
