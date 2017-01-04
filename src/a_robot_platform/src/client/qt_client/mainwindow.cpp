@@ -2,13 +2,22 @@
 #include "ui_mainwindow.h"
 #include <QTimer>
 #include <QString>
-#include<unistd.h>
-#include<string.h>
-#include<stdio.h>
-#include<math.h>
+#include <QFileDialog>
+#include <unistd.h>
+#include <string.h>
+#include <stdio.h>
+#include <math.h>
+#include <opencv2/highgui/highgui.hpp>
+#include <opencv2/imgproc/imgproc.hpp>
+#include <opencv2/core/core.hpp>
+
+
+
 #include "../../common/modbus.h"
 #include "../../common/use_display.h"
 #include "../../common/paras.h"
+#include "../../common/map_image.h"
+
 
 
 MainWindow::MainWindow(QWidget *parent) :
@@ -27,10 +36,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->lEdit_ip->setText(QString::fromStdString(zw::SERVER_IP));
     m_tcpSocketClient->host =ui->lEdit_ip->text().toStdString();
     m_tcpSocketClient->port =ui->lEdit_port->text().toUShort();
-    QObject::connect(ui->pBtn_start2connect,SIGNAL(clicked(bool)),
-                     this,SLOT(on_pBtn_start2connect_clicked(bool)));
-    QObject::connect(ui->pBtn_key_control_open,SIGNAL(clicked(bool)),
-                     this,SLOT(on_pBtn_key_control_open_clicked(bool)));
+
     QObject::connect(ui->lEdit_ip,SIGNAL(returnPressed()),
                      this,SLOT(on_lEdit_ip_returnPressed()));
     QObject::connect(ui->lEdit_port,SIGNAL(returnPressed()),
@@ -219,6 +225,7 @@ void MainWindow::ShowUltrasonic()   //显示超声
         painter.drawEllipse(6.565*ONE_GRID,11.565*ONE_GRID,0.87*ONE_GRID,0.87*ONE_GRID);
       ui->label_Ultra->setPixmap(*pixmap);
 }
+
 void MainWindow::ShowLaser()
 {
     pixmap->fill(Qt::black);
@@ -523,6 +530,7 @@ void MainWindow::keyPressEvent(QKeyEvent *e)
     if(m_keyControl->keyControl)
         m_keyControl->ControlKeyDown(e);
 }
+
 void MainWindow::on_ultraAll_clicked()
 {
     if(ui->ultraAll->isChecked())
@@ -535,8 +543,7 @@ void MainWindow::on_ultraAll_clicked()
         ui->ultra6->setChecked(true);
         ui->ultra7->setChecked(true);
         ui->ultra8->setChecked(true);
-    }else
-    {
+    }else{
         ui->ultra1->setChecked(false);
         ui->ultra2->setChecked(false);
         ui->ultra3->setChecked(false);
@@ -548,3 +555,17 @@ void MainWindow::on_ultraAll_clicked()
     }
 }
 
+void MainWindow::on_pBtn_open_map_clicked()
+{
+    using namespace cv;
+    QString img_name = QFileDialog::getOpenFileName(this,tr("Open Image"),".",tr("Image Files(*.png *.jpg *.pgm *.bmp)"));
+    Mat src=imread(img_name.toLatin1().data());
+
+    zw::MapImage m_mapImage;
+    QImage img ;
+    m_mapImage.GetQImage(src,img);
+
+    ui->lbl_map->setPixmap(QPixmap::fromImage(img));
+    ui->lbl_map->resize(img.width(),img.height());
+    ui->lbl_map->setScaledContents(true);
+}

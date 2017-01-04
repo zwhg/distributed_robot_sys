@@ -51,6 +51,8 @@ private slots:
 
   //  void on_tableView_activated(const QModelIndex &index);
 
+    void on_pBtn_open_map_clicked();
+
 private :
     void KeyControlMsgRefalsh(const zw::KeyControlMsg & kMsg);
     void MsgControlRefalsh(void);
