@@ -9,8 +9,6 @@
 #include "../../common/modbus.h"
 #include "../../common/use_display.h"
 #include "../../common/paras.h"
-
-
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow),
