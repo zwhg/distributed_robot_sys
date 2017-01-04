@@ -26,7 +26,6 @@ void TcpSocketServer::on_ProcessConnection(void)
 
 void TcpSocketServer::on_ReadyRead(void)
 {
-    static QByteArray buf;
     QByteArray arry= this->m_readWriteSocket->readAll();
     buf.append(arry);
 
@@ -60,7 +59,11 @@ void TcpSocketServer::on_ReadyRead(void)
     //            ff1.i=dat[0];
     //            ff2.i=dat[1];
     //            qDebug () <<ff1.f<<ff2.f;
-                delete packInfo.data;
+                if(packInfo.data!=nullptr)
+                {
+                   delete packInfo.data;
+                   packInfo.data=nullptr;
+                }
             }
         }
         if(startIndex!=0){

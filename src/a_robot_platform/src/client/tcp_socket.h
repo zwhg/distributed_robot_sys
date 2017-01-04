@@ -34,6 +34,7 @@ namespace zw {
            QTcpSocket *m_tcpClient;
            static const uint32_t CONNECT_TIMEOUT=3;  //s
            bool isConnected;
+           QByteArray buf;
 
        public:
            explicit  TcpSocket(QObject *parent=0);

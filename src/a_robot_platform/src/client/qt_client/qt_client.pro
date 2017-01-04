@@ -14,6 +14,8 @@ TARGET = qt_client
 TEMPLATE = app
 
 
+
+
 SOURCES += main.cpp\
         mainwindow.cpp \
     ../key_control.cpp \

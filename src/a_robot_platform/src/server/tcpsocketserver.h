@@ -17,6 +17,7 @@ private:
     Modbus m_modbus;
     QTcpServer *m_listenSocket;
     QTcpSocket *m_readWriteSocket;
+    QByteArray buf;
 
 public:
    TcpSocketServer();

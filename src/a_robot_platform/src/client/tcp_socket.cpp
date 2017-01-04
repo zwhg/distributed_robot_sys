@@ -90,7 +90,6 @@ namespace zw{
 
     void TcpSocket::on_ReadyRead(void)
     {
-        static QByteArray buf;
         QByteArray arry= m_tcpClient->readAll();
         buf.append(arry);
 
@@ -118,7 +117,11 @@ namespace zw{
                 }else if(packInfo.fuc == W_REGISTER){
                     m_para.SetAddressValue(packInfo);
                    // qDebug()<<"read success!";
-                    delete packInfo.data;
+                    if(packInfo.data!=nullptr)
+                    {
+                       delete packInfo.data;
+                       packInfo.data=nullptr;
+                    }
                 }
             }
             if(startIndex!=0){
