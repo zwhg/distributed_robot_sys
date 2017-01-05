@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1024</width>
-    <height>971</height>
+    <width>1069</width>
+    <height>995</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -29,14 +29,14 @@
    <widget class="QTabWidget" name="tabWidget">
     <property name="geometry">
      <rect>
-      <x>20</x>
-      <y>0</y>
+      <x>30</x>
+      <y>20</y>
       <width>1011</width>
       <height>901</height>
      </rect>
     </property>
     <property name="currentIndex">
-     <number>2</number>
+     <number>3</number>
     </property>
     <widget class="QWidget" name="tab_3">
      <attribute name="title">
@@ -701,8 +701,8 @@
      <widget class="QGroupBox" name="groupBox_4">
       <property name="geometry">
        <rect>
-        <x>849</x>
-        <y>19</y>
+        <x>850</x>
+        <y>30</y>
         <width>151</width>
         <height>281</height>
        </rect>
@@ -713,10 +713,10 @@
       <widget class="QWidget" name="layoutWidget">
        <property name="geometry">
         <rect>
-         <x>14</x>
-         <y>40</y>
-         <width>121</width>
-         <height>231</height>
+         <x>30</x>
+         <y>60</y>
+         <width>101</width>
+         <height>181</height>
         </rect>
        </property>
        <layout class="QVBoxLayout" name="verticalLayout_2">
@@ -777,9 +777,77 @@
       <widget class="QWidget" name="layoutWidget">
        <property name="geometry">
         <rect>
-         <x>10</x>
+         <x>120</x>
          <y>30</y>
-         <width>91</width>
+         <width>51</width>
+         <height>211</height>
+        </rect>
+       </property>
+       <layout class="QVBoxLayout" name="verticalLayout_4">
+        <item>
+         <widget class="QLabel" name="lb_ultra1">
+          <property name="text">
+           <string>0000</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="lb_ultra2">
+          <property name="text">
+           <string>0000</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="lb_ultra3">
+          <property name="text">
+           <string>0000</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="lb_ultra4">
+          <property name="text">
+           <string>0000</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="lb_ultra5">
+          <property name="text">
+           <string>0000</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="lb_ultra6">
+          <property name="text">
+           <string>0000</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="lb_ultra7">
+          <property name="text">
+           <string>0000</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="lb_ultra8">
+          <property name="text">
+           <string>0000</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="layoutWidget">
+       <property name="geometry">
+        <rect>
+         <x>11</x>
+         <y>31</y>
+         <width>78</width>
          <height>239</height>
         </rect>
        </property>
@@ -849,74 +917,6 @@
         </item>
        </layout>
       </widget>
-      <widget class="QWidget" name="layoutWidget">
-       <property name="geometry">
-        <rect>
-         <x>111</x>
-         <y>30</y>
-         <width>81</width>
-         <height>211</height>
-        </rect>
-       </property>
-       <layout class="QVBoxLayout" name="verticalLayout_4">
-        <item>
-         <widget class="QLabel" name="lb_ultra1">
-          <property name="text">
-           <string>0000</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QLabel" name="lb_ultra2">
-          <property name="text">
-           <string>0000</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QLabel" name="lb_ultra3">
-          <property name="text">
-           <string>0000</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QLabel" name="lb_ultra4">
-          <property name="text">
-           <string>0000</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QLabel" name="lb_ultra5">
-          <property name="text">
-           <string>0000</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QLabel" name="lb_ultra6">
-          <property name="text">
-           <string>0000</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QLabel" name="lb_ultra7">
-          <property name="text">
-           <string>0000</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QLabel" name="lb_ultra8">
-          <property name="text">
-           <string>0000</string>
-          </property>
-         </widget>
-        </item>
-       </layout>
-      </widget>
      </widget>
      <widget class="QGroupBox" name="groupBox_6">
       <property name="geometry">
@@ -958,6 +958,50 @@
       </widget>
      </widget>
     </widget>
+    <widget class="QWidget" name="tab_6">
+     <attribute name="title">
+      <string>地图</string>
+     </attribute>
+     <widget class="QPushButton" name="pBtn_open_map">
+      <property name="geometry">
+       <rect>
+        <x>0</x>
+        <y>30</y>
+        <width>80</width>
+        <height>23</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>打开地图</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="lbl_map">
+      <property name="geometry">
+       <rect>
+        <x>91</x>
+        <y>11</y>
+        <width>521</width>
+        <height>581</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>map</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="lbl_sub_map">
+      <property name="geometry">
+       <rect>
+        <x>660</x>
+        <y>10</y>
+        <width>281</width>
+        <height>201</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>submap</string>
+      </property>
+     </widget>
+    </widget>
    </widget>
   </widget>
   <widget class="QMenuBar" name="menuBar">
@@ -965,7 +1009,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1024</width>
+     <width>1069</width>
      <height>20</height>
     </rect>
    </property>

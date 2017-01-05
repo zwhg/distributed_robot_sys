@@ -5,8 +5,6 @@
 #include <QCoreApplication>
 #include <qdebug.h>
 
-
-
 int main(int argc, char **argv)
 {
   // Set up ROS.
@@ -18,7 +16,6 @@ int main(int argc, char **argv)
   zw::TcpSocketServer m_tcpServer;
   zw::UartOdom m_uartOdom;
 
-
   int32_t ret =-1;
   const char *addrPort;
   if(argc==1)
@@ -27,7 +24,7 @@ int main(int argc, char **argv)
     addrPort =argv[1];
 
   ret = m_uartOdom.OpenSerial(addrPort, B115200);
-  //ret =m_uartOdom.SetNoDelay();
+  ret =m_uartOdom.SetNoDelay();
   if(ret <0)
   {
     return -1;
@@ -35,9 +32,6 @@ int main(int argc, char **argv)
   m_uartOdom.StartScan();
 
   zw::UartOdomPthread m_OdomPthread;
-
-
-
   a.exec();
   ros::shutdown();
   m_uartOdom.CloseSerial();

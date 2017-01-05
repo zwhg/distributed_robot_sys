@@ -2,11 +2,12 @@
 #include "ui_mainwindow.h"
 #include <QTimer>
 #include <QString>
-#include <QDir>
+#include <QFileDialog>
 #include <unistd.h>
 #include <string.h>
 #include <stdio.h>
 #include <math.h>
+
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/core/core.hpp>
@@ -14,6 +15,7 @@
 #include "../../common/modbus.h"
 #include "../../common/use_display.h"
 #include "../../common/paras.h"
+#include "../../common/map_image.h"
 
 
 MainWindow::MainWindow(QWidget *parent) :
@@ -32,10 +34,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->lEdit_ip->setText(QString::fromStdString(zw::SERVER_IP));
     m_tcpSocketClient->host =ui->lEdit_ip->text().toStdString();
     m_tcpSocketClient->port =ui->lEdit_port->text().toUShort();
-    QObject::connect(ui->pBtn_start2connect,SIGNAL(clicked(bool)),
-                     this,SLOT(on_pBtn_start2connect_clicked(bool)));
-    QObject::connect(ui->pBtn_key_control_open,SIGNAL(clicked(bool)),
-                     this,SLOT(on_pBtn_key_control_open_clicked(bool)));
+
     QObject::connect(ui->lEdit_ip,SIGNAL(returnPressed()),
                      this,SLOT(on_lEdit_ip_returnPressed()));
     QObject::connect(ui->lEdit_port,SIGNAL(returnPressed()),
@@ -494,9 +493,7 @@ void MainWindow::on_pBtn_start2connect_clicked(bool checked)
             m_tcpSocketClient->doConnect =true;
             m_tcpSocketClient->Connect();
         }
-    }
-    else
-    {
+    }else{
         if(m_tcpSocketClient->doConnect){
             m_tcpSocketClient->doConnect =false;
             m_tcpSocketClient->DisConnect();
@@ -510,8 +507,7 @@ void MainWindow::on_pBtn_key_control_open_clicked(bool checked)
         ui->pBtn_key_control_open->setStyleSheet("background-color: rgb(0, 255, 0);");
         ui->pBtn_key_control_open->setText("started");
          m_keyControl->keyControl =true;
-    }
-    else{
+    }else{
         ui->pBtn_key_control_open->setStyleSheet("background-color: rgb(167, 167, 125)");
         ui->pBtn_key_control_open->setText("stoped");
         m_keyControl->keyControl =false;
@@ -546,8 +542,7 @@ void MainWindow::on_ultraAll_clicked()
         ui->ultra6->setChecked(true);
         ui->ultra7->setChecked(true);
         ui->ultra8->setChecked(true);
-    }else
-    {
+    }else{
         ui->ultra1->setChecked(false);
         ui->ultra2->setChecked(false);
         ui->ultra3->setChecked(false);
@@ -559,3 +554,24 @@ void MainWindow::on_ultraAll_clicked()
     }
 }
 
+void MainWindow::on_pBtn_open_map_clicked()
+{
+    using namespace cv;
+    zw::MapImage m_mapImage;
+    QImage img ;
+    QString img_name = QFileDialog::getOpenFileName(this,tr("Open Image"),".",tr("Image Files(*.png *.jpg *.pgm *.bmp)"));
+    Mat map=imread(img_name.toLatin1().data());
+    m_mapImage.GetQImage(map,img);
+    ui->lbl_map->setPixmap(QPixmap::fromImage(img));
+    ui->lbl_map->resize(img.width(),img.height());
+    ui->lbl_map->setScaledContents(true);
+
+    img_name = QFileDialog::getOpenFileName(this,tr("Open Image"),".",tr("Image Files(*.png *.jpg *.pgm *.bmp)"));
+    Mat submap=imread(img_name.toLatin1().data());
+    m_mapImage.GetQImage(submap,img);
+    ui->lbl_sub_map->setPixmap(QPixmap::fromImage(img));
+    ui->lbl_sub_map->resize(img.width(),img.height());
+    ui->lbl_sub_map->setScaledContents(true);
+
+    m_mapImage.SurfFeatureMatch(map,submap);
+}
