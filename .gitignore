@@ -1,0 +1,6 @@
+*.user
+*.catkin_workspace
+*~
+
+temp/
+img/

@@ -19,7 +19,6 @@
 #include "../../common/map_image.h"
 
 
-
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow),
