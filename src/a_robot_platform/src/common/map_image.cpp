@@ -46,7 +46,13 @@ void MapImage::SurfFeatureMatch(const cv::Mat& map,const cv::Mat &subMap)
     Mat image2 =subMap.clone();
 
     //转化为灰度图
+    cvtColor(image1,image1,CV_BGR2GRAY);
+    cvtColor(image2,image2,CV_BGR2GRAY);
 
+    //使用3*3的内核降噪
+    Mat edge;
+    blur(image1,edge,Size(3,3));
+    threshold(edge,image1,150,255,THRESH_BINARY);
 
     SurfFeatureDetector surfDetector(1000);  //hessianThreshold
     vector<KeyPoint> kp1,kp2;
