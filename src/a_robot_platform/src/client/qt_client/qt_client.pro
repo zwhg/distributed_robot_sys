@@ -13,8 +13,17 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 TARGET = qt_client
 TEMPLATE = app
 
+QMAKE_CXXFLAGS += -std=c++0x
+CONFIG += c++11
 
+INCLUDEPATH += /usr/local/include \
+                /usr/local/include/opencv \
+                /usr/local/include/opencv2
 
+LIBS += -L/usr/local/lib/ \
+        -lopencv_core \
+        -lopencv_highgui \
+        -lopencv_imgproc
 
 SOURCES += main.cpp\
         mainwindow.cpp \
