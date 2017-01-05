@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1024</width>
-    <height>971</height>
+    <width>1069</width>
+    <height>995</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -966,7 +966,7 @@
       <property name="geometry">
        <rect>
         <x>0</x>
-        <y>0</y>
+        <y>30</y>
         <width>80</width>
         <height>23</height>
        </rect>
@@ -978,14 +978,27 @@
      <widget class="QLabel" name="lbl_map">
       <property name="geometry">
        <rect>
-        <x>0</x>
-        <y>20</y>
-        <width>271</width>
-        <height>201</height>
+        <x>91</x>
+        <y>11</y>
+        <width>521</width>
+        <height>581</height>
        </rect>
       </property>
       <property name="text">
        <string>map</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="lbl_sub_map">
+      <property name="geometry">
+       <rect>
+        <x>660</x>
+        <y>10</y>
+        <width>281</width>
+        <height>201</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>submap</string>
       </property>
      </widget>
     </widget>
@@ -996,7 +1009,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1024</width>
+     <width>1069</width>
      <height>20</height>
     </rect>
    </property>

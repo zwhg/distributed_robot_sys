@@ -7,11 +7,6 @@
 #include <string.h>
 #include <stdio.h>
 #include <math.h>
-#include <opencv2/highgui/highgui.hpp>
-#include <opencv2/imgproc/imgproc.hpp>
-#include <opencv2/core/core.hpp>
-
-
 
 #include "../../common/modbus.h"
 #include "../../common/use_display.h"
@@ -557,14 +552,21 @@ void MainWindow::on_ultraAll_clicked()
 void MainWindow::on_pBtn_open_map_clicked()
 {
     using namespace cv;
-    QString img_name = QFileDialog::getOpenFileName(this,tr("Open Image"),".",tr("Image Files(*.png *.jpg *.pgm *.bmp)"));
-    Mat src=imread(img_name.toLatin1().data());
-
     zw::MapImage m_mapImage;
     QImage img ;
-    m_mapImage.GetQImage(src,img);
-
+    QString img_name = QFileDialog::getOpenFileName(this,tr("Open Image"),".",tr("Image Files(*.png *.jpg *.pgm *.bmp)"));
+    Mat map=imread(img_name.toLatin1().data());
+    m_mapImage.GetQImage(map,img);
     ui->lbl_map->setPixmap(QPixmap::fromImage(img));
     ui->lbl_map->resize(img.width(),img.height());
     ui->lbl_map->setScaledContents(true);
+
+    img_name = QFileDialog::getOpenFileName(this,tr("Open Image"),".",tr("Image Files(*.png *.jpg *.pgm *.bmp)"));
+    Mat submap=imread(img_name.toLatin1().data());
+    m_mapImage.GetQImage(submap,img);
+    ui->lbl_sub_map->setPixmap(QPixmap::fromImage(img));
+    ui->lbl_sub_map->resize(img.width(),img.height());
+    ui->lbl_sub_map->setScaledContents(true);
+
+    m_mapImage.SurfFeatureMatch(map,submap);
 }

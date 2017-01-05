@@ -14,6 +14,7 @@ public:
     MapImage();
     ~MapImage();
     void GetQImage(const cv::Mat& image,QImage &img);
+    void SurfFeatureMatch(const cv::Mat& map,const cv::Mat &subMap);
 
 };
 

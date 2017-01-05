@@ -40,4 +40,7 @@ INCLUDEPATH += /usr/local/include \
                /usr/local/include/opencv \
                /usr/local/inlcude/opencv2
 
-LIBS += -L/usr/local/lib/ -lopencv_highgui -lopencv_core -lopencv_imgproc -lopencv_imgcodecs
+LIBS += -L/usr/local/lib/ -lopencv_highgui -lopencv_core -lopencv_imgproc \
+                          -lopencv_legacy -lopencv_features2d -lopencv_nonfree \
+                          -lopencv_flann
+
