@@ -36,7 +36,7 @@
      </rect>
     </property>
     <property name="currentIndex">
-     <number>3</number>
+     <number>0</number>
     </property>
     <widget class="QWidget" name="tab_3">
      <attribute name="title">
@@ -847,8 +847,8 @@
         <rect>
          <x>11</x>
          <y>31</y>
-         <width>78</width>
-         <height>239</height>
+         <width>99</width>
+         <height>292</height>
         </rect>
        </property>
        <layout class="QVBoxLayout" name="verticalLayout_3">
@@ -1010,7 +1010,7 @@
      <x>0</x>
      <y>0</y>
      <width>1069</width>
-     <height>20</height>
+     <height>25</height>
     </rect>
    </property>
   </widget>

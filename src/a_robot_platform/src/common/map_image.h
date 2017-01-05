@@ -13,6 +13,7 @@ class MapImage
 public:
     MapImage();
     ~MapImage();
+    void GetBinaryImage(const cv::Mat& imgIn,cv::Mat& imgOut);
     void GetQImage(const cv::Mat& image,QImage &img);
     void SurfFeatureMatch(const cv::Mat& map,const cv::Mat &subMap);
 
