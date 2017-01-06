@@ -574,6 +574,7 @@ void MainWindow::on_pBtn_open_map_clicked()
     ui->lbl_sub_map->resize(img.width(),img.height());
     ui->lbl_sub_map->setScaledContents(true);
 
-   // m_mapImage.SurfFeatureMatch(map,submap);
-    m_mapImage.OrbFeaturematch(map,submap);
+    m_mapImage.SurfFeatureMatch(map,submap);
+  //  m_mapImage.OrbFeaturematch(map,submap);
+  //  m_mapImage.SiftFeaturematch(map,submap);
 }

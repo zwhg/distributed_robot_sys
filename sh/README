@@ -1,14 +1,10 @@
 a_robot_platform 功能说明
 src/中包含客户端和服务器
 
-###所有参数需定义在common/modbus.h与common/modbus.cpp中
-###添加参数，还需修改server/uartodompthread.cpp中的DoPthread()函数
-### 读取参数modbus.get()/set()
-
 包a_robot_platform含两个节点
 1、main_uart_laser
 
-input arg: /dev/ttyUSBx
+input arg: /dev/ttyUSBx (ttyUSB1 默认)
 通过串口，解析雷神激光数据.
 publish:
 发布雷达消息sensor_msgs::LaserScan，主题scan，坐标系laser_link.
@@ -16,7 +12,7 @@ subscribe:
 订阅std_msgs::Int32消息，主题main_uart_laser/startOrstop(1是start，控制激光开关).
 
 2、main_uart_odom
-input arg: /dev/ttyUSBx
+input arg: /dev/ttyUSBx (ttyUSB0 默认)
 通过串口，与机器人本体相连，实时控制机器人各项参数.
 作为tcp服务器，与客户端相连，端口号9527，客户端可定时查看已定义的数据类型.
 
@@ -31,6 +27,31 @@ src/client 中qt_client为qt上位机程序。可用qt(community)版本直接打
 2.键盘控制指令下发，wasd，zxcv
 
 
+构图过程:
+
+1、运行client
+
+运行qt客户端
+roscore
+cd distributed_root_sys
+source /opt/ros/indigo/setup.bash
+rosrun rviz rviz -d src/a_robot_platform/launch/slam.rviz
+bash sh/google_mapping.sh
+
+
+
+2、运行server
+sudo ssh pentium
+cd distributed_root_sys
+bash sh/server_mapping.sh
+
+3、连接client->server
+遥控机器人人运动
+保存地图图片
+source googleMapping/install_isolated/setup.bash
+rosservice call /finish_trajectory "stem: 'gtest'"
+或 bash sh/save.sh "gtest"
+保存位置 .ros/
 
 
 

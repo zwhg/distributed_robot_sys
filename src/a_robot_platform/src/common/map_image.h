@@ -17,6 +17,7 @@ public:
     void GetQImage(const cv::Mat& image,QImage &img);
     void SurfFeatureMatch(const cv::Mat& map,const cv::Mat &subMap);
     void OrbFeaturematch(const cv::Mat& map,const cv::Mat &subMap);
+    void SiftFeaturematch(const cv::Mat& map,const cv::Mat &subMap);
 
 };
 
