@@ -104,5 +104,52 @@ void MapImage::SurfFeatureMatch(const cv::Mat& map,const cv::Mat &subMap)
     imshow("match points",imgOutput);
 }
 
+void MapImage::OrbFeaturematch(const cv::Mat& map,const cv::Mat &subMap)
+{
+    if(map.empty() ||subMap.empty())
+    {
+       qDebug()<< "please open two map image!";
+       return;
+    }
+
+    Mat img1 =map.clone();
+    Mat img2 =subMap.clone();
+    ORB orb;
+    vector<cv::KeyPoint> kp1, kp2;
+    Mat desp1, desp2;
+    orb( img1, cv::Mat(), kp1, desp1 );
+    orb( img2, cv::Mat(), kp2, desp2 );
+    qDebug()<<"map.keypoint="<<kp1.size()<<"submap.keypoint="<<kp2.size();
+
+    Mat image1,image2;
+    drawKeypoints(img1,kp1,image1,Scalar::all(-1),DrawMatchesFlags::DRAW_RICH_KEYPOINTS);
+    drawKeypoints(img2,kp2,image2,Scalar::all(-1),DrawMatchesFlags::DRAW_RICH_KEYPOINTS);
+    imshow("KeyPoints of map",image1);
+    imshow("Keypoints of submap",image2);
+
+
+    Ptr<DescriptorMatcher>  matcher = DescriptorMatcher::create( "BruteForce-Hamming");
+
+    double knn_match_ratio=0.95;
+    vector< vector<DMatch> > matches_knn;
+    matcher->knnMatch( desp2, desp1, matches_knn, 2 );
+    vector<DMatch > matches;
+    for ( size_t i=0; i<matches_knn.size(); i++ )
+    {
+        if (matches_knn[i][0].distance < knn_match_ratio * matches_knn[i][1].distance )
+            matches.push_back( matches_knn[i][0] );
+    }
+
+//    vector<Point2f> points1,  points2;
+//    for ( auto m:matches )
+//    {
+//        points1.push_back( kp1[m.queryIdx].pt );
+//        points2.push_back( kp2[m.trainIdx].pt );
+//    }
+    Mat imgOutput;
+    drawMatches(img2,kp2,img1,kp1,matches,imgOutput,Scalar::all(-1),Scalar::all(-1),
+                vector<char>(),DrawMatchesFlags::NOT_DRAW_SINGLE_POINTS);
+    imshow("match points",imgOutput);
+}
 
 }
