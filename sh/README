@@ -50,7 +50,7 @@ bash sh/server_mapping.sh
 保存地图图片
 source googleMapping/install_isolated/setup.bash
 rosservice call /finish_trajectory "stem: 'gtest'"
-或 bash sh/save.sh "gtest"
+或 bash sh/map_save.sh "gtest"
 保存位置 .ros/
 
 

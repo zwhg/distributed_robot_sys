@@ -1,11 +1,11 @@
 #!/bin/bash
 
 
-sudo chmod 777 ttyUSB0
-sudo chmod 777 ttyUSB1
+sudo chmod 777 /dev/ttyUSB0
+sudo chmod 777 /dev/ttyUSB1
 
-IP=192.168.1.100:11311
+MASTER_IP=192.168.1.100:11311
 
 source temp/devel/setup.bash
-export ROS_MASTER_URI=http://&IP
+export ROS_MASTER_URI=http://$MASTER_IP
 roslaunch a_robot_platform config.launch 
