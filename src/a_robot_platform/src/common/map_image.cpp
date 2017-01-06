@@ -34,6 +34,19 @@ void MapImage::GetQImage(const cv::Mat& image,QImage &img)
     }
 }
 
+void MapImage::GetBinaryImage(const cv::Mat& imgIn,cv::Mat& imgOut)
+{
+    Mat dst,edge,gray;
+    dst.create( imgIn.size(), imgIn.type() );
+    // 将原图像转换为灰度图像
+    cvtColor( imgIn, gray, CV_BGR2GRAY );
+    // 先用使用 3x3内核来降噪
+    blur( gray, edge, Size(3,3) );
+//    blur( edge, gray, Size(3,3) );
+//    blur( gray, edge, Size(3,3) );
+    threshold(edge, imgOut, 130, 255, THRESH_BINARY);
+}
+
 void MapImage::SurfFeatureMatch(const cv::Mat& map,const cv::Mat &subMap)
 {
     if(map.empty() ||subMap.empty())
@@ -45,25 +58,19 @@ void MapImage::SurfFeatureMatch(const cv::Mat& map,const cv::Mat &subMap)
     Mat image1 =map.clone();
     Mat image2 =subMap.clone();
 
-    //转化为灰度图
-    cvtColor(image1,image1,CV_BGR2GRAY);
-    cvtColor(image2,image2,CV_BGR2GRAY);
+    GetBinaryImage(map,image1);
+    GetBinaryImage(subMap,image2);
 
-    //使用3*3的内核降噪
-    Mat edge;
-    blur(image1,edge,Size(3,3));
-    threshold(edge,image1,150,255,THRESH_BINARY);
+    SurfFeatureDetector surfDetector(80);  //hessianThreshold
 
-    SurfFeatureDetector surfDetector(1000);  //hessianThreshold
     vector<KeyPoint> kp1,kp2;
     surfDetector.detect(image1,kp1);
     surfDetector.detect(image2,kp2);
-
-
-    drawKeypoints(image1,kp1,image1,Scalar::all(-1),DrawMatchesFlags::DRAW_RICH_KEYPOINTS);
-    drawKeypoints(image2,kp2,image2,Scalar::all(-1),DrawMatchesFlags::DRAW_RICH_KEYPOINTS);
-    imshow("KeyPoints of map",image1);
-    imshow("Keypoints of submap",image2);
+    Mat img1,img2;
+    drawKeypoints(image1,kp1,img1,Scalar::all(-1),DrawMatchesFlags::DRAW_RICH_KEYPOINTS);
+    drawKeypoints(image2,kp2,img2,Scalar::all(-1),DrawMatchesFlags::DRAW_RICH_KEYPOINTS);
+    imshow("KeyPoints of map",img1);
+    imshow("Keypoints of submap",img2);
 
     SurfFeatureDetector SurfDescriptor;
     Mat imgd1,imgd2;
@@ -72,7 +79,7 @@ void MapImage::SurfFeatureMatch(const cv::Mat& map,const cv::Mat &subMap)
 
     FlannBasedMatcher matcher;
     vector<DMatch> matPoints;
-    matcher.match(imgd1,imgd2,matPoints,Mat());
+    matcher.match(imgd2,imgd1,matPoints,Mat());
 
     //提起强特征
     double min=1,max=0;
@@ -85,21 +92,14 @@ void MapImage::SurfFeatureMatch(const cv::Mat& map,const cv::Mat &subMap)
     vector<DMatch> gmchPoints;
 
     qDebug()<<"min="<<min<<"max="<<max;
-//    sort(matPoints.begin(),matPoints.end()); //从小到大排序
-//    for(unsigned int i=0;i<kp2.size()/2;i++)
-//    {
-//        gmchPoints.push_back(matPoints[i]);
-//    }
-
-    for(unsigned int i=0;i<matPoints.size();i++)
+    sort(matPoints.begin(),matPoints.end()); //从小到大排序
+    for(unsigned int i=0;i<kp2.size()/10;i++)
     {
-        if(matPoints[i].distance<=min)
-            gmchPoints.push_back(matPoints[i]);
+        gmchPoints.push_back(matPoints[i]);
     }
 
-
     Mat imgOutput;
-    drawMatches(map,kp1,subMap,kp2,gmchPoints,imgOutput,Scalar::all(-1),Scalar::all(-1),
+    drawMatches(image2,kp2,image1,kp1,gmchPoints,imgOutput,Scalar::all(-1),Scalar::all(-1),
                 vector<char>(),DrawMatchesFlags::NOT_DRAW_SINGLE_POINTS);
     imshow("match points",imgOutput);
 }

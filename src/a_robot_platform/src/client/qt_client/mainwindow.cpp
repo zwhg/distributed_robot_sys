@@ -8,6 +8,11 @@
 #include <stdio.h>
 #include <math.h>
 
+#include <opencv2/highgui/highgui.hpp>
+#include <opencv2/imgproc/imgproc.hpp>
+#include <opencv2/core/core.hpp>
+
+
 #include "../../common/modbus.h"
 #include "../../common/use_display.h"
 #include "../../common/paras.h"
@@ -43,6 +48,11 @@ MainWindow::MainWindow(QWidget *parent) :
     QTimer *cmd_timer =new QTimer();
     QObject::connect(cmd_timer,SIGNAL(timeout()),this,SLOT(on_cmdTimerUpdate()));
     cmd_timer->start(40);
+
+
+   // qDebug()<<QDir::current();
+    std::string im="../img/gmap.pgm";
+    cv::Mat img=cv::imread(im,1);
 }
 
 MainWindow::~MainWindow()
@@ -184,15 +194,14 @@ void MainWindow::ShowUltrasonic()   //显示超声
             //draw the obstacle outline
            painter.setPen(QPen(Qt::red,2,Qt::DashDotLine,Qt::RoundCap));
            static const QPointF points[8] = {
-                                                                              QPointF(ONE_Ultra_X + dis[0],ONE_Ultra_Y),
-                                                                              QPointF(TWO_Ultra_X + dis[1],TWO_Ultra_Y),
-                                                                              QPointF(THREE_Ultra_X ,THREE_Ultra_Y),
-                                                                              QPointF(FOUR_Ultra_X,FOUR_Ultra_Y-dis[3]),
-                                                                              QPointF(FIVE_Ultra_X,FIVE_Ultra_Y-dis[4]),
-                                                                              QPointF(SIX_Ultra_X,SIX_Ultra_Y),
-                                                                              QPointF(SEVEN_Ultra_X-dis[6],SEVEN_Ultra_Y),
-                                                                              QPointF(EIGHT_Ultra_X-dis[7],EIGHT_Ultra_Y)
-                                                                    };
+               QPointF(ONE_Ultra_X + dis[0],ONE_Ultra_Y),
+               QPointF(TWO_Ultra_X + dis[1],TWO_Ultra_Y),
+               QPointF(THREE_Ultra_X ,THREE_Ultra_Y),
+               QPointF(FOUR_Ultra_X,FOUR_Ultra_Y-dis[3]),
+               QPointF(FIVE_Ultra_X,FIVE_Ultra_Y-dis[4]),
+               QPointF(SIX_Ultra_X,SIX_Ultra_Y),
+               QPointF(SEVEN_Ultra_X-dis[6],SEVEN_Ultra_Y),
+               QPointF(EIGHT_Ultra_X-dis[7],EIGHT_Ultra_Y)};
            if(ui->Obsta_OutLine->isChecked())
                 painter.drawPolyline(points,8);
      //      printf("atan(1):%f\n",atan(1));
@@ -430,7 +439,7 @@ void MainWindow::on_cmdTimerUpdate(void)
 
     if(m_keyControl->keyControl){
         msgInfo={zw::W_REGISTER,2,zw::CONTROL,nullptr};
-        m_tcpSocketClient->SendMsg(msgInfo);
+        m_tcpSocketClient->SendMsg(msgInfo);     
     }
 
     msgInfo={zw::R_REGISTER,2,zw::MSG_CONTROL,nullptr};
@@ -485,9 +494,7 @@ void MainWindow::on_pBtn_start2connect_clicked(bool checked)
             m_tcpSocketClient->doConnect =true;
             m_tcpSocketClient->Connect();
         }
-    }
-    else
-    {
+    }else{
         if(m_tcpSocketClient->doConnect){
             m_tcpSocketClient->doConnect =false;
             m_tcpSocketClient->DisConnect();
@@ -501,8 +508,7 @@ void MainWindow::on_pBtn_key_control_open_clicked(bool checked)
         ui->pBtn_key_control_open->setStyleSheet("background-color: rgb(0, 255, 0);");
         ui->pBtn_key_control_open->setText("started");
          m_keyControl->keyControl =true;
-    }
-    else{
+    }else{
         ui->pBtn_key_control_open->setStyleSheet("background-color: rgb(167, 167, 125)");
         ui->pBtn_key_control_open->setText("stoped");
         m_keyControl->keyControl =false;
