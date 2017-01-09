@@ -1,7 +1,7 @@
 *.user
 *.catkin_workspace
 *~
-*.swap
+*.swp
 
 temp/
 googleMapping/
