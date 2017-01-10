@@ -10,7 +10,7 @@ int main(int argc, char **argv)
   // Set up ROS.
   QCoreApplication a(argc,argv);
   ros::init(argc, argv, "main_uart_odom");
-  ROS_INFO("package name:robot  node name:main_uart_odom");
+  ROS_INFO("package name:a_robot_platform  node name:main_uart_odom");
   qDebug()<<"qDebug ok!";
 
   zw::TcpSocketServer m_tcpServer;

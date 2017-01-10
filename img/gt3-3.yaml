@@ -1,0 +1,6 @@
+image: gt3-3.pgm
+resolution: 0.05
+origin: [-5.459790992736817, -5.766946411132814, 0]
+occupied_thresh: 0.51
+free_thresh: 0.49
+negate: 0

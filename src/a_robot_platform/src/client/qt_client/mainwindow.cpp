@@ -48,11 +48,6 @@ MainWindow::MainWindow(QWidget *parent) :
     QTimer *cmd_timer =new QTimer();
     QObject::connect(cmd_timer,SIGNAL(timeout()),this,SLOT(on_cmdTimerUpdate()));
     cmd_timer->start(40);
-
-
-   // qDebug()<<QDir::current();
-    std::string im="../img/gmap.pgm";
-    cv::Mat img=cv::imread(im,1);
 }
 
 MainWindow::~MainWindow()
@@ -442,7 +437,7 @@ void MainWindow::on_cmdTimerUpdate(void)
         m_tcpSocketClient->SendMsg(msgInfo);     
     }
 
-    msgInfo={zw::R_REGISTER,2,zw::MSG_CONTROL,nullptr};
+    msgInfo={zw::R_REGISTER,5,zw::MSG_CONTROL,nullptr};
     m_tcpSocketClient->SendMsg(msgInfo);
 
     msgInfo={zw::R_REGISTER,6,zw::MSG_IMU,nullptr};
@@ -462,14 +457,20 @@ void MainWindow::KeyControlMsgRefalsh(const zw::KeyControlMsg & kMsg)
 void MainWindow::MsgControlRefalsh(void)
 {
     zw::Paras m_para;
-    int32_t dat[2];
-    zw::ParaGetSet  packInfo = {zw::R_REGISTER,2,zw::MSG_CONTROL,dat};
+    int32_t dat[5];
+    zw::ParaGetSet  packInfo = {zw::R_REGISTER,5,zw::MSG_CONTROL,dat};
     m_para.GetAddressValue(packInfo);
     zw::Float2Int32 ff;
     ff.i=dat[0];
     ui->lbl_vel_ret->setText(QString::number(ff.f,'f',2));
     ff.i=dat[1];
     ui->lbl_ome_ret->setText(QString::number(ff.f,'f',2));
+    ff.i=dat[2];
+    ui->lbl_pose_x->setText(QString::number(ff.f,'f',2));
+    ff.i=dat[3];
+    ui->lbl_pose_y->setText(QString::number(ff.f,'f',2));
+    ff.i=dat[4];
+    ui->lbl_pose_h->setText(QString::number(ff.f,'f',2));
 }
 
 void MainWindow::MsgImuRefalsh(void)

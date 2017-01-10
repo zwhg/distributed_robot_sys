@@ -17,26 +17,12 @@ find_package(catkin REQUIRED COMPONENTS
 find_package(Qt5Widgets REQUIRED)
 
 
-
-###################################
-## catkin specific configuration ##
-###################################
-## The catkin_package macro generates cmake config files for your package
-## Declare things to be passed to dependent projects
-## INCLUDE_DIRS: uncomment this if you package contains header files
-## LIBRARIES: libraries you create in this project that dependent projects also need
-## CATKIN_DEPENDS: catkin_packages dependent projects also need
-## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
 #  INCLUDE_DIRS include
 #  LIBRARIES robot_platform
 #  CATKIN_DEPENDS roscpp
 #  DEPENDS system_lib
 )
-
-###########
-## Build ##
-###########
 
 
 
@@ -53,18 +39,30 @@ add_executable(main_uart_odom src/server/main_uart_odom.cpp
  src/server/uartodom.cpp
  src/server/uartodompthread.cpp
 )
-
 target_link_libraries(main_uart_odom
  ${catkin_LIBRARIES})
+
 
 
 add_executable(main_uart_laser src/server/main_uart_laser.cpp
  src/server/uartdriver.cpp
  src/server/uartlaser.cpp
  )
-
 target_link_libraries(main_uart_laser
  ${catkin_LIBRARIES})
+
+
+
+add_executable(main_sub_pose src/server/main_sub_pose.cpp
+ src/common/modbus.cpp
+ src/common/paras.cpp
+ )
+target_link_libraries(main_sub_pose
+ ${catkin_LIBRARIES})
+
+
+
+
 
 add_definitions(-std=gnu++11)
 
@@ -74,5 +72,9 @@ qt5_use_modules(main_uart_odom
  )
 
 qt5_use_modules(main_uart_laser
+  Core
+)
+
+qt5_use_modules(main_sub_pose
   Core
 )
