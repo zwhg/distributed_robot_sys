@@ -36,7 +36,7 @@
      </rect>
     </property>
     <property name="currentIndex">
-     <number>0</number>
+     <number>3</number>
     </property>
     <widget class="QWidget" name="tab_3">
      <attribute name="title">
@@ -1001,6 +1001,19 @@
        <string>submap</string>
       </property>
      </widget>
+     <widget class="QPushButton" name="pBtn_open_submap">
+      <property name="geometry">
+       <rect>
+        <x>0</x>
+        <y>60</y>
+        <width>80</width>
+        <height>23</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>打开子图</string>
+      </property>
+     </widget>
     </widget>
    </widget>
   </widget>
@@ -1010,7 +1023,7 @@
      <x>0</x>
      <y>0</y>
      <width>1069</width>
-     <height>25</height>
+     <height>22</height>
     </rect>
    </property>
   </widget>

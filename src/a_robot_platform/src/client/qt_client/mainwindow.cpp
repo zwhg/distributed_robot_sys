@@ -10,7 +10,7 @@
 
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
-#include <opencv2/core/core.hpp>
+
 
 
 #include "../../common/modbus.h"
@@ -559,23 +559,31 @@ void MainWindow::on_ultraAll_clicked()
 void MainWindow::on_pBtn_open_map_clicked()
 {
     using namespace cv;
-    zw::MapImage m_mapImage;
     QImage img ;
     QString img_name = QFileDialog::getOpenFileName(this,tr("Open Image"),".",tr("Image Files(*.png *.jpg *.pgm *.bmp)"));
-    Mat map=imread(img_name.toLatin1().data());
+    map=imread(img_name.toLatin1().data());
     m_mapImage.GetQImage(map,img);
     ui->lbl_map->setPixmap(QPixmap::fromImage(img));
     ui->lbl_map->resize(img.width(),img.height());
     ui->lbl_map->setScaledContents(true);
 
-    img_name = QFileDialog::getOpenFileName(this,tr("Open Image"),".",tr("Image Files(*.png *.jpg *.pgm *.bmp)"));
-    Mat submap=imread(img_name.toLatin1().data());
-    m_mapImage.GetQImage(submap,img);
-    ui->lbl_sub_map->setPixmap(QPixmap::fromImage(img));
-    ui->lbl_sub_map->resize(img.width(),img.height());
-    ui->lbl_sub_map->setScaledContents(true);
+    if((!map.empty())&&(!submap.empty()))
+        m_mapImage.SurfFeatureMatch(map,submap);
+}
 
-    m_mapImage.SurfFeatureMatch(map,submap);
+void MainWindow::on_pBtn_open_submap_clicked()
+{
+    using namespace cv;
+    QImage img ;
+    QString img_name = QFileDialog::getOpenFileName(this,tr("Open Image"),".",tr("Image Files(*.png *.jpg *.pgm *.bmp)"));
+    submap=imread(img_name.toLatin1().data());
+//    m_mapImage.GetQImage(submap,img);
+//    ui->lbl_sub_map->setPixmap(QPixmap::fromImage(img));
+//    ui->lbl_sub_map->resize(img.width(),img.height());
+//    ui->lbl_sub_map->setScaledContents(true);
+
+    if((!map.empty())&&(!submap.empty()))
+        m_mapImage.SurfFeatureMatch(map,submap);
   //  m_mapImage.OrbFeaturematch(map,submap);
   //  m_mapImage.SiftFeaturematch(map,submap);
 }
