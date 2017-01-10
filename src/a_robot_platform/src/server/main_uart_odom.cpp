@@ -24,7 +24,7 @@ int main(int argc, char **argv)
     addrPort =argv[1];
 
   ret = m_uartOdom.OpenSerial(addrPort, B115200);
-  ret =m_uartOdom.SetNoDelay();
+  //ret =m_uartOdom.SetNoDelay();
   if(ret <0)
   {
     return -1;

@@ -42,7 +42,8 @@ void *UartOdom::DoPthread(void)
 //    int32_t tmp[2]={fi.i,fy.i};
 //    ParaGetSet tmpInfo={W_REGISTER,2, MSG_CONTROL,tmp};
 //    m_para.SetAddressValue(tmpInfo);
-      usleep(40000);
+//      usleep(40000);
+    usleep(10000);
   }
 }
 
@@ -75,19 +76,38 @@ void UartOdom::Analysis(uint8_t *arry, int nRet)
                 m_para.SetAddressValue(packInfo);
 
                 int32_t dat[8];
-//                if(packInfo.addr==MSG_Ultrasonic){
-//                    zw::ParaGetSet  pack = {zw::R_REGISTER,8,zw::MSG_Ultrasonic,dat};
-//                    m_para.GetAddressValue(pack);
-//                    zw::Float2Int32 ff[8];
-//                   for(int i=0;i<8;i++)
-//                   {
-//                      ff[i].i = dat[i];
-//                   }
-//                   qDebug()<<ff[0].f<<ff[1].f<<ff[2].f<<ff[3].f<<ff[4].f<<ff[5].f<<ff[6].f<<ff[7].f;
-//                }
 
-        //        qDebug () <<ff1.f<<ff2.f;
-       //         qDebug()<<dat[0]<<dat[1]<<dat[2]<<dat[3]<<dat[4]<<dat[5];
+                #if 0
+                if(packInfo.addr==MSG_Ultrasonic){
+                    zw::ParaGetSet  pack = {zw::R_REGISTER,8,zw::MSG_Ultrasonic,dat};
+                    m_para.GetAddressValue(pack);
+                    zw::Float2Int32 ff[8];
+                   for(int i=0;i<8;i++)
+                   {
+                      ff[i].i = dat[i];
+                   }
+                   qDebug()<<ff[0].f<<ff[1].f<<ff[2].f<<ff[3].f<<ff[4].f<<ff[5].f<<ff[6].f<<ff[7].f;
+                }
+                if (packInfo.addr==MSG_IMU)
+                {
+                	zw::ParaGetSet pack ={zw::R_REGISTER,6,zw::MSG_IMU,dat};
+                	m_para.GetAddressValue(pack);
+                	qDebug()<<dat[0]<<dat[1]<<dat[2]<<dat[3]<<dat[4]<<dat[5];
+                }                
+                if (packInfo.addr==CONTROL)
+                {
+                	zw::ParaGetSet pack ={zw::R_REGISTER,2,zw::CONTROL,dat};
+                	m_para.GetAddressValue(pack);
+                	zw::Float2Int32 ff[2];
+               	for(int i=0;i<2;i++)
+        		{
+        		  ff[i].i = dat[i];
+        		}
+                	qDebug()<<ff[0].f<<ff[1].f;
+                }
+                #endif
+
+
                 if(packInfo.data!=nullptr)
                 {
                    delete packInfo.data;
