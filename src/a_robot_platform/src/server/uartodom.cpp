@@ -75,16 +75,16 @@ void UartOdom::Analysis(uint8_t *arry, int nRet)
                 m_para.SetAddressValue(packInfo);
 
                 int32_t dat[8];
-                if(packInfo.addr==MSG_Ultrasonic){
-                    zw::ParaGetSet  pack = {zw::R_REGISTER,8,zw::MSG_Ultrasonic,dat};
-                    m_para.GetAddressValue(pack);
-                    zw::Float2Int32 ff[8];
-                   for(int i=0;i<8;i++)
-                   {
-                      ff[i].i = dat[i];
-                   }
-                   qDebug()<<ff[0].f<<ff[1].f<<ff[2].f<<ff[3].f<<ff[4].f<<ff[5].f<<ff[6].f<<ff[7].f;
-                }
+//                if(packInfo.addr==MSG_Ultrasonic){
+//                    zw::ParaGetSet  pack = {zw::R_REGISTER,8,zw::MSG_Ultrasonic,dat};
+//                    m_para.GetAddressValue(pack);
+//                    zw::Float2Int32 ff[8];
+//                   for(int i=0;i<8;i++)
+//                   {
+//                      ff[i].i = dat[i];
+//                   }
+//                   qDebug()<<ff[0].f<<ff[1].f<<ff[2].f<<ff[3].f<<ff[4].f<<ff[5].f<<ff[6].f<<ff[7].f;
+//                }
 
         //        qDebug () <<ff1.f<<ff2.f;
        //         qDebug()<<dat[0]<<dat[1]<<dat[2]<<dat[3]<<dat[4]<<dat[5];
@@ -101,7 +101,6 @@ void UartOdom::Analysis(uint8_t *arry, int nRet)
         }
     }
 }
-
 
 void UartOdom::SendVelControl(void)
 {

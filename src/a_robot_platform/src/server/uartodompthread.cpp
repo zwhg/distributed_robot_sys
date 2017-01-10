@@ -80,6 +80,7 @@ void *UartOdomPthread::DoPthread(void)
     zw::Float2Int32 mf;
     mf.i= car_msg[0];
     vx =(double)mf.f;
+    vy =0;
     car_para={R_REGISTER,6,MSG_IMU,car_msg};
     m_para.GetAddressValue(car_para);
     vth = (double)car_msg[5] * Gyro_Gr;    //gyr_z

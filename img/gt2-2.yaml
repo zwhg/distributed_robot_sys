@@ -1,0 +1,6 @@
+image: gt2-2.pgm
+resolution: 0.05
+origin: [-5.628569221496583, -2.89399061203003, 0]
+occupied_thresh: 0.51
+free_thresh: 0.49
+negate: 0

@@ -15,13 +15,13 @@ namespace zw {
 #define KEY_OMEGA_SUB   (Qt::Key_V)
 
 #define SPEED_STEP  0.02
-#define OMEGA_STEP  0.02
+#define OMEGA_STEP  0.1
 
 #define SET_MAX_SPEED_STEP 0.1
 #define SET_MAX_OMEGA_STEP 0.1
 
 #define MAX_SPEED_CMD	0.5     // m/s
-#define MAX_OMEGA_CMD   0.6     // rad/s
+#define MAX_OMEGA_CMD   0.8     // rad/s
 
 #pragma pack(4)
 typedef struct

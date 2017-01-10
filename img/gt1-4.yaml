@@ -1,0 +1,6 @@
+image: gt1-4.pgm
+resolution: 0.05
+origin: [-5.831790924072266, -3.796906089782716, 0]
+occupied_thresh: 0.51
+free_thresh: 0.49
+negate: 0

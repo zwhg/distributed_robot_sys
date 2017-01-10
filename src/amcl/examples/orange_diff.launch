@@ -3,7 +3,7 @@
 <launch>
 
 	<!-- Run the map server -->
-	<node name="map_server" pkg="map_server" type="map_server" args="/home/hustac/distributed_robot_sys/img/map/gtest.yaml"/>
+	<node name="map_server" pkg="map_server" type="map_server" args="/home/zw/distributed_robot_sys/img/map/gtest.yaml"/>
 
 	<!--- Run AMCL -->
 	<node pkg="amcl" type="amcl" name="amcl" output="screen">
@@ -25,7 +25,7 @@
 	<!--Laser mode-->	
 		<param name="laser_min_range" value="-1.0"/> 
 		<param name="laser_max_range " value="5.5"/>
-		<param name="laser_max_beams" value="30"/> 
+		<param name="laser_max_beams" value="360"/> 
 		<param name="laser_z_hit" value="0.5"/> 
 		<param name="laser_z_short" value="0.05"/> 
 		<param name="laser_z_max" value="0.05"/> 
