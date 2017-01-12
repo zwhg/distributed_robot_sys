@@ -43,7 +43,7 @@ typedef union
 }Float2Int32;
 
 
-const std::string SERVER_IP="192.168.123.106" ;  // 192.168.1.101
+const std::string SERVER_IP="192.168.1.101" ;  // 192.168.1.101
 const std::string CLIENT_IP="192.168.1.101" ;
 const uint16_t SOCKET_PORT= 9527;
 

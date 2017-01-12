@@ -436,7 +436,7 @@ void MainWindow::on_cmdTimerUpdate(void)
         msgInfo={zw::W_REGISTER,2,zw::CONTROL,nullptr};
         m_tcpSocketClient->SendMsg(msgInfo);     
     }   
-    msgInfo={zw::R_REGISTER,1, zw::BTN_SWITCH,nullptr};
+    msgInfo={zw::W_REGISTER,1, zw::BTN_SWITCH,nullptr};
     m_tcpSocketClient->SendMsg(msgInfo);
 
     msgInfo={zw::R_REGISTER,5,zw::MSG_CONTROL,nullptr};

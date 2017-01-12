@@ -18,7 +18,7 @@ namespace zw {
         keyControl =false;
         QTimer *m_timer =new QTimer();
         QObject::connect(m_timer,SIGNAL(timeout()),this,SLOT(on_TimerUpdate()));
-        m_timer->start(30);
+        m_timer->start(50);
     }
 
     KeyControl:: ~KeyControl()
@@ -69,6 +69,8 @@ namespace zw {
             dat[1]=f2io.i;
             m_para.SetAddressValue(packInfo);
             keyFlag=0x00;
+
+            //qDebug()<< f2is.f<<f2io.f;
         }
         packInfo={R_REGISTER,2, MSG_CONTROL,dat};
         m_para.GetAddressValue(packInfo);
