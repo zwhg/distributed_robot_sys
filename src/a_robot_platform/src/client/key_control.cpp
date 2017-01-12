@@ -8,8 +8,6 @@
 
 namespace zw {
 
-
-
     KeyControl::KeyControl(QObject *parent):
         QObject(parent)
 
