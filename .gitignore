@@ -8,3 +8,7 @@ temp/
 googleMapping/
 build/
 devel/
+catkin_generated/
+catkin/
+build-a_robot_platform-Desktop-Debug/
+
