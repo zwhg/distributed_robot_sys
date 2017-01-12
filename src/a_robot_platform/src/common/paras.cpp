@@ -38,6 +38,8 @@ static volatile zw::ElementTable dataTable[]=
     {MSG_Ultrasonic+5,0},
     {MSG_Ultrasonic+6,0},
     {MSG_Ultrasonic+7,0},
+
+    {BTN_SWITCH,0},
 };
 
 

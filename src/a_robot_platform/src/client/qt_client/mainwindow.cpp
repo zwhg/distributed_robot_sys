@@ -435,7 +435,9 @@ void MainWindow::on_cmdTimerUpdate(void)
     if(m_keyControl->keyControl){
         msgInfo={zw::W_REGISTER,2,zw::CONTROL,nullptr};
         m_tcpSocketClient->SendMsg(msgInfo);     
-    }
+    }   
+    msgInfo={zw::R_REGISTER,1, zw::BTN_SWITCH,nullptr};
+    m_tcpSocketClient->SendMsg(msgInfo);
 
     msgInfo={zw::R_REGISTER,5,zw::MSG_CONTROL,nullptr};
     m_tcpSocketClient->SendMsg(msgInfo);
@@ -505,15 +507,24 @@ void MainWindow::on_pBtn_start2connect_clicked(bool checked)
 
 void MainWindow::on_pBtn_key_control_open_clicked(bool checked)
 {
+    int32_t dat[1];
+    zw::ParaGetSet packInfo={zw::R_REGISTER,1, zw::BTN_SWITCH,dat};
+    zw::Paras m_para;
+    m_para.GetAddressValue(packInfo);
+
     if(checked){
         ui->pBtn_key_control_open->setStyleSheet("background-color: rgb(0, 255, 0);");
         ui->pBtn_key_control_open->setText("started");
          m_keyControl->keyControl =true;
+         dat[0]|=KEY_VEL_CTR;
     }else{
         ui->pBtn_key_control_open->setStyleSheet("background-color: rgb(167, 167, 125)");
         ui->pBtn_key_control_open->setText("stoped");
         m_keyControl->keyControl =false;
+        dat[0] &=(~KEY_VEL_CTR);
     }
+    packInfo.fuc =zw::W_REGISTER;
+    m_para.SetAddressValue(packInfo);
 }
 
 void MainWindow::on_lEdit_ip_returnPressed()

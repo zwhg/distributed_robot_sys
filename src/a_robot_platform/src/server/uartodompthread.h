@@ -31,6 +31,7 @@ public:
   ~UartOdomPthread();
 
 private:
+  static void cmd_keyCallback(const geometry_msgs::Twist::ConstPtr & cmd);
   static void timerCallback(const ros::TimerEvent &e);
   static void *MyPthread(void *temp);
 

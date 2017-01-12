@@ -27,6 +27,7 @@ void *UartOdomPthread::MyPthread(void *temp)
 void *UartOdomPthread::DoPthread(void)
 {
   ros::NodeHandle n;
+  ros::Subscriber key_sub =n.subscribe("cmd_vel",2,cmd_keyCallback);
   ros::Publisher odom_pub = n.advertise<nav_msgs::Odometry>("odom", 100);
   ros::Publisher imu_pub =n.advertise<sensor_msgs::Imu>("imu",100);
 
@@ -144,6 +145,27 @@ void *UartOdomPthread::DoPthread(void)
     loop_rate.sleep();
   }
 }
+
+void UartOdomPthread::cmd_keyCallback(const geometry_msgs::Twist::ConstPtr & cmd)
+{
+    Float2Int32 fi;
+    int32_t dat[2];
+    ParaGetSet packInfo={R_REGISTER,1, BTN_SWITCH,dat};
+    Paras m_para;
+    m_para.GetAddressValue(packInfo);
+    if((dat[0]&KEY_VEL_CTR)==KEY_VEL_CTR)
+        return;
+    else{
+        fi.f=cmd->linear.x;
+        dat[0]=fi.i;
+        fi.f=cmd->angular.z;
+        dat[1]=fi.i;
+        packInfo={W_REGISTER,2, CONTROL,dat};
+        Paras m_para;
+        m_para.SetAddressValue(packInfo);
+    }
+}
+
 
 void UartOdomPthread::timerCallback(const ros::TimerEvent &e)
 {
