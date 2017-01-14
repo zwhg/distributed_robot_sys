@@ -13,22 +13,21 @@ find_package(catkin REQUIRED COMPONENTS
  tf
 )
 
-#set (CMAKE_PREFIX_PATH /home/zw/Qt5.7.0/5.7/gcc_64)
+
+set (CMAKE_PREFIX_PATH /home/zw/Qt5.7.0/5.7/gcc_64)
 find_package(Qt5Widgets REQUIRED)
 
 
 catkin_package(
-#  INCLUDE_DIRS include
-#  LIBRARIES robot_platform
+ #   INCLUDE_DIRS include
+ #   LIBRARIES robot_platform
 #  CATKIN_DEPENDS roscpp
-#  DEPENDS system_lib
+ # DEPENDS
 )
 
 
-
-include_directories(
-  ${catkin_INCLUDE_DIRS}
-)
+include_directories(include
+    ${yamlcpp_INCLUDE_DIRS} )
 
 add_executable(main_uart_odom src/server/main_uart_odom.cpp
  src/common/modbus.cpp
@@ -61,6 +60,14 @@ target_link_libraries(main_sub_pose
  ${catkin_LIBRARIES})
 
 
+add_executable(main_global_location src/server/main_global_location.cpp
+ src/map/mapreadandwrite.cpp
+ )
+target_link_libraries(main_global_location
+ ${catkin_LIBRARIES}
+ yaml-cpp
+ )
+
 
 
 
@@ -78,3 +85,4 @@ qt5_use_modules(main_uart_laser
 qt5_use_modules(main_sub_pose
   Core
 )
+
