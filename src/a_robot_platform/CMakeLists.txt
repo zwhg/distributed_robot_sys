@@ -61,13 +61,19 @@ target_link_libraries(main_sub_pose
 
 
 add_executable(main_global_location src/server/main_global_location.cpp
- src/map/mapreadandwrite.cpp
  )
 target_link_libraries(main_global_location
  ${catkin_LIBRARIES}
- yaml-cpp
  )
 
+
+add_executable(main_map_server src/server/main_map_server.cpp
+ src/map/mapreadandwrite.cpp
+ )
+target_link_libraries(main_map_server
+ ${catkin_LIBRARIES}
+ yaml-cpp
+ )
 
 
 

@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <fstream>
 #include <cstdlib>
+#include <tf/tf.h>
 #include "yaml-cpp/yaml.h"
 
 namespace zw {
@@ -89,6 +90,12 @@ bool PgmAndYamlToOccupancy(nav_msgs::OccupancyGrid& grid,const std::string& stem
     ROS_INFO("origin.x=%f, origin.y=%f, origin.z=%f",grid.info.origin.position.x,
              grid.info.origin.position.y,
              grid.info.origin.position.z);
+    tf::Quaternion q;
+    q.setRPY(0,0,grid.info.origin.position.z);
+    grid.info.origin.orientation.x=q.x();
+    grid.info.origin.orientation.y=q.y();
+    grid.info.origin.orientation.z=q.z();
+    grid.info.origin.orientation.w=q.w();
   }
   const std::string map_filename =stem +".pgm";
   if(access(map_filename.c_str(),0)==-1)
@@ -96,9 +103,10 @@ bool PgmAndYamlToOccupancy(nav_msgs::OccupancyGrid& grid,const std::string& stem
     ROS_ERROR("%s does not exist.",map_filename.c_str());
     return false;
   }
-  readPgm(grid,map_filename);
-
-  return true;
+  if(readPgm(grid,map_filename))
+    return true;
+  else
+    return false;
 }
 
 void OccupancyToPgmAndYaml(nav_msgs::OccupancyGrid& grid,const std::string& stem)
