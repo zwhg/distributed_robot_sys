@@ -9,7 +9,6 @@ TcpSocketServer::TcpSocketServer()
     m_listenSocket =new QTcpServer();
     m_listenSocket->listen(QHostAddress::Any , SOCKET_PORT);
     QObject::connect(this->m_listenSocket,SIGNAL(newConnection()),this,SLOT(on_ProcessConnection()));
-
 }
 
 TcpSocketServer::~TcpSocketServer()

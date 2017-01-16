@@ -18,13 +18,14 @@
 #include "../../common/paras.h"
 #include "../../common/map_image.h"
 
+#include <QtNetwork>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow),
     m_keyControl(new zw::KeyControl(parent)),
-    m_tcpSocketClient(new zw::TcpSocket(parent))
-
+    m_tcpSocketClient(new zw::TcpSocket(parent)),
+    m_udpSocketClient(new zw::UdpSocket(parent))
 {
     ui->setupUi(this);
     pixmap = new QPixmap(PIXMAP_X,PIXMAP_Y);
@@ -35,12 +36,10 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->lEdit_ip->setText(QString::fromStdString(zw::SERVER_IP));
     m_tcpSocketClient->host =ui->lEdit_ip->text().toStdString();
     m_tcpSocketClient->port =ui->lEdit_port->text().toUShort();
-
     QObject::connect(ui->lEdit_ip,SIGNAL(returnPressed()),
                      this,SLOT(on_lEdit_ip_returnPressed()));
     QObject::connect(ui->lEdit_port,SIGNAL(returnPressed()),
                      this,SLOT(on_lEdit_port_returnPressed()));
-
     QTimer *x_timer =new QTimer();
     QObject::connect(x_timer,SIGNAL(timeout()),this,SLOT(on_xTimerUpdate()));
     x_timer->start(50);

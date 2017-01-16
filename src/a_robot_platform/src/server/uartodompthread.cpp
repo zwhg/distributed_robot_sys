@@ -5,9 +5,6 @@ extern zw::UartOdom m_uartOdom;
 
 namespace zw {
 
-
-
-
 UartOdomPthread::UartOdomPthread()
 {
   pthread_create(&id,NULL,MyPthread,(void *)this);

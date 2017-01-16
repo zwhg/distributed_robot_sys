@@ -3,8 +3,9 @@
 
 #include <QMainWindow>
 #include "../tcp_socket.h"
+#include "../udp_socket.h"
 #include "../key_control.h"
-#include<QMouseEvent>
+#include <QMouseEvent>
 #include <QMessageBox>
 #include <QPainter>
 #include <QPixmap>
@@ -12,12 +13,11 @@
 #include <QTimer>
 #include <QPoint>
 #include <QTableWidget>
-#include<QProgressBar>
+#include <QProgressBar>
 
 #define Myhigh 600
 #define Mywidth 600
 #define  MIDD 720
-
 namespace Ui {
 class MainWindow;
 }
@@ -37,7 +37,6 @@ public:
 protected:
     void keyPressEvent(QKeyEvent *e);
 
-
 private slots:
     void ShowLaser();
     void ShowUltrasonic();
@@ -52,6 +51,7 @@ private slots:
   //  void on_tableView_activated(const QModelIndex &index);
 
     void on_pBtn_open_map_clicked();
+    //void processPendingDatagram();
 
 private :
     void KeyControlMsgRefalsh(const zw::KeyControlMsg & kMsg);
@@ -63,7 +63,7 @@ private:
     Ui::MainWindow *ui;
     zw::KeyControl *m_keyControl;
     zw::TcpSocket *m_tcpSocketClient;
-
+    zw::UdpSocket *m_udpSocketClient;
 };
 
 #endif // MAINWINDOW_H

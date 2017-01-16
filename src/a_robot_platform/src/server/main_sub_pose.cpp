@@ -16,6 +16,7 @@ int main(int argc, char **argv)
   ros::Subscriber pose_sub = n.subscribe("amcl_pose", 2,PoseReceived);
 
   ros::Rate loop_rate(50);
+
   while(ros::ok())
   {
     ros::spinOnce();

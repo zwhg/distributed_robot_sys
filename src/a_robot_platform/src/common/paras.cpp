@@ -1,13 +1,14 @@
 #include "paras.h"
 #include <qdebug.h>
-
+#include  "../server/uartlaser.h"
 
 
 namespace zw {
 
 static uint16_t dataTableLen=0;
 static pthread_mutex_t g_tMutex  = PTHREAD_MUTEX_INITIALIZER;
-
+static double send_distance[PACKLEN] = {0};
+static pthread_mutex_t g_tLaserMutex  = PTHREAD_MUTEX_INITIALIZER;
 
 static volatile zw::ElementTable dataTable[]=
 {
@@ -103,6 +104,24 @@ bool Paras::GetAddressValue(ParaGetSet &para)
         }
     }
     return false;
+}
+void Paras::get_distance(double dis[])
+{
+      pthread_mutex_lock(&g_tLaserMutex );
+      for(int i=0;i<PACKLEN;i++)
+      {
+          dis[i] = send_distance[i];
+      }
+        pthread_mutex_unlock(&g_tLaserMutex );
+}
+void Paras::set_distance( double dis[])
+{
+    pthread_mutex_lock(&g_tLaserMutex );
+    for(int i=0;i<PACKLEN;i++)
+    {
+      send_distance[i]= dis[i];
+    }
+      pthread_mutex_unlock(&g_tLaserMutex );
 }
 }
 
