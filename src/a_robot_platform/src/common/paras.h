@@ -39,6 +39,8 @@ public:
     ~Paras();
     bool SetAddressValue(const ParaGetSet &para);
     bool GetAddressValue(ParaGetSet &para);
+    static void get_distance(double *dis);
+    static void set_distance(double *dis);
 
 };
 

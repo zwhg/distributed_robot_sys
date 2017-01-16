@@ -3,8 +3,9 @@
 
 #include <QMainWindow>
 #include "../tcp_socket.h"
+#include "../udp_socket.h"
 #include "../key_control.h"
-#include<QMouseEvent>
+#include <QMouseEvent>
 #include <QMessageBox>
 #include <QPainter>
 #include <QPixmap>
@@ -12,14 +13,13 @@
 #include <QTimer>
 #include <QPoint>
 #include <QTableWidget>
-#include<QProgressBar>
+#include <QProgressBar>
 
 #include "../../common/map_image.h"
 
 #define Myhigh 600
 #define Mywidth 600
 #define  MIDD 720
-
 namespace Ui {
 class MainWindow;
 }
@@ -39,7 +39,6 @@ public:
 protected:
     void keyPressEvent(QKeyEvent *e);
 
-
 private slots:
     void ShowLaser();
     void ShowUltrasonic();
@@ -48,12 +47,13 @@ private slots:
     void on_pBtn_key_control_open_clicked(bool checked);
     void on_lEdit_ip_returnPressed();
     void on_lEdit_port_returnPressed();
-    void on_xTimerUpdate();
-    void on_cmdTimerUpdate();
+    void xTimerUpdate();
+    void cmdTimerUpdate();
 
   //  void on_tableView_activated(const QModelIndex &index);
 
     void on_pBtn_open_map_clicked();
+    //void processPendingDatagram();
 
     void on_pBtn_open_submap_clicked();
 
@@ -67,10 +67,13 @@ private:
     Ui::MainWindow *ui;
     zw::KeyControl *m_keyControl;
     zw::TcpSocket *m_tcpSocketClient;
+    zw::UdpSocket *m_udpSocketClient;
+
 
     cv::Mat map;
     cv::Mat submap;
     zw::MapImage m_mapImage;
+
 };
 
 #endif // MAINWINDOW_H

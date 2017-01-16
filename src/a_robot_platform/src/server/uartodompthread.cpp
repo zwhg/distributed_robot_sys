@@ -5,9 +5,6 @@ extern zw::UartOdom m_uartOdom;
 
 namespace zw {
 
-
-
-
 UartOdomPthread::UartOdomPthread()
 {
   pthread_create(&id,NULL,MyPthread,(void *)this);
@@ -28,6 +25,7 @@ void *UartOdomPthread::DoPthread(void)
 {
   ros::NodeHandle n;
   ros::Subscriber key_sub =n.subscribe("cmd_vel",2,cmd_keyCallback);
+  ros::Subscriber pose_sub = n.subscribe("amcl_pose", 2,PoseReceived);
   ros::Publisher odom_pub = n.advertise<nav_msgs::Odometry>("odom", 100);
   ros::Publisher imu_pub =n.advertise<sensor_msgs::Imu>("imu",100);
 
@@ -164,6 +162,21 @@ void UartOdomPthread::cmd_keyCallback(const geometry_msgs::Twist::ConstPtr & cmd
         Paras m_para;
         m_para.SetAddressValue(packInfo);
     }
+}
+
+void UartOdomPthread::PoseReceived(const geometry_msgs::PoseWithCovarianceConstPtr pose)
+{
+  int32_t ctr_msg[3];
+  zw::ParaGetSet car_para={zw::R_REGISTER,3,zw::MSG_CONTROL+2,ctr_msg};
+  zw::Float2Int32 mf;
+  mf.f=(float)pose->pose.position.x;
+  ctr_msg[0]=mf.i;
+  mf.f=(float)pose->pose.position.y;
+  ctr_msg[1]=mf.i;
+  mf.f =(float)(tf::getYaw(pose->pose.orientation));
+  ctr_msg[2]=mf.i;
+  zw::Paras m_para;
+  m_para.SetAddressValue(car_para);
 }
 
 

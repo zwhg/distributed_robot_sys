@@ -10,21 +10,19 @@
 
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
-
-
-
 #include "../../common/modbus.h"
 #include "../../common/use_display.h"
 #include "../../common/paras.h"
 #include "../../common/map_image.h"
 
+#include <QtNetwork>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow),
     m_keyControl(new zw::KeyControl(parent)),
-    m_tcpSocketClient(new zw::TcpSocket(parent))
-
+    m_tcpSocketClient(new zw::TcpSocket(parent)),
+    m_udpSocketClient(new zw::UdpSocket(parent))
 {
     ui->setupUi(this);
     pixmap = new QPixmap(PIXMAP_X,PIXMAP_Y);
@@ -36,24 +34,19 @@ MainWindow::MainWindow(QWidget *parent) :
     m_tcpSocketClient->host =ui->lEdit_ip->text().toStdString();
     m_tcpSocketClient->port =ui->lEdit_port->text().toUShort();
 
-    QObject::connect(ui->lEdit_ip,SIGNAL(returnPressed()),
-                     this,SLOT(on_lEdit_ip_returnPressed()));
-    QObject::connect(ui->lEdit_port,SIGNAL(returnPressed()),
-                     this,SLOT(on_lEdit_port_returnPressed()));
-
     QTimer *x_timer =new QTimer();
-    QObject::connect(x_timer,SIGNAL(timeout()),this,SLOT(on_xTimerUpdate()));
+    QObject::connect(x_timer,SIGNAL(timeout()),this,SLOT(xTimerUpdate()));
     x_timer->start(50);
 
     QTimer *cmd_timer =new QTimer();
-    QObject::connect(cmd_timer,SIGNAL(timeout()),this,SLOT(on_cmdTimerUpdate()));
+    QObject::connect(cmd_timer,SIGNAL(timeout()),this,SLOT(cmdTimerUpdate()));
     cmd_timer->start(40);
 }
-
 MainWindow::~MainWindow()
 {
     delete m_keyControl;
     delete m_tcpSocketClient;
+    delete m_udpSocketClient;
     this->close();
     delete ui;
 }
@@ -88,7 +81,6 @@ void MainWindow::ShowUltrasonic()   //显示超声
                     <<QPointF(SEVEN_Ultra_X-dis[6],SEVEN_Ultra_Y+dis[6]*tan(PI/12));
       polygon8<<QPointF(EIGHT_Ultra_X,EIGHT_Ultra_Y)<<QPointF(EIGHT_Ultra_X-dis[7],EIGHT_Ultra_Y-dis[7]*tan(PI/12))
                     <<QPointF(EIGHT_Ultra_X-dis[7],EIGHT_Ultra_Y+dis[7]*tan(PI/12));
-
       if(ui->ultra1->isChecked())
       {
           if(ui->Ultra_Area->isChecked())
@@ -404,7 +396,7 @@ void MainWindow::ShowLaser()
     ui->label_main->setPixmap(*pixmap);
 }
 
-void MainWindow::on_xTimerUpdate(void)
+void MainWindow::xTimerUpdate(void)
 {
     switch (m_tcpSocketClient->m_connectStatus) {
     case zw::DISCONNECTED:
@@ -426,9 +418,10 @@ void MainWindow::on_xTimerUpdate(void)
     }
     KeyControlMsgRefalsh(m_keyControl->kMsg);
     MsgImuRefalsh();
+    MsgControlRefalsh();
 }
 
-void MainWindow::on_cmdTimerUpdate(void)
+void MainWindow::cmdTimerUpdate(void)
 {
     zw::ParaGetSet msgInfo;
 
@@ -450,10 +443,10 @@ void MainWindow::KeyControlMsgRefalsh(const zw::KeyControlMsg & kMsg)
 {
     ui->lbl_vel_max->setText(QString::number(kMsg.maxSpeed,'f',2));
     ui->lbl_vel_exp->setText(QString::number(kMsg.e_speed,'f',2));
-    ui->lbl_vel_ret->setText(QString::number(kMsg.a_speed,'f',2));
+   // ui->lbl_vel_ret->setText(QString::number(kMsg.a_speed,'f',2));
     ui->lbl_ome_max->setText(QString::number(kMsg.maxOmega,'f',2));
     ui->lbl_ome_exp->setText(QString::number(kMsg.e_omega,'f',2));
-    ui->lbl_ome_ret->setText(QString::number(kMsg.a_omega,'f',2));
+   // ui->lbl_ome_ret->setText(QString::number(kMsg.a_omega,'f',2));
 }
 
 void MainWindow::MsgControlRefalsh(void)

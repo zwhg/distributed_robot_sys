@@ -4,8 +4,6 @@
 
 
 namespace zw{
-
-
     TcpSocket::TcpSocket(QObject *parent):
         QObject(parent)
     {

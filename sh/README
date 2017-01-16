@@ -54,4 +54,6 @@ rosservice call /finish_trajectory "stem: 'gtest'"
 保存位置 .ros/
 
 
+定位过程:
+
 

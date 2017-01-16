@@ -1,5 +1,7 @@
 #include "uartlaser.h"
 
+
+
 namespace zw {
 
 UartLaser ::UartLaser()
@@ -25,7 +27,7 @@ int32_t UartLaser ::StartScan(void)
   }
   if (scanflags == 0)
   {
-    wRet = write(fd, startCmd, 7);      //发送开始扫描指令
+    wRet = write(fd, startCmd, 7);          //发送开始扫描指令
   }
   usleep(3000);
   wRet = write(fd, dataScanCmd, 7);		//持续请求扫描数据
@@ -52,9 +54,9 @@ int32_t UartLaser ::GetScanData( double *ang, double *dis, int32_t len, double *
     ang[i] = angle[i];
     dis[i] = distance[i];
   }
-  *spd  = speed;
-
-  pthread_mutex_unlock(&tMutex);
+    *spd  = speed;
+    pthread_mutex_unlock(&tMutex);
+    Paras::set_distance(dis);
   return min;
 }
 

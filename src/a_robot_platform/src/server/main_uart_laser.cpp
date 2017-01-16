@@ -5,6 +5,8 @@
 #include "std_msgs/Int32.h"
 #include "sensor_msgs/LaserScan.h"
 #include "uartlaser.h"
+#include "udpsocketserver.h"
+#include <QtNetwork/QUdpSocket>
 
 static int32_t startOrStop = 1;	// 1是start，0是stop
 static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
@@ -24,7 +26,7 @@ int main(int argc, char **argv)
   int32_t ret = -1;
   const char * addrPort;
   if(argc==1)
-      addrPort="/dev/ttyUSB1";
+      addrPort="/dev/ttyUSB0";
   else
       addrPort =argv[1];
 
@@ -48,14 +50,16 @@ int main(int argc, char **argv)
   {
     ros::spinOnce();
 
+    zw::UdpSocketServer m_udpserver;
+
     pthread_mutex_lock(&mutex);
-    if(isStarted && 0 == startOrStop) // 当前正在扫描且要求停止
+    if(isStarted && 0 == startOrStop)              // 当前正在扫描且要求停止
     {
       ROS_INFO("stop");
       m_lsRadar.StopScan();
       isStarted = false;
     }
-    else if(!isStarted && 1 == startOrStop)	// 当前未扫描且要求开始扫描
+    else if(!isStarted && 1 == startOrStop)	    // 当前未扫描且要求开始扫描
     {
       ROS_INFO("start");
       m_lsRadar.StartScan();

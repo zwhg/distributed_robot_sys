@@ -23,16 +23,16 @@ namespace zw {
 #define MAX_SPEED_CMD	0.5     // m/s
 #define MAX_OMEGA_CMD   1     // rad/s
 
+
 #pragma pack(4)
 typedef struct
 {
     float maxSpeed;
     float e_speed;
-    float a_speed;
+ //   float a_speed;
     float maxOmega;
     float e_omega;
-    float a_omega;
-
+ //   float a_omega;
 }KeyControlMsg;
 
 class KeyControl :public QObject{

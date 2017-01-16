@@ -2,6 +2,7 @@
 #define USE_DISPLAY_H
 
 #include <QStringList>
+#include"qbuttongroup.h"
 #define CAMBER  0.0174533  // 1°对应的弧度
 #define PI 3.14159265
 #define Du_Hudu(x) (x*0.0174533)
