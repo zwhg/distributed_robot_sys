@@ -48,8 +48,8 @@ private slots:
     void on_pBtn_key_control_open_clicked(bool checked);
     void on_lEdit_ip_returnPressed();
     void on_lEdit_port_returnPressed();
-    void on_xTimerUpdate();
-    void on_cmdTimerUpdate();
+    void xTimerUpdate();
+    void cmdTimerUpdate();
 
   //  void on_tableView_activated(const QModelIndex &index);
 

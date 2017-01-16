@@ -14,6 +14,7 @@ namespace zw {
     {
         keyFlag =0x00;
         keyControl =false;
+        kMsg={0,0,0,0};
         QTimer *m_timer =new QTimer();
         QObject::connect(m_timer,SIGNAL(timeout()),this,SLOT(on_TimerUpdate()));
         m_timer->start(50);
@@ -70,12 +71,12 @@ namespace zw {
 
             //qDebug()<< f2is.f<<f2io.f;
         }
-        packInfo={R_REGISTER,2, MSG_CONTROL,dat};
-        m_para.GetAddressValue(packInfo);
-        f2is.i=dat[0];
-        f2io.i=dat[1];
-        kMsg.a_speed=f2is.f;
-        kMsg.a_omega=f2io.f;
+//        packInfo={R_REGISTER,2, MSG_CONTROL,dat};
+//        m_para.GetAddressValue(packInfo);
+//        f2is.i=dat[0];
+//        f2io.i=dat[1];
+//        kMsg.a_speed=f2is.f;
+//        kMsg.a_omega=f2io.f;
     }
 
 

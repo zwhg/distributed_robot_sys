@@ -52,14 +52,6 @@ target_link_libraries(main_uart_laser
 
 
 
-add_executable(main_sub_pose src/server/main_sub_pose.cpp
- src/common/modbus.cpp
- src/common/paras.cpp
- )
-target_link_libraries(main_sub_pose
- ${catkin_LIBRARIES})
-
-
 add_executable(main_global_location src/server/main_global_location.cpp
  )
 target_link_libraries(main_global_location
@@ -88,7 +80,5 @@ qt5_use_modules(main_uart_laser
   Core
 )
 
-qt5_use_modules(main_sub_pose
-  Core
-)
+
 
