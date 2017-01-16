@@ -1,0 +1,1 @@
+/usr/bin/g++  -fPIC -g   -shared -Wl,-soname,libgtest.so -o libgtest.so CMakeFiles/gtest.dir/src/gtest-all.cc.o  -L/home/shenyu/distributed_robot_sys/src/build-a_robot_platform-Desktop-Debug/gtest/src -lpthread -Wl,-rpath,/home/shenyu/distributed_robot_sys/src/build-a_robot_platform-Desktop-Debug/gtest/src 
