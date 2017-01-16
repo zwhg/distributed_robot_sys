@@ -18,10 +18,10 @@ namespace zw {
 #define OMEGA_STEP  0.1
 
 #define SET_MAX_SPEED_STEP 0.1
-#define SET_MAX_OMEGA_STEP 0.1
+#define SET_MAX_OMEGA_STEP 0.5
 
 #define MAX_SPEED_CMD	0.5     // m/s
-#define MAX_OMEGA_CMD   0.8     // rad/s
+#define MAX_OMEGA_CMD   1     // rad/s
 
 #pragma pack(4)
 typedef struct
