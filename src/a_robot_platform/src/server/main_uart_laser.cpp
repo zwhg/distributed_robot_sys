@@ -18,7 +18,7 @@ int main(int argc, char **argv)
 {
   // Set up ROS.
   ros::init(argc, argv, "main_uart_laser");
-  ROS_INFO("package name:a_robot_platform  node name:main_uart_laser");
+  ROS_INFO("package_name:a_robot_platform  node_name:main_uart_laser");
   qDebug()<<"qDebug ok!";
 
   ros::NodeHandle n;

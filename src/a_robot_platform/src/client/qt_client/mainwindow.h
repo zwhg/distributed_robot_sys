@@ -15,6 +15,8 @@
 #include <QTableWidget>
 #include <QProgressBar>
 
+#include "../../common/map_image.h"
+
 #define Myhigh 600
 #define Mywidth 600
 #define  MIDD 720
@@ -45,13 +47,15 @@ private slots:
     void on_pBtn_key_control_open_clicked(bool checked);
     void on_lEdit_ip_returnPressed();
     void on_lEdit_port_returnPressed();
-    void on_xTimerUpdate();
-    void on_cmdTimerUpdate();
+    void xTimerUpdate();
+    void cmdTimerUpdate();
 
   //  void on_tableView_activated(const QModelIndex &index);
 
     void on_pBtn_open_map_clicked();
     //void processPendingDatagram();
+
+    void on_pBtn_open_submap_clicked();
 
 private :
     void KeyControlMsgRefalsh(const zw::KeyControlMsg & kMsg);
@@ -64,6 +68,12 @@ private:
     zw::KeyControl *m_keyControl;
     zw::TcpSocket *m_tcpSocketClient;
     zw::UdpSocket *m_udpSocketClient;
+
+
+    cv::Mat map;
+    cv::Mat submap;
+    zw::MapImage m_mapImage;
+
 };
 
 #endif // MAINWINDOW_H

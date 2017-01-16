@@ -1,0 +1,7 @@
+<?xml version="1.0"?>
+<launch>
+
+<node name="map_server" pkg="a_robot_platform" type="main_map_server" args= "/home/zw/distributed_robot_sys/img/map/gtest" output="screen">
+</node>
+
+</launch>

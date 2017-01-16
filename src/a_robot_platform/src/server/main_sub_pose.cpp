@@ -10,7 +10,7 @@ int main(int argc, char **argv)
 {
   // Set up ROS.
   ros::init(argc, argv, "mian_sub_pose");
-  ROS_INFO("package name:a_robot_platform  node name:main_sub_pose");
+  ROS_INFO("package_name:a_robot_platform  node_name:main_sub_pose");
 
   ros::NodeHandle n;
   ros::Subscriber pose_sub = n.subscribe("amcl_pose", 2,PoseReceived);

@@ -10,7 +10,7 @@
 
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
-#include <opencv2/core/core.hpp>
+
 
 
 #include "../../common/modbus.h"
@@ -36,16 +36,13 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->lEdit_ip->setText(QString::fromStdString(zw::SERVER_IP));
     m_tcpSocketClient->host =ui->lEdit_ip->text().toStdString();
     m_tcpSocketClient->port =ui->lEdit_port->text().toUShort();
-    QObject::connect(ui->lEdit_ip,SIGNAL(returnPressed()),
-                     this,SLOT(on_lEdit_ip_returnPressed()));
-    QObject::connect(ui->lEdit_port,SIGNAL(returnPressed()),
-                     this,SLOT(on_lEdit_port_returnPressed()));
+
     QTimer *x_timer =new QTimer();
-    QObject::connect(x_timer,SIGNAL(timeout()),this,SLOT(on_xTimerUpdate()));
+    QObject::connect(x_timer,SIGNAL(timeout()),this,SLOT(xTimerUpdate()));
     x_timer->start(50);
 
     QTimer *cmd_timer =new QTimer();
-    QObject::connect(cmd_timer,SIGNAL(timeout()),this,SLOT(on_cmdTimerUpdate()));
+    QObject::connect(cmd_timer,SIGNAL(timeout()),this,SLOT(cmdTimerUpdate()));
     cmd_timer->start(40);
 }
 
@@ -403,7 +400,7 @@ void MainWindow::ShowLaser()
     ui->label_main->setPixmap(*pixmap);
 }
 
-void MainWindow::on_xTimerUpdate(void)
+void MainWindow::xTimerUpdate(void)
 {
     switch (m_tcpSocketClient->m_connectStatus) {
     case zw::DISCONNECTED:
@@ -425,16 +422,19 @@ void MainWindow::on_xTimerUpdate(void)
     }
     KeyControlMsgRefalsh(m_keyControl->kMsg);
     MsgImuRefalsh();
+    MsgControlRefalsh();
 }
 
-void MainWindow::on_cmdTimerUpdate(void)
+void MainWindow::cmdTimerUpdate(void)
 {
     zw::ParaGetSet msgInfo;
 
     if(m_keyControl->keyControl){
         msgInfo={zw::W_REGISTER,2,zw::CONTROL,nullptr};
         m_tcpSocketClient->SendMsg(msgInfo);     
-    }
+    }   
+    msgInfo={zw::W_REGISTER,1, zw::BTN_SWITCH,nullptr};
+    m_tcpSocketClient->SendMsg(msgInfo);
 
     msgInfo={zw::R_REGISTER,5,zw::MSG_CONTROL,nullptr};
     m_tcpSocketClient->SendMsg(msgInfo);
@@ -447,10 +447,10 @@ void MainWindow::KeyControlMsgRefalsh(const zw::KeyControlMsg & kMsg)
 {
     ui->lbl_vel_max->setText(QString::number(kMsg.maxSpeed,'f',2));
     ui->lbl_vel_exp->setText(QString::number(kMsg.e_speed,'f',2));
-    ui->lbl_vel_ret->setText(QString::number(kMsg.a_speed,'f',2));
+   // ui->lbl_vel_ret->setText(QString::number(kMsg.a_speed,'f',2));
     ui->lbl_ome_max->setText(QString::number(kMsg.maxOmega,'f',2));
     ui->lbl_ome_exp->setText(QString::number(kMsg.e_omega,'f',2));
-    ui->lbl_ome_ret->setText(QString::number(kMsg.a_omega,'f',2));
+   // ui->lbl_ome_ret->setText(QString::number(kMsg.a_omega,'f',2));
 }
 
 void MainWindow::MsgControlRefalsh(void)
@@ -504,15 +504,24 @@ void MainWindow::on_pBtn_start2connect_clicked(bool checked)
 
 void MainWindow::on_pBtn_key_control_open_clicked(bool checked)
 {
+    int32_t dat[1];
+    zw::ParaGetSet packInfo={zw::R_REGISTER,1, zw::BTN_SWITCH,dat};
+    zw::Paras m_para;
+    m_para.GetAddressValue(packInfo);
+
     if(checked){
         ui->pBtn_key_control_open->setStyleSheet("background-color: rgb(0, 255, 0);");
         ui->pBtn_key_control_open->setText("started");
          m_keyControl->keyControl =true;
+         dat[0]|=KEY_VEL_CTR;
     }else{
         ui->pBtn_key_control_open->setStyleSheet("background-color: rgb(167, 167, 125)");
         ui->pBtn_key_control_open->setText("stoped");
         m_keyControl->keyControl =false;
+        dat[0] &=(~KEY_VEL_CTR);
     }
+    packInfo.fuc =zw::W_REGISTER;
+    m_para.SetAddressValue(packInfo);
 }
 
 void MainWindow::on_lEdit_ip_returnPressed()
@@ -558,23 +567,31 @@ void MainWindow::on_ultraAll_clicked()
 void MainWindow::on_pBtn_open_map_clicked()
 {
     using namespace cv;
-    zw::MapImage m_mapImage;
     QImage img ;
     QString img_name = QFileDialog::getOpenFileName(this,tr("Open Image"),".",tr("Image Files(*.png *.jpg *.pgm *.bmp)"));
-    Mat map=imread(img_name.toLatin1().data());
+    map=imread(img_name.toLatin1().data());
     m_mapImage.GetQImage(map,img);
     ui->lbl_map->setPixmap(QPixmap::fromImage(img));
     ui->lbl_map->resize(img.width(),img.height());
     ui->lbl_map->setScaledContents(true);
 
-    img_name = QFileDialog::getOpenFileName(this,tr("Open Image"),".",tr("Image Files(*.png *.jpg *.pgm *.bmp)"));
-    Mat submap=imread(img_name.toLatin1().data());
-    m_mapImage.GetQImage(submap,img);
-    ui->lbl_sub_map->setPixmap(QPixmap::fromImage(img));
-    ui->lbl_sub_map->resize(img.width(),img.height());
-    ui->lbl_sub_map->setScaledContents(true);
+    if((!map.empty())&&(!submap.empty()))
+        m_mapImage.SurfFeatureMatch(map,submap);
+}
 
-    m_mapImage.SurfFeatureMatch(map,submap);
+void MainWindow::on_pBtn_open_submap_clicked()
+{
+    using namespace cv;
+    QImage img ;
+    QString img_name = QFileDialog::getOpenFileName(this,tr("Open Image"),".",tr("Image Files(*.png *.jpg *.pgm *.bmp)"));
+    submap=imread(img_name.toLatin1().data());
+//    m_mapImage.GetQImage(submap,img);
+//    ui->lbl_sub_map->setPixmap(QPixmap::fromImage(img));
+//    ui->lbl_sub_map->resize(img.width(),img.height());
+//    ui->lbl_sub_map->setScaledContents(true);
+
+    if((!map.empty())&&(!submap.empty()))
+        m_mapImage.SurfFeatureMatch(map,submap);
   //  m_mapImage.OrbFeaturematch(map,submap);
   //  m_mapImage.SiftFeaturematch(map,submap);
 }
