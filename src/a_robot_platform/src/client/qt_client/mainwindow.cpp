@@ -10,9 +10,6 @@
 
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
-
-
-
 #include "../../common/modbus.h"
 #include "../../common/use_display.h"
 #include "../../common/paras.h"
@@ -45,11 +42,11 @@ MainWindow::MainWindow(QWidget *parent) :
     QObject::connect(cmd_timer,SIGNAL(timeout()),this,SLOT(cmdTimerUpdate()));
     cmd_timer->start(40);
 }
-
 MainWindow::~MainWindow()
 {
     delete m_keyControl;
     delete m_tcpSocketClient;
+    delete m_udpSocketClient;
     this->close();
     delete ui;
 }
@@ -84,7 +81,6 @@ void MainWindow::ShowUltrasonic()   //显示超声
                     <<QPointF(SEVEN_Ultra_X-dis[6],SEVEN_Ultra_Y+dis[6]*tan(PI/12));
       polygon8<<QPointF(EIGHT_Ultra_X,EIGHT_Ultra_Y)<<QPointF(EIGHT_Ultra_X-dis[7],EIGHT_Ultra_Y-dis[7]*tan(PI/12))
                     <<QPointF(EIGHT_Ultra_X-dis[7],EIGHT_Ultra_Y+dis[7]*tan(PI/12));
-
       if(ui->ultra1->isChecked())
       {
           if(ui->Ultra_Area->isChecked())

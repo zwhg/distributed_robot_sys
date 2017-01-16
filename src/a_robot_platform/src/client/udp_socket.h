@@ -4,12 +4,15 @@
 #include <QObject>
 #include <QtNetwork/QUdpSocket>
 #include <QtNetwork/qudpsocket.h>
+
 namespace  zw{
+
     union floatTobyte
    {
       float  ff;
       uint8_t  fb[4];
    };
+
     class UdpSocket : public QObject
     {
        Q_OBJECT

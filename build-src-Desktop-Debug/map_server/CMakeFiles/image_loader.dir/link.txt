@@ -1,1 +1,0 @@
-/usr/bin/g++  -fPIC -g   -shared -Wl,-soname,libimage_loader.so -o ../devel/lib/libimage_loader.so CMakeFiles/image_loader.dir/src/image_loader.cpp.o -lSDL -lSDL_image -lboost_system 
