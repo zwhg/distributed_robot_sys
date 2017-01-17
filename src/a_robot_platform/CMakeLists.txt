@@ -27,6 +27,10 @@ catkin_package(
 include_directories(include
     ${yamlcpp_INCLUDE_DIRS} )
 
+
+
+
+
 add_executable(main_uart_odom src/server/main_uart_odom.cpp
  src/common/modbus.cpp
  src/common/paras.cpp
@@ -62,6 +66,7 @@ target_link_libraries(main_global_location
 
 add_executable(main_map_server src/server/main_map_server.cpp
  src/map/mapreadandwrite.cpp
+ src/common/map_process.cpp
  )
 target_link_libraries(main_map_server
  ${catkin_LIBRARIES}

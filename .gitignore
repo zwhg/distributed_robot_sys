@@ -1,8 +1,12 @@
 *.user
+*.user.*
 *.catkin_workspace
 *.workspace
 *~
 *.swp
+*.autosave
+
+
 
 temp/
 googleMapping/

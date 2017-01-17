@@ -4,6 +4,9 @@
 #include <cstdlib>
 #include <tf/tf.h>
 #include "yaml-cpp/yaml.h"
+#include "../common/map_process.h"
+#include "probability_values.h"
+
 
 namespace zw {
 
@@ -30,15 +33,36 @@ bool readPgm(nav_msgs::OccupancyGrid& grid,const std::string file_path)
   unsigned long dat_size=grid.info.width*grid.info.height;
   grid.data.resize(dat_size,-1);
   char *dat=new char[dat_size];
+  char *map=new char[dat_size];
   pgm_file.read(dat,dat_size);
-  constexpr uint8_t kUnknownValue = 128;
   size_t j=0;
+  char p_value;
   for (size_t y = 0; y < grid.info.height; ++y) {
     for (size_t x = 0; x < grid.info.width; ++x) {
-      const size_t i = x + (grid.info.height - y - 1) * grid.info.width;
-      grid.data[i]=100-((unsigned char)dat[j++]*100)/255;
+      //const size_t i = x + (grid.info.height - y - 1) * grid.info.width;
+      const size_t i=zw::GetGridIndexOfMap(grid.info.width,x,(grid.info.height - y - 1));
+      p_value=kOccGrid-((unsigned char)dat[j]*kOccGrid)/255;
+      if(p_value>=(char)(kOccProbaility*kOccGrid))
+        p_value=kOccGrid;
+      else if(p_value <=(char)(kFreeprobaility*kOccGrid))
+        p_value=kFreeGrid;
+      else
+        p_value=kUnknownGrid;
+      dat[j++]=p_value;
+     // grid.data[i] =p_value;
+      map[i]=p_value;
     }
   }
+  for(uint8_t f=0;f<1;f++){
+    map_filter(map, dat, grid.info.width, grid.info.height);
+    map_filter(dat, map, grid.info.width, grid.info.height);
+  }
+
+  for (size_t k = 0; k < dat_size; ++k) {
+      grid.data[k]=map[k];
+  }
+
+  delete map;
   delete dat;
   pgm_file.close();
   //OccupancyToPgmAndYaml(grid,"/home/zw/zw");
@@ -57,8 +81,8 @@ void WriteOccupancyGridToPgm(const ::nav_msgs::OccupancyGrid& grid,
     for (size_t y = 0; y < grid.info.height; ++y) {
       for (size_t x = 0; x < grid.info.width; ++x) {
         const size_t i = x + (grid.info.height - y - 1) * grid.info.width;
-        if (grid.data[i] >= 0 && grid.data[i] <= 100) {
-          pgm_file.put((100 - grid.data[i]) * 255 / 100);
+        if (grid.data[i] >= 0 && grid.data[i] <= kOccGrid) {
+          pgm_file.put((kOccGrid - grid.data[i]) * 255 / kOccGrid);
         } else {
           // We choose a value between the free and occupied threshold.
           constexpr uint8_t kUnknownValue = 128;
@@ -127,8 +151,8 @@ void OccupancyToPgmAndYaml(nav_msgs::OccupancyGrid& grid,const std::string& stem
      out << YAML::Key << "origin" << YAML::Value << YAML::Flow << YAML::BeginSeq
          << grid.info.origin.position.x << grid.info.origin.position.y
          << kYawButMaybeIgnored << YAML::EndSeq;
-     out << YAML::Key << "occupied_thresh" << YAML::Value << 0.51;
-     out << YAML::Key << "free_thresh" << YAML::Value << 0.49;
+     out << YAML::Key << "occupied_thresh" << YAML::Value << kOccProbaility;
+     out << YAML::Key << "free_thresh" << YAML::Value << kFreeprobaility;
      out << YAML::Key << "negate" << YAML::Value << 0;
      out << YAML::EndMap;
    }
