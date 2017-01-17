@@ -53,13 +53,13 @@ bool readPgm(nav_msgs::OccupancyGrid& grid,const std::string file_path)
       map[i]=p_value;
     }
   }
-  for(uint8_t f=0;f<1;f++){
-    map_filter(map, dat, grid.info.width, grid.info.height);
-    map_filter(dat, map, grid.info.width, grid.info.height);
-  }
+  // filter the islet of the map
+  map_filter(map, dat, grid.info.width, grid.info.height);
+ // map_filter(dat, map, grid.info.width, grid.info.height);
 
   for (size_t k = 0; k < dat_size; ++k) {
-      grid.data[k]=map[k];
+      grid.data[k]=dat[k];
+      //grid.data[k]=map[k];
   }
 
   delete map;
