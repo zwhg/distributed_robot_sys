@@ -26,7 +26,7 @@ int main(int argc, char **argv)
   int32_t ret = -1;
   const char * addrPort;
   if(argc==1)
-      addrPort="/dev/ttyUSB0";
+      addrPort="/dev/ttyUSB1";
   else
       addrPort =argv[1];
 
