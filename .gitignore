@@ -7,7 +7,7 @@
 *.autosave
 
 
-
+src/amcl/
 temp/
 googleMapping/
 build/

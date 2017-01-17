@@ -474,12 +474,12 @@ void MainWindow::MsgImuRefalsh(void)
     int32_t dat[6];
     zw::ParaGetSet  packInfo = {zw::R_REGISTER,6,zw::MSG_IMU,dat};
     m_para.GetAddressValue(packInfo);
-    ui->lbl_acc_x->setText(QString::number(dat[0]));
-    ui->lbl_acc_y->setText(QString::number(dat[1]));
-    ui->lbl_acc_z->setText(QString::number(dat[2]));
-    ui->lbl_gyr_x->setText(QString::number(dat[3]));
-    ui->lbl_gyr_y->setText(QString::number(dat[4]));
-    ui->lbl_gyr_z->setText(QString::number(dat[5]));
+    ui->lbl_acc_x->setText(QString::number(dat[0]*Acc_Mss,'f',4));
+    ui->lbl_acc_y->setText(QString::number(dat[1]*Acc_Mss,'f',4));
+    ui->lbl_acc_z->setText(QString::number(dat[2]*Acc_Mss,'f',4));
+    ui->lbl_gyr_x->setText(QString::number(dat[3]*Gyro_Gr,'f',4));
+    ui->lbl_gyr_y->setText(QString::number(dat[4]*Gyro_Gr,'f',4));
+    ui->lbl_gyr_z->setText(QString::number(dat[5]*Gyro_Gr,'f',4));
 }
 
 void MainWindow::on_pBtn_start2connect_clicked(bool checked)

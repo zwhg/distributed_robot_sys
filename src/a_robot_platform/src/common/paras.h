@@ -32,6 +32,10 @@ typedef enum
 #define KEY_VEL_CTR     0x00000001
 
 
+#define Gyro_Gr	  (2000.0/65536.0*3.1415926/180.0)//(0.0005326/2.0)
+#define Acc_Mss  ((4.0*9.81)/65536.0)
+
+
 class Paras
 {
 public:
