@@ -28,6 +28,43 @@ using namespace amcl;
 #define NEW_UNIFORM_SAMPLING 1
 
 
+// Pose hypothesis
+typedef struct
+{
+  // Total weight (weights sum to 1)
+  double weight;
+
+  // Mean of pose esimate
+  pf_vector_t pf_pose_mean;
+
+  // Covariance of pose estimate
+  pf_matrix_t pf_pose_cov;
+
+} amcl_hyp_t;
+
+static double
+normalize(double z)
+{
+  return atan2(sin(z),cos(z));
+}
+
+static double
+angle_diff(double a, double b)
+{
+  double d1, d2;
+  a = normalize(a);
+  b = normalize(b);
+  d1 = a-b;
+  d2 = 2*M_PI - fabs(d1);
+  if(d1 > 0)
+    d2 *= -1.0;
+  if(fabs(d1) < fabs(d2))
+    return(d1);
+  else
+    return(d2);
+}
+
+static const std::string scan_topic_ = "scan";
 
 class AmclNode
 {
@@ -35,7 +72,7 @@ class AmclNode
   public:
     AmclNode();
     ~AmclNode();
-#if 0
+
     /**
      * @brief Uses TF and LaserScan messages from bag file to drive AMCL instead
      */
@@ -167,8 +204,6 @@ class AmclNode
     bool first_reconfigure_call_;
 
     boost::recursive_mutex configuration_mutex_;
-    dynamic_reconfigure::Server<amcl::AMCLConfig> *dsrv_;
-    amcl::AMCLConfig default_config_;
     ros::Timer check_laser_timer_;
 
     int max_beams_, min_particles_, max_particles_;
@@ -185,12 +220,9 @@ class AmclNode
     laser_model_t laser_model_type_;
     bool tf_broadcast_;
 
-    void reconfigureCB(amcl::AMCLConfig &config, uint32_t level);
-
     ros::Time last_laser_received_ts_;
     ros::Duration laser_check_interval_;
     void checkLaserReceived(const ros::TimerEvent& event);
-    #endif
 };
 
 }
