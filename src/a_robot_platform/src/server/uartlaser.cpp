@@ -47,7 +47,6 @@ int32_t UartLaser ::GetScanData( double *ang, double *dis, int32_t len, double *
 
   pthread_mutex_lock(&tMutex);
   pthread_cond_wait(&tConVar, &tMutex);
-
   min = len > PACKLEN ? PACKLEN : len;
   for (i = 0; i < min; i++)
   {

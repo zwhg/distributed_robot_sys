@@ -1,6 +1,6 @@
 #include"udp_socket.h"
 #include<qdebug.h>
-    float  laser_dis[720]={0};
+ float  laser_dis[720]={0};
 namespace zw
 {
 

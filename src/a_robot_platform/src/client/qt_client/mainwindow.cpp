@@ -80,7 +80,7 @@ void MainWindow::ShowUltrasonic()   //显示超声
       polygon7<<QPointF(SEVEN_Ultra_X,SEVEN_Ultra_Y)<<QPointF(SEVEN_Ultra_X-dis[6],SEVEN_Ultra_Y-dis[6]*tan(PI/12))
                     <<QPointF(SEVEN_Ultra_X-dis[6],SEVEN_Ultra_Y+dis[6]*tan(PI/12));
       polygon8<<QPointF(EIGHT_Ultra_X,EIGHT_Ultra_Y)<<QPointF(EIGHT_Ultra_X-dis[7],EIGHT_Ultra_Y-dis[7]*tan(PI/12))
-                    <<QPointF(EIGHT_Ultra_X-dis[7],EIGHT_Ultra_Y+dis[7]*tan(PI/12));
+                     <<QPointF(EIGHT_Ultra_X-dis[7],EIGHT_Ultra_Y+dis[7]*tan(PI/12));
       if(ui->ultra1->isChecked())
       {
           if(ui->Ultra_Area->isChecked())
@@ -225,7 +225,7 @@ void MainWindow::ShowLaser()
         tem_x = laser_dis[i]*sin(0.5*i*CAMBER);
         ShowPoint[i][0] = (tem_x*(Myhigh/2))/DIA;
         ShowPoint[i][1] = (tem_y*(Myhigh/2))/DIA;
-  //   qDebug()<<"(x,y):"<<"("<<ShowPoint[i][0]<<","<<ShowPoint[i][1]<<")";
+//qDebug()<<"(x,y):"<<"("<<ShowPoint[i][0]<<","<<ShowPoint[i][1]<<")";
     }
 //*******************draw the laser wave*********************//
 //    QVector<double>  x(TAG),y(TAG);
@@ -521,6 +521,7 @@ void MainWindow::MsgUltrasonicRefalsh(void)
     {
         fi.i = dat[i];
         dis[i] = fi.f;
+        qDebug()<<"ultrasonic data:"<<dis[i];
     }
 }
 void MainWindow::on_pBtn_start2connect_clicked(bool checked)
