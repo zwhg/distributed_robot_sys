@@ -23,13 +23,8 @@ catkin_package(
  # DEPENDS
 )
 
-
 include_directories(include
     ${yamlcpp_INCLUDE_DIRS} )
-
-
-
-
 
 add_executable(main_uart_odom src/server/main_uart_odom.cpp
  src/common/modbus.cpp
@@ -85,8 +80,6 @@ target_link_libraries(main_map_server
  ${catkin_LIBRARIES}
  yaml-cpp
  )
-
-
 
 add_definitions(-std=gnu++11)
 

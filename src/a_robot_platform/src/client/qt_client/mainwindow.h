@@ -14,8 +14,8 @@
 #include <QPoint>
 #include <QTableWidget>
 #include <QProgressBar>
-
 #include "../../common/map_image.h"
+#include "qcustomplot.h"
 
 #define Myhigh 600
 #define Mywidth 600
@@ -56,11 +56,11 @@ private slots:
     //void processPendingDatagram();
 
     void on_pBtn_open_submap_clicked();
-
 private :
     void KeyControlMsgRefalsh(const zw::KeyControlMsg & kMsg);
     void MsgControlRefalsh(void);
     void MsgImuRefalsh(void);
+    void MsgUltrasonicRefalsh(void);
     void ClearData();
 
 private:

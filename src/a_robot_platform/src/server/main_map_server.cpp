@@ -32,6 +32,7 @@ int main(int argc, char **argv)
   map_pub = n.advertise<nav_msgs::OccupancyGrid>("map", 1, true);
   map_pub.publish(grid);
 
+
   ros::spin();
   return 0;
 }

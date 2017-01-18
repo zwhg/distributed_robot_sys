@@ -7,6 +7,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <math.h>
+#include<QVector>
 
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
@@ -14,6 +15,7 @@
 #include "../../common/use_display.h"
 #include "../../common/paras.h"
 #include "../../common/map_image.h"
+#include "../udp_socket.h"
 
 #include <QtNetwork>
 
@@ -50,19 +52,17 @@ MainWindow::~MainWindow()
     this->close();
     delete ui;
 }
-
 void MainWindow::ShowUltrasonic()   //显示超声
 {
     pixmap->fill(Qt::white);
     QPainter painter(pixmap);
 //draw  the ultrasonic  Area
-      float dis[8] = {ONE_GRID,2*ONE_GRID,3*ONE_GRID,4*ONE_GRID,4*ONE_GRID,3*ONE_GRID,2*ONE_GRID,ONE_GRID};
       painter.setBrush(Qt::gray);
       QPolygonF  polygon1,polygon2,polygon3,polygon4,polygon5,polygon6,polygon7,polygon8;
       polygon1<<QPointF(ONE_Ultra_X,ONE_Ultra_Y)<<QPointF(ONE_Ultra_X+dis[0],ONE_Ultra_Y-dis[0]*tan(PI/12))
-                    <<QPointF(ONE_Ultra_X+dis[0],ONE_Ultra_Y+dis[0]*tan(PI/12));
+                      <<QPointF(ONE_Ultra_X+dis[0],ONE_Ultra_Y+dis[0]*tan(PI/12));
       polygon2<<QPointF(TWO_Ultra_X,TWO_Ultra_Y)<<QPointF(TWO_Ultra_X+dis[1],TWO_Ultra_Y-dis[1]*tan(PI/12))
-                    <<QPointF(TWO_Ultra_X+dis[1],TWO_Ultra_Y+dis[1]*tan(PI/12));
+                      <<QPointF(TWO_Ultra_X+dis[1],TWO_Ultra_Y+dis[1]*tan(PI/12));
       polygon3<<QPointF(THREE_Ultra_X,THREE_Ultra_Y)
                       <<QPointF(THREE_Ultra_X+(dis[2]/cos(PI/12))*cos(atan((Car_Central_Y-THREE_Ultra_Y)/(THREE_Ultra_X-Car_Central_X))-PI/12),
                                          THREE_Ultra_Y- (dis[2]/cos(PI/12))*sin(atan((Car_Central_Y-THREE_Ultra_Y)/(THREE_Ultra_X-Car_Central_X))-PI/12))
@@ -80,7 +80,7 @@ void MainWindow::ShowUltrasonic()   //显示超声
       polygon7<<QPointF(SEVEN_Ultra_X,SEVEN_Ultra_Y)<<QPointF(SEVEN_Ultra_X-dis[6],SEVEN_Ultra_Y-dis[6]*tan(PI/12))
                     <<QPointF(SEVEN_Ultra_X-dis[6],SEVEN_Ultra_Y+dis[6]*tan(PI/12));
       polygon8<<QPointF(EIGHT_Ultra_X,EIGHT_Ultra_Y)<<QPointF(EIGHT_Ultra_X-dis[7],EIGHT_Ultra_Y-dis[7]*tan(PI/12))
-                    <<QPointF(EIGHT_Ultra_X-dis[7],EIGHT_Ultra_Y+dis[7]*tan(PI/12));
+                     <<QPointF(EIGHT_Ultra_X-dis[7],EIGHT_Ultra_Y+dis[7]*tan(PI/12));
       if(ui->ultra1->isChecked())
       {
           if(ui->Ultra_Area->isChecked())
@@ -177,22 +177,21 @@ void MainWindow::ShowUltrasonic()   //显示超声
           ui->lb_ultra8->setText("0000");
       }
 /**********************8#******************************/
-      /**********************************************************************************/
-            //draw the obstacle outline
-           painter.setPen(QPen(Qt::red,2,Qt::DashDotLine,Qt::RoundCap));
-           static const QPointF points[8] = {
-               QPointF(ONE_Ultra_X + dis[0],ONE_Ultra_Y),
-               QPointF(TWO_Ultra_X + dis[1],TWO_Ultra_Y),
-               QPointF(THREE_Ultra_X ,THREE_Ultra_Y),
-               QPointF(FOUR_Ultra_X,FOUR_Ultra_Y-dis[3]),
-               QPointF(FIVE_Ultra_X,FIVE_Ultra_Y-dis[4]),
-               QPointF(SIX_Ultra_X,SIX_Ultra_Y),
-               QPointF(SEVEN_Ultra_X-dis[6],SEVEN_Ultra_Y),
-               QPointF(EIGHT_Ultra_X-dis[7],EIGHT_Ultra_Y)};
-           if(ui->Obsta_OutLine->isChecked())
-                painter.drawPolyline(points,8);
-     //      printf("atan(1):%f\n",atan(1));
-      /**********************************************************************************/
+      //draw the obstacle outline
+          QPointF points[8] = {
+              QPointF(ONE_Ultra_X + dis[0],ONE_Ultra_Y),
+              QPointF(TWO_Ultra_X + dis[1],TWO_Ultra_Y),
+              QPointF(THREE_Ultra_X +(((dis[2]/cos(PI/12))*cos(atan((Car_Central_Y-THREE_Ultra_Y)/(THREE_Ultra_X-Car_Central_X))-PI/12))+((dis[2]/cos(PI/12))*cos(atan((Car_Central_Y-THREE_Ultra_Y)/(THREE_Ultra_X-Car_Central_X))+PI/12)))/2.0,
+              THREE_Ultra_Y-(((dis[2]/cos(PI/12))*sin(atan((Car_Central_Y-THREE_Ultra_Y)/(THREE_Ultra_X-Car_Central_X))-PI/12))+((dis[2]/cos(PI/12))*sin(atan((Car_Central_Y-THREE_Ultra_Y)/(THREE_Ultra_X-Car_Central_X))+PI/12)))/2.0),
+              QPointF(FOUR_Ultra_X,FOUR_Ultra_Y-dis[3]),
+              QPointF(FIVE_Ultra_X,FIVE_Ultra_Y-dis[4]),
+              QPointF(SIX_Ultra_X-(((dis[5]/cos(PI/12))*cos(atan((SIX_Ultra_Y-Car_Central_Y)/(SIX_Ultra_X-Car_Central_X))+PI/12))+(dis[5]/cos(PI/12)*cos(atan((SIX_Ultra_Y-Car_Central_Y)/(SIX_Ultra_X-Car_Central_X))-PI/12)))/2.0,
+              SIX_Ultra_Y-(((dis[5]/cos(PI/12))*sin(atan((SIX_Ultra_Y-Car_Central_Y)/(SIX_Ultra_X-Car_Central_X))+PI/12))+((dis[5]/cos(PI/12))*sin(atan((SIX_Ultra_Y-Car_Central_Y)/(SIX_Ultra_X-Car_Central_X))-PI/12)))/2.0),
+              QPointF(SEVEN_Ultra_X-dis[6],SEVEN_Ultra_Y),
+              QPointF(EIGHT_Ultra_X-dis[7],EIGHT_Ultra_Y)};
+              painter.setPen(QPen(Qt::red,2,Qt::DashDotLine,Qt::RoundCap));
+               if(ui->Obsta_OutLine->isChecked())
+                    painter.drawPolyline(points,8);
       painter.setPen(QPen(Qt::black,1,Qt::DashDotLine,Qt::RoundCap));        //set style of the pen
       //绘制垂直和水平的虚线
       for(int i=0;i<=PIXMAP_Y;i=i+ONE_GRID)
@@ -213,16 +212,42 @@ void MainWindow::ShowUltrasonic()   //显示超声
      //draw the laser outline
         painter.setBrush(Qt::black);
         painter.drawEllipse(6.565*ONE_GRID,11.565*ONE_GRID,0.87*ONE_GRID,0.87*ONE_GRID);
-      ui->label_Ultra->setPixmap(*pixmap);
+        ui->label_Ultra->setPixmap(*pixmap);
 }
-
 void MainWindow::ShowLaser()
 {
+//get the laser distance
+    for(int i=0;i < TAG;i++)
+    {
+        qDebug()<<"laser_dis:"<<laser_dis[i];
+        distance[i] = laser_dis[i];
+        tem_y = -laser_dis[i]*cos(0.5*i*CAMBER);
+        tem_x = laser_dis[i]*sin(0.5*i*CAMBER);
+        ShowPoint[i][0] = (tem_x*(Myhigh/2))/DIA;
+        ShowPoint[i][1] = (tem_y*(Myhigh/2))/DIA;
+//qDebug()<<"(x,y):"<<"("<<ShowPoint[i][0]<<","<<ShowPoint[i][1]<<")";
+    }
+//*******************draw the laser wave*********************//
+//    QVector<double>  x(TAG),y(TAG);
+//    for(int i=0;i<TAG;i++)
+//    {
+//        x[i] = i;
+//        y[i] = distance[100];
+//        ui->qCustomPlot->addGraph();
+//        ui->qCustomPlot->graph(0)->setPen(QPen(Qt::black));
+//        ui->qCustomPlot->graph(0)->setData(x,y);
+//        ui->qCustomPlot->xAxis->setLabel("时间");
+//        ui->qCustomPlot->yAxis->setLabel("距离(mm)");
+//        ui->qCustomPlot->xAxis->setRange(0,750);
+//        ui->qCustomPlot->yAxis->setRange(0,1500);
+//        if(i==TAG)
+//            i=0;
+//    }
+//********************draw the laser wave**********************//
     pixmap->fill(Qt::black);
     QPainter painter(pixmap);
     QColor qcolor(108,108,108);
     painter.setPen(qcolor);
-
     getModeSelect.addButton(ui->rb_all,Show_All);
     getModeSelect.addButton(ui->rb_2m,Show_2M);
     getModeSelect.addButton(ui->rb_1m,Show_1M);
@@ -241,7 +266,7 @@ void MainWindow::ShowLaser()
     QLine qline2(Mywidth/2 +25,Myhigh +25,Mywidth/2 +25,0 +25-10);
     painter.drawLine(qline1);
     painter.drawLine(qline2);
-    ///////////////////////绘制斜线///////////////////////////
+    /////////////////////////绘制斜线///////////////////////////
     // 将画笔中心点移动至(Mywidth/2,Myhigh/2)
     painter.translate(QPoint(Mywidth/2 +25,Myhigh/2 +25));
     painter.rotate(30);
@@ -311,12 +336,12 @@ void MainWindow::ShowLaser()
         painter.drawText(QPoint(temp_x,temp_y),*st);
     }
     //绘制点
-    qcolor.setRgb(255,255,240);
-   painter.setPen(qcolor);
-//    painter.setBrush(Qt::white);
-    painter.drawText(-250,-Mywidth/2 +620,"Rotate Speed:");
-//    QString txt5 = QString("%1").arg(speed);
-//    painter.drawText(-160,-Mywidth/2+620,txt5);
+        qcolor.setRgb(255,255,240);
+        painter.setPen(qcolor);
+//     painter.setBrush(Qt::white);
+        painter.drawText(-250,-Mywidth/2 +620,"Rotate Speed:");
+//     QString txt5 = QString("%1").arg(speed);
+//     painter.drawText(-160,-Mywidth/2+620,txt5);
     for(unsigned int y=0;y<MIDD;y++)
     {
          if(getModeSelect.checkedId()==Show_All)
@@ -356,9 +381,9 @@ void MainWindow::ShowLaser()
     painter.drawText(-60,-Mywidth/2+740,"Distance:");
     painter.drawText(30,-Mywidth/2+740,QString("%1").arg(dis_right));
 
-    painter.drawText(200,-Mywidth/2+680,"Version : V1.0");
+    painter.drawText(200,-Mywidth/2+680,"Version : V2.0");
     painter.drawText(200,-Mywidth/2+710,"Author : shenyu");
-    painter.drawText(200,-Mywidth/2+740,"Date : 2016-12");
+    painter.drawText(200,-Mywidth/2+740,"Date : 2017-01");
   //draw the arrow of  directiion
     QPolygonF  polygon;
     if(dis_forward <= Safe_Distance)   //Warning!!!
@@ -419,6 +444,7 @@ void MainWindow::xTimerUpdate(void)
     KeyControlMsgRefalsh(m_keyControl->kMsg);
     MsgImuRefalsh();
     MsgControlRefalsh();
+    MsgUltrasonicRefalsh();
 }
 
 void MainWindow::cmdTimerUpdate(void)
@@ -436,6 +462,9 @@ void MainWindow::cmdTimerUpdate(void)
     m_tcpSocketClient->SendMsg(msgInfo);
 
     msgInfo={zw::R_REGISTER,6,zw::MSG_IMU,nullptr};
+    m_tcpSocketClient->SendMsg(msgInfo);
+
+    msgInfo={zw::R_REGISTER,8,zw::MSG_Ultrasonic,nullptr};
     m_tcpSocketClient->SendMsg(msgInfo);
 }
 
@@ -481,7 +510,20 @@ void MainWindow::MsgImuRefalsh(void)
     ui->lbl_gyr_y->setText(QString::number(dat[4]));
     ui->lbl_gyr_z->setText(QString::number(dat[5]));
 }
-
+void MainWindow::MsgUltrasonicRefalsh(void)
+{
+    zw::Paras m_para;
+    int32_t dat[Ultra_Num];
+    zw::Float2Int32  fi;
+    zw::ParaGetSet packInfo = {zw::R_REGISTER,Ultra_Num,zw::MSG_Ultrasonic,dat};
+    m_para.GetAddressValue(packInfo);
+    for(int i=0;i<Ultra_Num;i++)
+    {
+        fi.i = dat[i];
+        dis[i] = fi.f;
+        qDebug()<<"ultrasonic data:"<<dis[i];
+    }
+}
 void MainWindow::on_pBtn_start2connect_clicked(bool checked)
 {
     if(checked)

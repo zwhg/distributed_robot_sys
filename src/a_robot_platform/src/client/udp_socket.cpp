@@ -1,7 +1,9 @@
 #include"udp_socket.h"
 #include<qdebug.h>
+ float  laser_dis[720]={0};
 namespace zw
 {
+
     UdpSocket::UdpSocket(QObject *parent):
         QObject(parent)
     {
@@ -17,6 +19,7 @@ namespace zw
     }
     void UdpSocket::processPendingDatagram()
     {
+           int data_num=0;
            while(m_udpClient->hasPendingDatagrams())
             {
                 QByteArray  datagram;
@@ -28,7 +31,13 @@ namespace zw
                 {
                     BtF.fb[i] = datagram.at(i);
                 }
-                qDebug()<<BtF.ff;
+                if(data_num<720)
+                {
+                    laser_dis[data_num++] = BtF.ff;
+                    qDebug()<<"laser_disXXXX"<<laser_dis[data_num];
+                }
+                else
+                    data_num=0;
              }
     }
 }
