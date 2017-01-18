@@ -51,13 +51,26 @@ add_executable(main_uart_laser src/server/main_uart_laser.cpp
  src/server/uartlaser.cpp
  src/server/udpsocketserver.cpp
  src/server/moc_udpsocketserver.cpp
-  src/common/paras.cpp
+ src/common/paras.cpp
  )
 target_link_libraries(main_uart_laser
  ${catkin_LIBRARIES})
 
 
 add_executable(main_global_location src/server/main_global_location.cpp
+ src/location/amcl_location.cpp
+ src/location/amcl/sensors/amcl_laser.cpp
+ src/location/amcl/sensors/amcl_odom.cpp
+ src/location/amcl/sensors/amcl_sensor.cpp
+ src/location/amcl/pf/eig3.c
+ src/location/amcl/pf/pf.c
+ src/location/amcl/pf/pf_kdtree.c
+ src/location/amcl/pf/pf_pdf.c
+ src/location/amcl/pf/pf_vector.c
+ src/location/amcl/map/map.c
+ src/location/amcl/map/map_cspace.cpp
+ src/location/amcl/map/map_range.c
+ src/location/amcl/map/map_store.c
  )
 target_link_libraries(main_global_location
  ${catkin_LIBRARIES}
