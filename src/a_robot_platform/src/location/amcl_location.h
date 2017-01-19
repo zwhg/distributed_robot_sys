@@ -42,14 +42,12 @@ typedef struct
 
 } amcl_hyp_t;
 
-static double
-normalize(double z)
+static double normalize(double z)
 {
   return atan2(sin(z),cos(z));
 }
 
-static double
-angle_diff(double a, double b)
+static double angle_diff(double a, double b)
 {
   double d1, d2;
   a = normalize(a);
@@ -76,10 +74,9 @@ class AmclNode
     /**
      * @brief Uses TF and LaserScan messages from bag file to drive AMCL instead
      */
-  //  void runFromBag(const std::string &in_bag_fn);
+    void runFromBag(const std::string &in_bag_fn);
 
-    int process();
-    void savePoseToServer();
+   // void savePoseToServer();
 
   private:
     tf::TransformBroadcaster* tfb_;
@@ -103,6 +100,9 @@ class AmclNode
 #if NEW_UNIFORM_SAMPLING
     static std::vector<std::pair<int,int> > free_space_indices;
 #endif
+
+    void paraInit();
+
     // Callbacks
     bool globalLocalizationCallback(std_srvs::Empty::Request& req,
                                     std_srvs::Empty::Response& res);
@@ -111,18 +111,26 @@ class AmclNode
     bool setMapCallback(nav_msgs::SetMap::Request& req,
                         nav_msgs::SetMap::Response& res);
 
+    void checkLaserReceived(const ros::TimerEvent& event);
     void laserReceived(const sensor_msgs::LaserScanConstPtr& laser_scan);
-    void initialPoseReceived(const geometry_msgs::PoseWithCovarianceStampedConstPtr& msg);
-    void handleInitialPoseMessage(const geometry_msgs::PoseWithCovarianceStamped& msg);
-    void mapReceived(const nav_msgs::OccupancyGridConstPtr& msg);
 
+
+    void mapReceived(const nav_msgs::OccupancyGridConstPtr& msg);
+    void requestMap();
     void handleMapMessage(const nav_msgs::OccupancyGrid& msg);
     void freeMapDependentMemory();
     map_t* convertMap( const nav_msgs::OccupancyGrid& map_msg );
+
     void updatePoseFromServer();
     void applyInitialPose();
+    void initialPoseReceived(const geometry_msgs::PoseWithCovarianceStampedConstPtr& msg);
+    void handleInitialPoseMessage(const geometry_msgs::PoseWithCovarianceStamped& msg);
 
-    double getYaw(tf::Pose& t);
+    double getYaw(tf::Pose& t);    
+
+    // Helper to get odometric pose from transform system
+    bool getOdomPose(tf::Stamped<tf::Pose>& pose,double& x, double& y, double& yaw,
+                     const ros::Time& t, const std::string& f);
 
     //parameter for what odom to use
     std::string odom_frame_id_;
@@ -178,13 +186,6 @@ class AmclNode
     // For slowing play-back when reading directly from a bag file
     ros::WallDuration bag_scan_period_;
 
-    void requestMap();
-
-    // Helper to get odometric pose from transform system
-    bool getOdomPose(tf::Stamped<tf::Pose>& pose,
-                     double& x, double& y, double& yaw,
-                     const ros::Time& t, const std::string& f);
-
     //time for tolerance on the published transform,
     //basically defines how long a map->odom transform is good for
     ros::Duration transform_tolerance_;
@@ -201,7 +202,7 @@ class AmclNode
 
     amcl_hyp_t* initial_pose_hyp_;
     bool first_map_received_;
-    bool first_reconfigure_call_;
+//    bool first_reconfigure_call_;
 
     boost::recursive_mutex configuration_mutex_;
     ros::Timer check_laser_timer_;
@@ -210,7 +211,7 @@ class AmclNode
     double alpha1_, alpha2_, alpha3_, alpha4_, alpha5_;
     double alpha_slow_, alpha_fast_;
     double z_hit_, z_short_, z_max_, z_rand_, sigma_hit_, lambda_short_;
-  //beam skip related params
+    //beam skip related params
     bool do_beamskip_;
     double beam_skip_distance_, beam_skip_threshold_, beam_skip_error_threshold_;
     double laser_likelihood_max_dist_;
@@ -222,7 +223,6 @@ class AmclNode
 
     ros::Time last_laser_received_ts_;
     ros::Duration laser_check_interval_;
-    void checkLaserReceived(const ros::TimerEvent& event);
 };
 
 }

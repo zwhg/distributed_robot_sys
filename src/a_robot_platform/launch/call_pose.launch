@@ -1,7 +1,0 @@
-<?xml version="1.0"?>
-<launch>
-
-<node name="call_pose" pkg="a_robot_platform" type="main_sub_pose">
-</node>
-
-</launch>

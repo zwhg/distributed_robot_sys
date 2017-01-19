@@ -33,7 +33,7 @@ int main(int argc, char **argv)
   }
   else if ((argc == 3) && (std::string(argv[1]) == "--run-from-bag"))
   {
-   // amcl_node_ptr->runFromBag(argv[2]);
+    amcl_node_ptr->runFromBag(argv[2]);
   }
 
   // Without this, our boost locks are not shut down nicely

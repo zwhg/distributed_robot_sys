@@ -11,6 +11,7 @@ find_package(catkin REQUIRED COMPONENTS
  sensor_msgs
  std_msgs
  tf
+ rosbag
 )
 set (CMAKE_PREFIX_PATH /home/shenyu/Qt5.7.0/5.7/gcc_64)
 find_package(Qt5Widgets REQUIRED)
