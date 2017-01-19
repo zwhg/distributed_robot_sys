@@ -8,7 +8,7 @@ QT       += core \
             gui \
             network
 
-greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
+greaterThan(QT_MAJOR_VERSION, 4): QT += widgets  printsupport
 
 TARGET = qt_client
 TEMPLATE = app
@@ -32,7 +32,8 @@ SOURCES += main.cpp\
     ../../common/paras.cpp \
     ../../common/modbus.cpp \
     ../../common/map_image.cpp \
-    ../udp_socket.cpp
+    ../udp_socket.cpp \
+    qcustomplot.cpp
 
 HEADERS  += mainwindow.h \
     ../key_control.h \
@@ -42,7 +43,8 @@ HEADERS  += mainwindow.h \
     ../../common/modbus.h\
     ../../common/use_display.h \
     ../../common/map_image.h \
-    ../udp_socket.h
+    ../udp_socket.h \
+    qcustomplot.h
 
 FORMS    += mainwindow.ui
 

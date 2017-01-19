@@ -15,15 +15,15 @@ void map_filter(const char * dat, char *out,uint32_t w, uint32_t h)
       uint32_t ci=GetGridIndexOfMap(w,x,y);
       uint32_t cl=ci-1;
       uint32_t cr=ci+1;
-      uint32_t cu=GetGridIndexOfMap(w,x,y+1);
+      uint32_t cu=GetGridIndexOfMap(w,x,(y+1));
       uint32_t cul=cu-1;
       uint32_t cur=cu+1;
-      uint32_t cd=GetGridIndexOfMap(w,x,y-1);
+      uint32_t cd=GetGridIndexOfMap(w,x,(y-1));
       uint32_t cdl=cd-1;
       uint32_t cdr=cd+1;
 
       if((dat[ci]!=dat[cl])&&(dat[cl]==dat[cr])&&
-         (dat[cl]==dat[cu])&&(dat[cl]==dat[cr]))
+         (dat[cl]==dat[cu])&&(dat[cl]==dat[cd]))
         out[ci]=dat[cl];
     }
   }

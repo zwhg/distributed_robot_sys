@@ -5,7 +5,7 @@
 *~
 *.swp
 *.autosave
-
+*.o
 
 src/amcl/
 temp/

@@ -26,7 +26,7 @@ int main(int argc, char **argv)
   int32_t ret = -1;
   const char * addrPort;
   if(argc==1)
-      addrPort="/dev/ttyUSB0";
+      addrPort="/dev/ttyUSB1";
   else
       addrPort =argv[1];
 
@@ -85,7 +85,7 @@ int main(int argc, char **argv)
 
 void publish_scan(ros::Publisher *pub, double *dist, int32_t count, ros::Time start, double scan_time)
 {
-    static int32_t scan_count = 0;
+  static int32_t scan_count = 0;
   sensor_msgs::LaserScan scan_msg;
   scan_msg.header.stamp = start;
   scan_msg.header.frame_id = "laser_link";

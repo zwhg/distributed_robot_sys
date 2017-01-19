@@ -4,7 +4,8 @@
 #include <QObject>
 #include <QtNetwork/QUdpSocket>
 #include <QtNetwork/qudpsocket.h>
-
+extern float laser_dis[720];
+extern int a;
 namespace  zw{
 
     union floatTobyte

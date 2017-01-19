@@ -77,7 +77,7 @@ void UartOdom::Analysis(uint8_t *arry, int nRet)
 
                 int32_t dat[8];
 
-                #if 0
+                #if 1
                 if(packInfo.addr==MSG_Ultrasonic){
                     zw::ParaGetSet  pack = {zw::R_REGISTER,8,zw::MSG_Ultrasonic,dat};
                     m_para.GetAddressValue(pack);

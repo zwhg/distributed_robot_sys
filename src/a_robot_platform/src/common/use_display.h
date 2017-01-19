@@ -10,6 +10,8 @@
 #define TAG 720
 #define  PIXMAP_X     850
 #define  PIXMAP_Y     800
+#define  Ultra_Num    8
+
 double distance[TAG];
 int tem_x,tem_y;
 double temp_x,temp_y;
@@ -78,4 +80,5 @@ float  Ultra6_Central_x=0,Ultra6_Central_y=0;
 float  Ultra7_Central_x=0,Ultra7_Central_y=0;
 float  Ultra8_Central_x=0,Ultra8_Central_y=0;
 
+float dis[8] = {0};  //the distance of ultrasonic
 #endif // USE_DISPLAY_H
