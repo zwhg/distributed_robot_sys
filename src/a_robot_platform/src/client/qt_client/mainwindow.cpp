@@ -32,6 +32,7 @@ MainWindow::MainWindow(QWidget *parent) :
     timer->start(50);
     connect(timer,SIGNAL(timeout()),this,SLOT(ShowLaser()));
     connect(timer,SIGNAL(timeout()),this,SLOT(ShowUltrasonic()));
+
     ui->lEdit_ip->setText(QString::fromStdString(zw::SERVER_IP));
     m_tcpSocketClient->host =ui->lEdit_ip->text().toStdString();
     m_tcpSocketClient->port =ui->lEdit_port->text().toUShort();
@@ -44,6 +45,7 @@ MainWindow::MainWindow(QWidget *parent) :
     QObject::connect(cmd_timer,SIGNAL(timeout()),this,SLOT(cmdTimerUpdate()));
     cmd_timer->start(40);
 }
+
 MainWindow::~MainWindow()
 {
     delete m_keyControl;
@@ -52,6 +54,7 @@ MainWindow::~MainWindow()
     this->close();
     delete ui;
 }
+
 void MainWindow::ShowUltrasonic()   //显示超声
 {
     pixmap->fill(Qt::white);
@@ -214,12 +217,13 @@ void MainWindow::ShowUltrasonic()   //显示超声
         painter.drawEllipse(6.565*ONE_GRID,11.565*ONE_GRID,0.87*ONE_GRID,0.87*ONE_GRID);
         ui->label_Ultra->setPixmap(*pixmap);
 }
+
 void MainWindow::ShowLaser()
 {
 //get the laser distance
     for(int i=0;i < TAG;i++)
     {
-        qDebug()<<"laser_dis:"<<laser_dis[i];
+      //  qDebug()<<"laser_dis:"<<laser_dis[i];
         distance[i] = laser_dis[i];
         tem_y = -laser_dis[i]*cos(0.5*i*CAMBER);
         tem_x = laser_dis[i]*sin(0.5*i*CAMBER);
@@ -336,10 +340,10 @@ void MainWindow::ShowLaser()
         painter.drawText(QPoint(temp_x,temp_y),*st);
     }
     //绘制点
-        qcolor.setRgb(255,255,240);
-        painter.setPen(qcolor);
+    qcolor.setRgb(255,255,240);
+    painter.setPen(qcolor);
 //     painter.setBrush(Qt::white);
-        painter.drawText(-250,-Mywidth/2 +620,"Rotate Speed:");
+    painter.drawText(-250,-Mywidth/2 +620,"Rotate Speed:");
 //     QString txt5 = QString("%1").arg(speed);
 //     painter.drawText(-160,-Mywidth/2+620,txt5);
     for(unsigned int y=0;y<MIDD;y++)
@@ -510,6 +514,7 @@ void MainWindow::MsgImuRefalsh(void)
     ui->lbl_gyr_y->setText(QString::number(dat[4]*Gyro_Gr,'f',4));
     ui->lbl_gyr_z->setText(QString::number(dat[5]*Gyro_Gr,'f',4));
 }
+
 void MainWindow::MsgUltrasonicRefalsh(void)
 {
     zw::Paras m_para;
@@ -521,9 +526,10 @@ void MainWindow::MsgUltrasonicRefalsh(void)
     {
         fi.i = dat[i];
         dis[i] = fi.f;
-        qDebug()<<"ultrasonic data:"<<dis[i];
+    //    qDebug()<<"ultrasonic data:"<<dis[i];
     }
 }
+
 void MainWindow::on_pBtn_start2connect_clicked(bool checked)
 {
     if(checked)
