@@ -1,7 +1,7 @@
 #include "tcp_socket.h"
 #include "../client/tcp_socket.h"
 #include <qdebug.h>
-
+#include <QException>
 
 namespace zw{
     TcpSocket::TcpSocket(QObject *parent):
@@ -132,7 +132,12 @@ namespace zw{
     bool TcpSocket::SendMsg(const byte *bytes,uint16_t size)
     {
         if(IsConnect()){
-           m_tcpClient->write((char *)bytes,size);
+            try{
+                m_tcpClient->write((char *)bytes,size);
+            }catch(QException &e){
+                qDebug()<<e.what();
+                return false;
+            }
            return true;
         }
         return false;

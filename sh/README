@@ -1,9 +1,9 @@
 a_robot_platform 功能说明
 src/中包含客户端和服务器
 
-包a_robot_platform含两个节点
-1、main_uart_laser
+包a_robot_platform含以下几个节点:
 
+1、main_uart_laser
 input arg: /dev/ttyUSBx (ttyUSB1 默认)
 通过串口，解析雷神激光数据.
 publish:
@@ -16,10 +16,42 @@ input arg: /dev/ttyUSBx (ttyUSB0 默认)
 通过串口，与机器人本体相连，实时控制机器人各项参数.
 作为tcp服务器，与客户端相连，端口号9527，客户端可定时查看已定义的数据类型.
 
+subscribe：
+订阅geometry_msgs::Twist消息，主题cmd_vel，该消息由导航模块发布
+订阅geometry_msgs::PoseWithCovarianceStamped消息，主题amcl_pose,该消息由定位模块发布
+
 publish:
 发布nav_msgs::Odometry消息,主题odom,坐标系odom,子坐标系base_link;
 发布sensor_msgs::Imu消息，主题imu,坐标系imu_link
 广播odom->base_link的tf变换
+
+3、main_map_server
+input arg: /home/zw/gt (默认地图文件，包含.pgm（p5格式）和.yaml)
+将地图文件转换成柵格地图消息发布
+
+publish:
+发布nav_msgs::MapMetaData消息，主题map_metadata
+发布nav_msgs::OccupancyGrid，主题map
+
+4、main_global_location
+amcl定位模块
+
+subscribe:
+订阅sensor_msgs::LaserScan消息，主题"scan"
+订阅geometry_msgs::PoseWithCovarianceStamped消息，主题"initialpose"
+订阅nav_msgs::OccupancyGrid消息，主题"map"
+
+server:
+服务std_srvs::Empty::Request，std_srvs::Empty::Response，主题"global_localization"
+服务std_srvs::Empty::Request，std_srvs::Empty::Response，主题"request_nomotion_update"
+服务nav_msgs::SetMap::Request, nav_msgs::SetMap::Response，主题"set_map"
+
+publish:
+发布geometry_msgs::PoseWithCovarianceStamped消息，主题"amcl_pose"
+发布geometry_msgs::PoseArray消息，主题"particlecloud"
+
+
+
 
 src/client 中qt_client为qt上位机程序。可用qt(community)版本直接打开
 功能：
@@ -27,18 +59,14 @@ src/client 中qt_client为qt上位机程序。可用qt(community)版本直接打
 2.键盘控制指令下发，wasd，zxcv
 
 
-构图过程:
+#######构图过程:
 
 1、运行client
-
 运行qt客户端
 roscore
 cd distributed_root_sys
-source /opt/ros/indigo/setup.bash
-rosrun rviz rviz -d src/a_robot_platform/launch/slam.rviz
+bash sh/map_rviz
 bash sh/google_mapping.sh
-
-
 
 2、运行server
 sudo ssh pentium
@@ -54,6 +82,20 @@ rosservice call /finish_trajectory "stem: 'gtest'"
 保存位置 .ros/
 
 
-定位过程:
+
+
+######定位过程:
+
+1、运行客户端
+ssh 192168.1.100
+roscore 
+cd ~/distributed_root_sys
+bash sh/location.rviz
+
+2、运行server
+sudo ssh pentium
+cd ~/distributed_root_sys
+bash sh/server_mapping.sh
+bash sh/server_amcl.sh
 
 

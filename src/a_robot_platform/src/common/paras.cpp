@@ -107,6 +107,7 @@ bool Paras::GetAddressValue(ParaGetSet &para)
     }
     return false;
 }
+
 void Paras::get_distance(double dis[])
 {
       pthread_mutex_lock(&g_tLaserMutex );
@@ -114,8 +115,9 @@ void Paras::get_distance(double dis[])
       {
           dis[i] = send_distance[i];
       }
-        pthread_mutex_unlock(&g_tLaserMutex );
+      pthread_mutex_unlock(&g_tLaserMutex );
 }
+
 void Paras::set_distance( double dis[])
 {
     pthread_mutex_lock(&g_tLaserMutex );
@@ -123,8 +125,9 @@ void Paras::set_distance( double dis[])
     {
       send_distance[i]= dis[i];
     }
-      pthread_mutex_unlock(&g_tLaserMutex );
+    pthread_mutex_unlock(&g_tLaserMutex );
 }
+
 }
 
 

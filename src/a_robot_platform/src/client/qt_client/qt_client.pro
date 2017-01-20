@@ -44,6 +44,8 @@ HEADERS  += mainwindow.h \
     ../../common/use_display.h \
     ../../common/map_image.h \
     ../udp_socket.h \
+    ../../server/uartlaser.h \
+    ../../server/uartdriver.h
 
 
 FORMS    += mainwindow.ui

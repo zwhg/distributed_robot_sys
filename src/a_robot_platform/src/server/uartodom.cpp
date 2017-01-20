@@ -1,5 +1,7 @@
 #include <qdebug.h>
 #include "uartodom.h"
+#include <unistd.h>
+
 
 namespace zw {
 
@@ -74,10 +76,8 @@ void UartOdom::Analysis(uint8_t *arry, int nRet)
                 delete packInfo.data;
             } else if(packInfo.fuc == W_REGISTER){
                 m_para.SetAddressValue(packInfo);
-
                 int32_t dat[8];
-
-                #if 1
+#if 1
                 if(packInfo.addr==MSG_Ultrasonic){
                     zw::ParaGetSet  pack = {zw::R_REGISTER,8,zw::MSG_Ultrasonic,dat};
                     m_para.GetAddressValue(pack);
@@ -88,6 +88,8 @@ void UartOdom::Analysis(uint8_t *arry, int nRet)
                    }
                    qDebug()<<ff[0].f<<ff[1].f<<ff[2].f<<ff[3].f<<ff[4].f<<ff[5].f<<ff[6].f<<ff[7].f;
                 }
+#endif
+#if 0
                 if (packInfo.addr==MSG_IMU)
                 {
                 	zw::ParaGetSet pack ={zw::R_REGISTER,6,zw::MSG_IMU,dat};
@@ -105,8 +107,7 @@ void UartOdom::Analysis(uint8_t *arry, int nRet)
         		}
                 	qDebug()<<ff[0].f<<ff[1].f;
                 }
-                #endif
-
+#endif
 
                 if(packInfo.data!=nullptr)
                 {
