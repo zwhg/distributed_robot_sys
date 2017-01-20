@@ -77,9 +77,9 @@ int main(int argc, char **argv)
     starts = ends;
   }
 
+  ros::shutdown();
   m_lsRadar.StopScan();
   m_lsRadar.CloseSerial();
-
   return 0;
 }
 

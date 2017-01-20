@@ -148,17 +148,17 @@ namespace zw{
         bool res =false;
         int32_t size;
         byte *msg;
+        Paras m_para;
         if(packInfo.fuc == R_REGISTER){
             size=FIXEDLENGTH;
-            msg =new byte[size];
         }else if(packInfo.fuc == W_REGISTER){
-            Paras m_para;
             packInfo.data = new int32_t[packInfo.len];
-            m_para.GetAddressValue(packInfo);
+            if(!m_para.GetAddressValue(packInfo))
+                return res;
             size=FIXEDLENGTH +packInfo.len*4;
-            msg =new byte[size];
-        }
-
+        }else
+            return res;
+        msg =new byte[size];
         if(size!=m_modbus.PackParas(packInfo,msg)){
             qDebug()<<"Error in pack size!";
         }else{
@@ -166,7 +166,14 @@ namespace zw{
         }
         delete msg;
         if(packInfo.fuc == W_REGISTER)
+        {
+            if(packInfo.addr==BTN_SWITCH)
+            {
+            //    qDebug("%d",packInfo.data[0]);
+                m_para.ResetKeyRegister();
+            }
             delete packInfo.data;
+        }
      return res;
     }
 }

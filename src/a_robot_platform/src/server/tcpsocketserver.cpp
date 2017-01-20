@@ -50,14 +50,21 @@ void TcpSocketServer::on_ReadyRead(void)
                 delete packInfo.data;
             }else if(packInfo.fuc == W_REGISTER){
                 m_para.SetAddressValue(packInfo);
-
-    //            int32_t dat[2];
-    //            zw::ParaGetSet  pack = {zw::R_REGISTER,2,zw::CONTROL,dat};
-    //            m_para.GetAddressValue(pack);
-    //            zw::Float2Int32 ff1,ff2;
-    //            ff1.i=dat[0];
-    //            ff2.i=dat[1];
-    //            qDebug () <<ff1.f<<ff2.f;
+#if 0
+                int32_t dat[2];
+                zw::ParaGetSet  pack = {zw::R_REGISTER,2,zw::CONTROL,dat};
+                m_para.GetAddressValue(pack);
+                zw::Float2Int32 ff1,ff2;
+                ff1.i=dat[0];
+                ff2.i=dat[1];
+                qDebug () <<ff1.f<<ff2.f;
+#endif
+#if 0
+                int32_t dat[1];
+                zw::ParaGetSet  pack = {zw::R_REGISTER,1,zw::BTN_SWITCH,dat};
+                m_para.GetAddressValue(pack);
+                qDebug () <<dat[0];
+#endif
                 if(packInfo.data!=nullptr)
                 {
                    delete packInfo.data;

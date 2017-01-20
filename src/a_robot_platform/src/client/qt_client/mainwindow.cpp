@@ -459,8 +459,6 @@ void MainWindow::cmdTimerUpdate(void)
         msgInfo={zw::W_REGISTER,2,zw::CONTROL,nullptr};
         m_tcpSocketClient->SendMsg(msgInfo);     
     }   
-    msgInfo={zw::W_REGISTER,1, zw::BTN_SWITCH,nullptr};
-    m_tcpSocketClient->SendMsg(msgInfo);
 
     msgInfo={zw::R_REGISTER,5,zw::MSG_CONTROL,nullptr};
     m_tcpSocketClient->SendMsg(msgInfo);
@@ -566,6 +564,22 @@ void MainWindow::on_pBtn_key_control_open_clicked(bool checked)
     }
     packInfo.fuc =zw::W_REGISTER;
     m_para.SetAddressValue(packInfo);
+
+    m_tcpSocketClient->SendMsg(packInfo);
+}
+
+
+void MainWindow::on_pBtn_key_Init_IMU_clicked()
+{
+    int32_t dat[1];
+    zw::ParaGetSet packInfo={zw::R_REGISTER,1, zw::BTN_SWITCH,dat};
+    zw::Paras m_para;
+    m_para.GetAddressValue(packInfo);
+    dat[0]|=KEY_INIT_IMU;
+    packInfo.fuc =zw::W_REGISTER;
+    m_para.SetAddressValue(packInfo);
+
+    m_tcpSocketClient->SendMsg(packInfo);
 }
 
 void MainWindow::on_lEdit_ip_returnPressed()
@@ -639,3 +653,5 @@ void MainWindow::on_pBtn_open_submap_clicked()
   //  m_mapImage.OrbFeaturematch(map,submap);
   //  m_mapImage.SiftFeaturematch(map,submap);
 }
+
+

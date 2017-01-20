@@ -128,6 +128,17 @@ void Paras::set_distance( double dis[])
     pthread_mutex_unlock(&g_tLaserMutex );
 }
 
+void Paras::ResetKeyRegister(void)
+{
+    int32_t dat[1];
+    zw::ParaGetSet packInfo={zw::R_REGISTER,1, zw::BTN_SWITCH,dat};
+    zw::Paras m_para;
+    m_para.GetAddressValue(packInfo);
+    dat[0]&=(~KEY_INIT_IMU);
+    packInfo.fuc =zw::W_REGISTER;
+    m_para.SetAddressValue(packInfo);
+}
+
 }
 
 
