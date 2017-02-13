@@ -82,6 +82,10 @@ target_link_libraries(main_map_server
  yaml-cpp
  )
 
+add_executable(main_pathplan_server src/server/main_pathplan_server.cpp)
+target_link_libraries(main_pathplan_server
+    ${catkin_LIBRARIES}
+    )
 add_definitions(-std=gnu++11)
 
 qt5_use_modules(main_uart_odom

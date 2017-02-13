@@ -29,7 +29,7 @@
 #include <QtWidgets/QToolBar>
 #include <QtWidgets/QVBoxLayout>
 #include <QtWidgets/QWidget>
-#include <qcustomplot.h>
+
 
 QT_BEGIN_NAMESPACE
 
@@ -104,7 +104,6 @@ public:
     QLabel *lbl_8;
     QLineEdit *lEdit_port;
     QGroupBox *groupBox_2;
-    QCustomPlot *qCustomPlot;
     QWidget *layoutWidget;
     QVBoxLayout *verticalLayout_3;
     QHBoxLayout *horizontalLayout_2;
@@ -543,9 +542,6 @@ public:
         groupBox_2 = new QGroupBox(tab_3);
         groupBox_2->setObjectName(QStringLiteral("groupBox_2"));
         groupBox_2->setGeometry(QRect(20, 20, 311, 391));
-        qCustomPlot = new QCustomPlot(tab_3);
-        qCustomPlot->setObjectName(QStringLiteral("qCustomPlot"));
-        qCustomPlot->setGeometry(QRect(20, 510, 961, 351));
         layoutWidget = new QWidget(tab_3);
         layoutWidget->setObjectName(QStringLiteral("layoutWidget"));
         layoutWidget->setGeometry(QRect(22, 442, 961, 58));
@@ -597,7 +593,6 @@ public:
         verticalLayout_3->addLayout(horizontalLayout);
 
         tabWidget->addTab(tab_3, QString());
-        qCustomPlot->raise();
         layoutWidget->raise();
         gBx_imu->raise();
         gBx_control->raise();

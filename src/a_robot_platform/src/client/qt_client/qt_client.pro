@@ -32,8 +32,7 @@ SOURCES += main.cpp\
     ../../common/paras.cpp \
     ../../common/modbus.cpp \
     ../../common/map_image.cpp \
-    ../udp_socket.cpp \
-    qcustomplot.cpp
+    ../udp_socket.cpp
 
 HEADERS  += mainwindow.h \
     ../key_control.h \
@@ -43,8 +42,7 @@ HEADERS  += mainwindow.h \
     ../../common/modbus.h\
     ../../common/use_display.h \
     ../../common/map_image.h \
-    ../udp_socket.h \
-    qcustomplot.h
+    ../udp_socket.h
 
 FORMS    += mainwindow.ui
 

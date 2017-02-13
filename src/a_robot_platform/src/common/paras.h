@@ -26,7 +26,7 @@ typedef enum
     MSG_CONTROL =0x0020, //show msg  v,w,x,y,theta   //float
     MSG_IMU = 0x0040,  //show msg  acc_x,y,z  gyr_x_y_z   //int16_t
     MSG_Ultrasonic = 0x0060,  //超声  int
-    BTN_SWITCH =0x0080,   //状态开关，键盘控制(bit 0)
+    BTN_SWITCH =0x0080,       //状态开关，键盘控制(bit 0)
 }ParaAddress;
 
 #define KEY_VEL_CTR     0x00000001

@@ -13,7 +13,7 @@ namespace zw {
          for(int i=0;i<720;i++)
          {
               FtB.ff =  laser_dis[i];
-              qDebug()<<"datagram***************"<<FtB.ff;
+         //  qDebug()<<"datagram***************"<<FtB.ff;
               for(int j=0;j<4;j++)
               {
                     datagram.append(FtB.fb[j]);

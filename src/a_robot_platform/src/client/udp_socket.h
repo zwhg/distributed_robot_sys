@@ -14,7 +14,7 @@ namespace  zw{
       uint8_t  fb[4];
    };
 
-    class UdpSocket : public QObject
+class UdpSocket : public QObject
     {
        Q_OBJECT
 public:

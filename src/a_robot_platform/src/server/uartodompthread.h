@@ -40,6 +40,4 @@ private:
 };
 
 }
-
-
 #endif // UARTODOMPTHREAD_H
