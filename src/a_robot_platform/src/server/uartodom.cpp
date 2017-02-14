@@ -34,6 +34,7 @@ void *UartOdom::DoPthread(void)
       Analysis(data_buf, nRet);
     }
     SendVelControl();
+    SendCmd2Hard();
 //    Paras m_para;
 //    int32_t dat[6]={i*10,-i*10,i*5,i+2,-i,i++};
 //    ParaGetSet packInfo={W_REGISTER,6, MSG_IMU,dat};
@@ -138,6 +139,32 @@ void UartOdom::SendVelControl(void)
     else
         write(fd,(char*)msg ,size);
     delete msg;
+}
+
+void UartOdom::SendCmd2Hard(void)
+{
+    Paras m_para;
+    int32_t cmd[1];
+    bool res=false;
+    ParaGetSet cmd_para={R_REGISTER,1,BTN_SWITCH,cmd};
+    m_para.GetAddressValue(cmd_para);
+    res=((cmd[0]&KEY_INIT_IMU) ==KEY_INIT_IMU)?true:false;
+  //  qDebug()<<cmd[0]<<res;
+    if(res)
+    {
+        Modbus m_modbus;
+        cmd_para.fuc=W_REGISTER;
+        int32_t size=FIXEDLENGTH + cmd_para.len*4;
+        byte* msg =new byte[size];
+        if(size!=m_modbus.PackParas(cmd_para,msg))
+            qDebug () <<"Error in pack size!";
+        else{
+            write(fd,(char*)msg ,size);
+            qDebug()<<"Reset IMU ok!";
+        }
+        delete msg;
+        m_para.ResetKeyRegister();
+    }
 }
 
 }

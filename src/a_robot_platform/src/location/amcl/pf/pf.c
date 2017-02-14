@@ -447,6 +447,8 @@ void pf_update_resample(pf_t *pf)
 
 // Compute the required number of samples, given that there are k bins
 // with samples in them.  This is taken directly from Fox et al.
+
+// << Probabilistic Robotics >> P264 Table8.4
 int pf_resample_limit(pf_t *pf, int k)
 {
   double a, b, c, x;

@@ -30,7 +30,7 @@
     <property name="geometry">
      <rect>
       <x>30</x>
-      <y>20</y>
+      <y>10</y>
       <width>1021</width>
       <height>911</height>
      </rect>
@@ -48,7 +48,7 @@
         <x>350</x>
         <y>250</y>
         <width>311</width>
-        <height>161</height>
+        <height>171</height>
        </rect>
       </property>
       <property name="title">
@@ -60,7 +60,7 @@
          <x>11</x>
          <y>31</y>
          <width>291</width>
-         <height>111</height>
+         <height>134</height>
         </rect>
        </property>
        <layout class="QFormLayout" name="formLayout_3">
@@ -207,6 +207,22 @@
         </item>
        </layout>
       </widget>
+      <widget class="QPushButton" name="pBtn_key_Init_IMU">
+       <property name="geometry">
+        <rect>
+         <x>110</x>
+         <y>0</y>
+         <width>96</width>
+         <height>27</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>reInit</string>
+       </property>
+       <property name="checkable">
+        <bool>true</bool>
+       </property>
+      </widget>
      </widget>
      <widget class="QGroupBox" name="gBx_control">
       <property name="geometry">
@@ -242,7 +258,7 @@
          <x>20</x>
          <y>70</y>
          <width>281</width>
-         <height>111</height>
+         <height>134</height>
         </rect>
        </property>
        <layout class="QFormLayout" name="formLayout">
@@ -396,7 +412,7 @@
         <x>670</x>
         <y>250</y>
         <width>311</width>
-        <height>161</height>
+        <height>171</height>
        </rect>
       </property>
       <property name="title">
@@ -405,10 +421,10 @@
       <widget class="QWidget" name="form_5">
        <property name="geometry">
         <rect>
-         <x>200</x>
-         <y>30</y>
-         <width>101</width>
-         <height>111</height>
+         <x>180</x>
+         <y>40</y>
+         <width>119</width>
+         <height>121</height>
         </rect>
        </property>
        <layout class="QFormLayout" name="formLayout_5">
@@ -490,10 +506,10 @@
       <widget class="QWidget" name="form_6">
        <property name="geometry">
         <rect>
-         <x>10</x>
-         <y>30</y>
-         <width>101</width>
-         <height>111</height>
+         <x>20</x>
+         <y>40</y>
+         <width>103</width>
+         <height>121</height>
         </rect>
        </property>
        <layout class="QFormLayout" name="formLayout_7">
@@ -524,19 +540,6 @@
           </property>
          </widget>
         </item>
-        <item row="3" column="1">
-         <widget class="QLabel" name="lbl_pose_y">
-          <property name="styleSheet">
-           <string notr="true">rgb:(255, 85, 0)</string>
-          </property>
-          <property name="text">
-           <string>0.00</string>
-          </property>
-          <property name="alignment">
-           <set>Qt::AlignCenter</set>
-          </property>
-         </widget>
-        </item>
         <item row="4" column="0">
          <widget class="QLabel" name="lbl_23">
           <property name="text">
@@ -564,6 +567,19 @@
           </property>
           <property name="text">
            <string>pose (m)</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item row="3" column="1">
+         <widget class="QLabel" name="lbl_pose_y">
+          <property name="styleSheet">
+           <string notr="true">rgb:(255, 85, 0)</string>
+          </property>
+          <property name="text">
+           <string>0.00</string>
           </property>
           <property name="alignment">
            <set>Qt::AlignCenter</set>
@@ -660,7 +676,7 @@
         <x>20</x>
         <y>20</y>
         <width>311</width>
-        <height>391</height>
+        <height>401</height>
        </rect>
       </property>
       <property name="title">
@@ -702,7 +718,7 @@
         <rect>
          <x>30</x>
          <y>60</y>
-         <width>101</width>
+         <width>109</width>
          <height>181</height>
         </rect>
        </property>
@@ -1088,7 +1104,7 @@
      <x>0</x>
      <y>0</y>
      <width>1069</width>
-     <height>25</height>
+     <height>27</height>
     </rect>
    </property>
   </widget>
