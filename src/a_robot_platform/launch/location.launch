@@ -18,9 +18,17 @@
 	<param name="kld_z" value="0.99"/>
 	<param name="odom_alpha1" value="0.2"/>
 	<param name="odom_alpha2" value="0.2"/>
-	<param name="odom_alpha3" value="0.8"/>
+	<param name="odom_alpha3" value="0.2"/>
 	<param name="odom_alpha4" value="0.2"/>
 	<param name="odom_alpha5" value="0.1"/>
+	
+        <param name="initial_pose_x" value="0.0"/>
+        <param name="initial_pose_y" value="0.0"/>
+        <param name="initial_pose_z" value="0.0"/>
+        <param name="initial_cov_xx" value="0.25"/>
+        <param name="initial_cov_yy" value="0.25"/>
+        <param name="initial_cov_aa" value="0.068"/>
+
 	<param name="do_beamskip" value="false"/>
 	<param name="beam_skip_distance" value="0.5"/>
 	<param name="beam_skip_threshold" value="0.3"/>

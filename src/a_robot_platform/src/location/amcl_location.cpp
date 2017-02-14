@@ -253,6 +253,7 @@ void AmclNode::paraInit()
 
 void AmclNode::updatePoseFromServer()
 {
+    //initial pose mean and covariance,used to initialize filter with Gaussion distribution
     // Check for NAN on input from param server, #5239
     if(!private_nh_.getParam("initial_pose_x",init_pose_[0]))
        init_pose_[0]= 0.0;
