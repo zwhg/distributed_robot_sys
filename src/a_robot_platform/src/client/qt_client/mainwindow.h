@@ -55,6 +55,8 @@ private slots:
     //void processPendingDatagram();
 
     void on_pBtn_open_submap_clicked();
+    void on_pBtn_key_Init_IMU_clicked();
+
 private :
     void KeyControlMsgRefalsh(const zw::KeyControlMsg & kMsg);
     void MsgControlRefalsh(void);

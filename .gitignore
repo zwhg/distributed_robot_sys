@@ -6,8 +6,10 @@
 *.swp
 *.autosave
 *.o
+*Makefile
+*ui_mainwindow.h
 
-
+src/amcl/
 temp/
 googleMapping/
 build/

@@ -1,5 +1,5 @@
 #include "uartlaser.h"
-
+#include <ros/ros.h>
 
 
 namespace zw {

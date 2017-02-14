@@ -8,6 +8,7 @@
 #include  <errno.h>      /*错误号定义*/
 #include  <qdebug.h>
 #include "uartdriver.h"
+//#include <ros/ros.h>
 
 namespace zw {
 
@@ -71,7 +72,7 @@ int32_t UartDriver::OpenSerial(const char * addr , uint32_t baudrate)
   tcflush(fd,TCIFLUSH);	//清空终端未完成的输入/输出请求及数据。
   if( tcsetattr(fd,TCSANOW,&m_stNew) != 0 )
   {
-    ROS_FATAL("[%s - %d] tcsetattr error ! \n", __FILE__, __LINE__);
+    //ROS_FATAL("[%s - %d] tcsetattr error ! \n", __FILE__, __LINE__);
     qDebug()<< "tcsetattr error !";
     return -1;
   }

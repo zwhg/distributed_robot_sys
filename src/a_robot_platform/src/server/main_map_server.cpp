@@ -13,7 +13,7 @@ int main(int argc, char **argv)
   if(argc>1)
     stem = argv[1];
   else
-    stem= "/home/zw/gt";
+    stem= "/home/shenyu/distributed_robot_sys/img/map/gtest";
   if(! zw::PgmAndYamlToOccupancy(grid,stem))
     return -1;
   grid.info.map_load_time=ros::Time::now();
@@ -33,5 +33,7 @@ int main(int argc, char **argv)
   map_pub.publish(grid);
 
   ros::spin();
+  ros::shutdown();
+
   return 0;
 }

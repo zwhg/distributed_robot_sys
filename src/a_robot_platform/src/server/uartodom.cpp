@@ -1,5 +1,7 @@
 #include <qdebug.h>
 #include "uartodom.h"
+#include <unistd.h>
+
 
 namespace zw {
 
@@ -32,6 +34,7 @@ void *UartOdom::DoPthread(void)
       Analysis(data_buf, nRet);
     }
     SendVelControl();
+    SendCmd2Hard();
 //    Paras m_para;
 //    int32_t dat[6]={i*10,-i*10,i*5,i+2,-i,i++};
 //    ParaGetSet packInfo={W_REGISTER,6, MSG_IMU,dat};
@@ -74,10 +77,8 @@ void UartOdom::Analysis(uint8_t *arry, int nRet)
                 delete packInfo.data;
             } else if(packInfo.fuc == W_REGISTER){
                 m_para.SetAddressValue(packInfo);
-
                 int32_t dat[8];
-
-                #if 1
+#if 1
                 if(packInfo.addr==MSG_Ultrasonic){
                     zw::ParaGetSet  pack = {zw::R_REGISTER,8,zw::MSG_Ultrasonic,dat};
                     m_para.GetAddressValue(pack);
@@ -88,6 +89,8 @@ void UartOdom::Analysis(uint8_t *arry, int nRet)
                    }
                    qDebug()<<ff[0].f<<ff[1].f<<ff[2].f<<ff[3].f<<ff[4].f<<ff[5].f<<ff[6].f<<ff[7].f;
                 }
+#endif
+#if 0
                 if (packInfo.addr==MSG_IMU)
                 {
                 	zw::ParaGetSet pack ={zw::R_REGISTER,6,zw::MSG_IMU,dat};
@@ -105,8 +108,7 @@ void UartOdom::Analysis(uint8_t *arry, int nRet)
         		}
                 	qDebug()<<ff[0].f<<ff[1].f;
                 }
-                #endif
-
+#endif
 
                 if(packInfo.data!=nullptr)
                 {
@@ -137,6 +139,32 @@ void UartOdom::SendVelControl(void)
     else
         write(fd,(char*)msg ,size);
     delete msg;
+}
+
+void UartOdom::SendCmd2Hard(void)
+{
+    Paras m_para;
+    int32_t cmd[1];
+    bool res=false;
+    ParaGetSet cmd_para={R_REGISTER,1,BTN_SWITCH,cmd};
+    m_para.GetAddressValue(cmd_para);
+    res=((cmd[0]&KEY_INIT_IMU) ==KEY_INIT_IMU)?true:false;
+  //  qDebug()<<cmd[0]<<res;
+    if(res)
+    {
+        Modbus m_modbus;
+        cmd_para.fuc=W_REGISTER;
+        int32_t size=FIXEDLENGTH + cmd_para.len*4;
+        byte* msg =new byte[size];
+        if(size!=m_modbus.PackParas(cmd_para,msg))
+            qDebug () <<"Error in pack size!";
+        else{
+            write(fd,(char*)msg ,size);
+            qDebug()<<"Reset IMU ok!";
+        }
+        delete msg;
+        m_para.ResetKeyRegister();
+    }
 }
 
 }

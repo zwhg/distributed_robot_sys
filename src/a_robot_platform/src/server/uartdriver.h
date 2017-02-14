@@ -1,7 +1,6 @@
 #ifndef UARTDRIVER_H
 #define UARTDRIVER_H
 
-#include <ros/ros.h>
 #include <termios.h>
 
 #include "../common/modbus.h"
