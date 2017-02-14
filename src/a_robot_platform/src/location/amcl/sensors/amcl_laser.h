@@ -138,9 +138,9 @@ class AMCLLaser : public AMCLSensor
   //
   // Mixture params for the components of the model; must sum to 1
   private: double z_hit;
+  private: double z_rand;
   private: double z_short;
   private: double z_max;
-  private: double z_rand;
   //
   // Stddev of Gaussian model for laser hits.
   private: double sigma_hit;

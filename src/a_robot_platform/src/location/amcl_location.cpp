@@ -672,7 +672,7 @@ void AmclNode::laserReceived(const sensor_msgs::LaserScanConstPtr& laser_scan)
       // Compute bearing
       ldata.ranges[i][1] = angle_min +(i * angle_increment);
     }
-
+    // update weight, w_fast and w_slow
     lasers_[laser_index]->UpdateSensor(pf_, (AMCLSensorData*)&ldata);
     lasers_update_[laser_index] = false;
     pf_odom_pose_ = pose;
@@ -684,7 +684,8 @@ void AmclNode::laserReceived(const sensor_msgs::LaserScanConstPtr& laser_scan)
       resampled = true;
     }
     pf_sample_set_t* set = pf_->sets + pf_->current_set;
-    ROS_DEBUG("Num samples: %d\n", set->sample_count);
+  //  ROS_DEBUG("Num samples: %d\n", set->sample_count);
+     ROS_INFO("Num samples: %d\n", set->sample_count);
 
     // Publish the resulting cloud // TODO: set maximum rate for publishing
     if (!m_force_update) {
