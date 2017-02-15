@@ -15,7 +15,6 @@ namespace zw{
   public:
       UdpSocketServer();
       ~UdpSocketServer();
-
   private:
       QUdpSocket *Udp_Sender;
 

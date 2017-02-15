@@ -568,7 +568,6 @@ void MainWindow::on_pBtn_key_control_open_clicked(bool checked)
     m_tcpSocketClient->SendMsg(packInfo);
 }
 
-
 void MainWindow::on_pBtn_key_Init_IMU_clicked()
 {
     int32_t dat[1];

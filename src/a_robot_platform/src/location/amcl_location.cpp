@@ -5,6 +5,7 @@
 #include <rosbag/bag.h>
 #include <rosbag/view.h>
 #include <boost/foreach.hpp>
+#include "../map/probability_values.h"
 
 namespace zw {
 
@@ -416,12 +417,16 @@ map_t* AmclNode::convertMap( const nav_msgs::OccupancyGrid& map_msg )
   ROS_ASSERT(map->cells);
   for(int i=0;i<map->size_x * map->size_y;i++)
   {
-    if(map_msg.data[i] == 0)
+    if(map_msg.data[i] == kFreeGrid){
       map->cells[i].occ_state = -1;
-    else if(map_msg.data[i] == 100)
+      map->cells[i].probability = kMinProbability;
+    }else if(map_msg.data[i] == kOccGrid){
       map->cells[i].occ_state = +1;
-    else
+      map->cells[i].probability = kMaxProbability;
+    }else{
       map->cells[i].occ_state = 0;
+      map->cells[i].probability = kUnknownProbability;
+    }
   }
   return map;
 }
@@ -563,6 +568,9 @@ void AmclNode::laserReceived(const sensor_msgs::LaserScanConstPtr& laser_scan)
     ROS_DEBUG("Received laser's pose wrt robot: %.3f %.3f %.3f",
               laser_pose_v.v[0], laser_pose_v.v[1], laser_pose_v.v[2]);
     frame_to_laser_[laser_scan->header.frame_id] = laser_index;
+
+    //计算激光坐标系在全局坐标中的坐标
+    scan_processor.SetLaserPose(laser_pose_v);
   } else {
     // we have the laser pose, retrieve laser index
     laser_index = frame_to_laser_[laser_scan->header.frame_id];
@@ -734,11 +742,6 @@ void AmclNode::laserReceived(const sensor_msgs::LaserScanConstPtr& laser_scan)
 
     if(max_weight > 0.0)
     {
-      ROS_DEBUG("Max weight pose: %.3f %.3f %.3f",
-                hyps[max_weight_hyp].pf_pose_mean.v[0],
-                hyps[max_weight_hyp].pf_pose_mean.v[1],
-                hyps[max_weight_hyp].pf_pose_mean.v[2]);
-
       geometry_msgs::PoseWithCovarianceStamped p;
       // Fill in the header
       p.header.frame_id = global_frame_id_;
@@ -765,10 +768,24 @@ void AmclNode::laserReceived(const sensor_msgs::LaserScanConstPtr& laser_scan)
       pose_pub_.publish(p);
       last_published_pose = p;
 
-      ROS_DEBUG("New pose: %6.3f %6.3f %6.3f",
+      Eigen::Vector3f scan_match_pose(hyps[max_weight_hyp].pf_pose_mean.v[0],
+                                      hyps[max_weight_hyp].pf_pose_mean.v[1],
+                                      hyps[max_weight_hyp].pf_pose_mean.v[2]);
+
+      scan_processor.LaserScanToDataContainer(laser_scan,
+                                              scan_processor.dataContainer,
+                                              1.0);
+      scan_match_pose = scan_processor.PoseUpdate(scan_processor.dataContainer,
+                                                  map_,
+                                                  scan_match_pose);
+
+      ROS_INFO("amcl pose: [%6.3f %6.3f %6.3f]  scan pose:[%6.3f %6.3f %6.3f]",
                hyps[max_weight_hyp].pf_pose_mean.v[0],
                hyps[max_weight_hyp].pf_pose_mean.v[1],
-               hyps[max_weight_hyp].pf_pose_mean.v[2]);
+               hyps[max_weight_hyp].pf_pose_mean.v[2],
+               scan_match_pose[0],
+               scan_match_pose[1],
+               scan_match_pose[2]);
 
       // subtracting base to odom from map to base and send map to odom instead
       tf::Stamped<tf::Pose> odom_to_map;

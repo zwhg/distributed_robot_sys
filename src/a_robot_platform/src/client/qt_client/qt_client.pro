@@ -32,8 +32,7 @@ SOURCES += main.cpp\
     ../../common/paras.cpp \
     ../../common/modbus.cpp \
     ../../common/map_image.cpp \
-    ../udp_socket.cpp \
-
+    ../udp_socket.cpp
 
 HEADERS  += mainwindow.h \
     ../key_control.h \

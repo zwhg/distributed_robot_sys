@@ -26,7 +26,7 @@ int main(int argc, char **argv)
   int32_t ret = -1;
   const char * addrPort;
   if(argc==1)
-      addrPort="/dev/ttyUSB1";
+      addrPort="/dev/ttyUSB0";
   else
       addrPort =argv[1];
 
@@ -50,9 +50,10 @@ int main(int argc, char **argv)
   {
     ros::spinOnce();
 
-   // zw::UdpSocketServer m_udpserver;
+    zw::UdpSocketServer m_udpserver;
 
     pthread_mutex_lock(&mutex);
+
     if(isStarted && 0 == startOrStop)              // 当前正在扫描且要求停止
     {
       ROS_INFO("stop");

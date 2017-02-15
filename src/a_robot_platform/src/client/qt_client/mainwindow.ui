@@ -683,6 +683,7 @@
        <string>UART</string>
       </property>
      </widget>
+
     </widget>
     <widget class="QWidget" name="tab_4">
      <attribute name="title">

@@ -8,9 +8,6 @@
 namespace zw {
 
 #define UARTBUFMAX 	5000
-
-
-
 class UartOdom: public UartDriver
 {
 

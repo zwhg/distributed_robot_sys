@@ -129,7 +129,7 @@ void *UartOdomPthread::DoPthread(void)
     imu.linear_acceleration.x =xf;
     imu.linear_acceleration.y =yf;
     imu.linear_acceleration.z =zf;
-    xf= car_msg[3] * Gyro_Gr;   //gyr_x     rad/s
+    xf= car_msg[3] * Gyro_Gr;          //gyr_x     rad/s
     yf= car_msg[4] * Gyro_Gr;
     zf= car_msg[5] * Gyro_Gr;
     imu.angular_velocity.x =xf;
