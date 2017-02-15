@@ -15,7 +15,6 @@
 #include <QTableWidget>
 #include <QProgressBar>
 #include "../../common/map_image.h"
-#include "qcustomplot.h"
 
 #define Myhigh 600
 #define Mywidth 600
