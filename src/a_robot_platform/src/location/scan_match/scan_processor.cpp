@@ -50,7 +50,9 @@ Eigen::Vector3f ScanProcessor::matchData(const Eigen::Vector3f& beginEstimateWor
         //计算激光坐标系在全局坐标中的坐标
         // Take account of the laser pose relative to the robot
          pf_vector_t pose={beginEstimateWorld[0],beginEstimateWorld[1],beginEstimateWorld[2]};  //robot in world pose
-         pose = pf_vector_coord_add(laser_pose, pose);    //laser in world pose
+         pose = pf_vector_add(pose,laser_pose);    //laser in world pose
+         ROS_INFO("lwp:[%6.3f %6.3f %6.3f]",pose.v[0],pose.v[1],pose.v[2]);
+
          int mi,mj;
          mi=MAP_GXWX(map, pose.v[0]);
          mj=MAP_GYWY(map, pose.v[1]);
@@ -59,6 +61,7 @@ Eigen::Vector3f ScanProcessor::matchData(const Eigen::Vector3f& beginEstimateWor
              return beginEstimateWorld;
          }
          Eigen::Vector3f estimate(mj,mj,pose.v[2]);  //laser in map pose
+         ROS_INFO("lmp:[%6.3f %6.3f %6.3f]",estimate[0],estimate[1],estimate[2]);
 
          estimateTransformationLogLh(estimate,map,dataContainer);
 
@@ -73,8 +76,14 @@ Eigen::Vector3f ScanProcessor::matchData(const Eigen::Vector3f& beginEstimateWor
          covMatrix = Eigen::Matrix3f::Zero();
          covMatrix = H;
 
+         ROS_INFO("slmp:[%6.3f %6.3f %6.3f]",estimate[0],estimate[1],estimate[2]);
+
          pose={MAP_WXGX(map,estimate[0]),MAP_WYGY(map,estimate[1]),estimate[2]};  //laser in world pose
-         pose= pf_vector_coord_sub(pose,laser_pose);  //robot in world pose
+         ROS_INFO("slwp:[%6.3f %6.3f %6.3f]",pose.v[0],pose.v[1],pose.v[2]);
+
+         pose= pf_vector_sub(pose,laser_pose);  //robot in world pose
+
+         ROS_INFO("bwp:[%6.3f %6.3f %6.3f]",pose.v[0],pose.v[1],pose.v[2]);
 
          estimate[0]=pose.v[0];
          estimate[1]=pose.v[1];

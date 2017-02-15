@@ -50,7 +50,7 @@ int main(int argc, char **argv)
   {
     ros::spinOnce();
 
-    zw::UdpSocketServer m_udpserver;
+   // zw::UdpSocketServer m_udpserver;
 
     pthread_mutex_lock(&mutex);
 

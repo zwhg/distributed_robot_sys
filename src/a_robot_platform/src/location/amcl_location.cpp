@@ -568,6 +568,7 @@ void AmclNode::laserReceived(const sensor_msgs::LaserScanConstPtr& laser_scan)
     ROS_DEBUG("Received laser's pose wrt robot: %.3f %.3f %.3f",
               laser_pose_v.v[0], laser_pose_v.v[1], laser_pose_v.v[2]);
     frame_to_laser_[laser_scan->header.frame_id] = laser_index;
+  //  ROS_INFO("laser_index=%d",laser_index);
 
     //计算激光坐标系在全局坐标中的坐标
     scan_processor.SetLaserPose(laser_pose_v);
