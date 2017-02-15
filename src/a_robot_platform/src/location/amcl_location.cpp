@@ -685,8 +685,7 @@ void AmclNode::laserReceived(const sensor_msgs::LaserScanConstPtr& laser_scan)
       resampled = true;
     }
     pf_sample_set_t* set = pf_->sets + pf_->current_set;
-  //  ROS_DEBUG("Num samples: %d\n", set->sample_count);
-     ROS_INFO("Num samples: %d\n", set->sample_count);
+    ROS_DEBUG("Num samples: %d\n", set->sample_count);
 
     // Publish the resulting cloud // TODO: set maximum rate for publishing
     if (!m_force_update) {
