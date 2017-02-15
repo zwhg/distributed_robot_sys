@@ -20,6 +20,8 @@
 #include "amcl/sensors/amcl_odom.h"
 
 
+#include "scan_match/scan_processor.h"
+
 
 namespace zw {
 
@@ -223,6 +225,8 @@ class AmclNode
 
     ros::Time last_laser_received_ts_;
     ros::Duration laser_check_interval_;
+
+    ScanProcessor scan_processor;
 };
 
 }
