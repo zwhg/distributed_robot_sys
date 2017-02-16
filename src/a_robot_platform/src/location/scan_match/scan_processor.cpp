@@ -63,9 +63,7 @@ Eigen::Vector3f ScanProcessor::matchData(const Eigen::Vector3f& beginEstimateWor
          Eigen::Vector3f estimate(mj,mj,pose.v[2]);  //laser in map pose
          ROS_INFO("lmp:[%6.3f %6.3f %6.3f]",estimate[0],estimate[1],estimate[2]);
 
-         estimateTransformationLogLh(estimate,map,dataContainer);
-
-         for(int i=0;i<maxIterations;i++)
+         for(int i=0;i<maxIterations+1;i++)
              estimateTransformationLogLh(estimate,map,dataContainer);
 
         //normalize angle
@@ -73,6 +71,7 @@ Eigen::Vector3f ScanProcessor::matchData(const Eigen::Vector3f& beginEstimateWor
          if(angle>M_PI)
              angle -= 2.0f*M_PI;
          estimate[2]=angle;
+
          covMatrix = Eigen::Matrix3f::Zero();
          covMatrix = H;
 
@@ -100,10 +99,16 @@ bool ScanProcessor::estimateTransformationLogLh(Eigen::Vector3f& estimate,
                                  const DataContainer& dataPoints)
 {
     getCompleteHessianDerivs(gridMapUtil,estimate, dataPoints, H, dTr);
+
+    std::cout << "\nH\n" << H  << "\n";
+    std::cout << "\ndTr\n" << dTr  << "\n";
+
     if ((H(0, 0) != 0.0f) && (H(1, 1) != 0.0f)) {
 
       //H += Eigen::Matrix3f::Identity() * 1.0f;
       Eigen::Vector3f searchDir (H.inverse() * dTr);
+
+      std::cout << "\nsearchdir\n" << searchDir  << "\n";
 
       if (searchDir[2] > 0.2f) {
         searchDir[2] = 0.2f;
@@ -168,7 +173,10 @@ Eigen::Vector3f ScanProcessor::interpMapValueWithDerivatives(const map_t *gridMa
 {
   if(!MAP_VALID(gridMapUtil, MAP_GXWX(gridMapUtil, coords[0]),
                              MAP_GXWX(gridMapUtil, coords[1])))
+  {
+      ROS_INFO("point out of bound");
       return Eigen::Vector3f(0.0f, 0.0f, 0.0f);
+  }
   //map coords are always positive, floor them by casting to int
    Eigen::Vector2i indMin(coords.cast<int>());
 

@@ -775,7 +775,7 @@ void AmclNode::laserReceived(const sensor_msgs::LaserScanConstPtr& laser_scan)
 
       scan_processor.LaserScanToDataContainer(laser_scan,
                                               scan_processor.dataContainer,
-                                              1.0);
+                                              map_->scale);
       scan_match_pose = scan_processor.PoseUpdate(scan_processor.dataContainer,
                                                   map_,
                                                   scan_match_pose);
