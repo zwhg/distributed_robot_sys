@@ -99,7 +99,7 @@ void publish_scan(ros::Publisher *pub, double *dist, int32_t count, ros::Time st
   scan_msg.time_increment = scan_time / (double)(count - 1);
 
   scan_msg.range_min = 0.15;
-  scan_msg.range_max = 6.0;
+  scan_msg.range_max = 6.5;
 
   scan_msg.intensities.resize(count);
   scan_msg.ranges.resize(count);

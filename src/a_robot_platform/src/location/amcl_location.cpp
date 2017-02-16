@@ -743,15 +743,41 @@ void AmclNode::laserReceived(const sensor_msgs::LaserScanConstPtr& laser_scan)
 
     if(max_weight > 0.0)
     {
+      Eigen::Vector3f scan_match_pose(hyps[max_weight_hyp].pf_pose_mean.v[0],
+                                      hyps[max_weight_hyp].pf_pose_mean.v[1],
+                                      hyps[max_weight_hyp].pf_pose_mean.v[2]);
+
+      scan_processor.LaserScanToDataContainer(laser_scan,
+                                              scan_processor.dataContainer,
+                                              1/map_->scale);
+      scan_match_pose = scan_processor.PoseUpdate(scan_processor.dataContainer,
+                                                  map_,
+                                                  scan_match_pose);
+
+      pf_vector_t  finalPose = {scan_match_pose[0],scan_match_pose[1],scan_match_pose[2]};
+
+      ROS_INFO("amcl pose: [%6.3f %6.3f %6.3f]  scan pose:[%6.3f %6.3f %6.3f]",
+             hyps[max_weight_hyp].pf_pose_mean.v[0],
+             hyps[max_weight_hyp].pf_pose_mean.v[1],
+             hyps[max_weight_hyp].pf_pose_mean.v[2],
+             scan_match_pose[0],
+             scan_match_pose[1],
+             scan_match_pose[2]);
+
       geometry_msgs::PoseWithCovarianceStamped p;
       // Fill in the header
       p.header.frame_id = global_frame_id_;
       p.header.stamp = laser_scan->header.stamp;
       // Copy in the pose
-      p.pose.pose.position.x = hyps[max_weight_hyp].pf_pose_mean.v[0];
-      p.pose.pose.position.y = hyps[max_weight_hyp].pf_pose_mean.v[1];
-      tf::quaternionTFToMsg(tf::createQuaternionFromYaw(hyps[max_weight_hyp].pf_pose_mean.v[2]),
-                            p.pose.pose.orientation);
+   //   p.pose.pose.position.x = hyps[max_weight_hyp].pf_pose_mean.v[0];
+   //   p.pose.pose.position.y = hyps[max_weight_hyp].pf_pose_mean.v[1];
+      p.pose.pose.position.x =finalPose.v[0];
+      p.pose.pose.position.y =finalPose.v[1];
+
+//      tf::quaternionTFToMsg(tf::createQuaternionFromYaw(hyps[max_weight_hyp].pf_pose_mean.v[2]),
+//                            p.pose.pose.orientation);
+      tf::quaternionTFToMsg(tf::createQuaternionFromYaw(finalPose.v[2]),p.pose.pose.orientation);
+
       // Copy in the covariance, converting from 3-D to 6-D
       pf_sample_set_t* set = pf_->sets + pf_->current_set;
       for(int i=0; i<2; i++)
@@ -769,33 +795,16 @@ void AmclNode::laserReceived(const sensor_msgs::LaserScanConstPtr& laser_scan)
       pose_pub_.publish(p);
       last_published_pose = p;
 
-      Eigen::Vector3f scan_match_pose(hyps[max_weight_hyp].pf_pose_mean.v[0],
-                                      hyps[max_weight_hyp].pf_pose_mean.v[1],
-                                      hyps[max_weight_hyp].pf_pose_mean.v[2]);
-
-      scan_processor.LaserScanToDataContainer(laser_scan,
-                                              scan_processor.dataContainer,
-                                              map_->scale);
-      scan_match_pose = scan_processor.PoseUpdate(scan_processor.dataContainer,
-                                                  map_,
-                                                  scan_match_pose);
-
-      ROS_INFO("amcl pose: [%6.3f %6.3f %6.3f]  scan pose:[%6.3f %6.3f %6.3f]",
-               hyps[max_weight_hyp].pf_pose_mean.v[0],
-               hyps[max_weight_hyp].pf_pose_mean.v[1],
-               hyps[max_weight_hyp].pf_pose_mean.v[2],
-               scan_match_pose[0],
-               scan_match_pose[1],
-               scan_match_pose[2]);
-
       // subtracting base to odom from map to base and send map to odom instead
       tf::Stamped<tf::Pose> odom_to_map;
       try
       {
-        tf::Transform tmp_tf(tf::createQuaternionFromYaw(hyps[max_weight_hyp].pf_pose_mean.v[2]),
-                             tf::Vector3(hyps[max_weight_hyp].pf_pose_mean.v[0],
-                                         hyps[max_weight_hyp].pf_pose_mean.v[1],
-                                         0.0));
+//        tf::Transform tmp_tf(tf::createQuaternionFromYaw(hyps[max_weight_hyp].pf_pose_mean.v[2]),
+//                             tf::Vector3(hyps[max_weight_hyp].pf_pose_mean.v[0],
+//                                         hyps[max_weight_hyp].pf_pose_mean.v[1],
+//                                         0.0));
+        tf::Transform tmp_tf(tf::createQuaternionFromYaw(finalPose.v[2]),
+                             tf::Vector3(finalPose.v[0], finalPose.v[1], 0.0));
         tf::Stamped<tf::Pose> tmp_tf_stamped (tmp_tf.inverse(),
                                               laser_scan->header.stamp,
                                               base_frame_id_);

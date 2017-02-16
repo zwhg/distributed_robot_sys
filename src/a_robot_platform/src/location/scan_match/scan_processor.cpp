@@ -4,7 +4,6 @@
 
 namespace zw{
 
-int n=0;
 
 ScanProcessor::ScanProcessor()
 {
@@ -65,10 +64,12 @@ Eigen::Vector3f ScanProcessor::matchData(const Eigen::Vector3f& beginEstimateWor
          }
          Eigen::Vector3f estimate(mi,mj,pose.v[2]);  //laser in map pose
 
-         std::cout<<"lmp: [ "<<estimate[0]<<" "<<estimate[1]<<" "<<estimate[2]<<" ]"<<"\n";
+      //   std::cout<<"lmp: [ "<<estimate[0]<<" "<<estimate[1]<<" "<<estimate[2]<<" ]"<<"\n";
 
          for(int i=0;i<maxIterations+1;i++)
+         {
              estimateTransformationLogLh(estimate,map,dataContainer);
+         }
 
         //normalize angle
          float angle = fmod(fmod(estimate[2], 2.0f*M_PI) + 2.0f*M_PI, 2.0f*M_PI);
@@ -79,11 +80,11 @@ Eigen::Vector3f ScanProcessor::matchData(const Eigen::Vector3f& beginEstimateWor
          covMatrix = Eigen::Matrix3f::Zero();
          covMatrix = H;
 
-         std::cout<<"elmp: [ "<<estimate[0]<<" "<<estimate[1]<<" "<<estimate[2]<<" ]"<<"\n";
-
-         pose={MAP_WXGX(map,estimate[0]),MAP_WYGY(map,estimate[1]),estimate[2]};  //laser in world pose
+       //  std::cout<<"elmp: [ "<<estimate[0]<<" "<<estimate[1]<<" "<<estimate[2]<<" ]"<<"\n";
+         //laser in world pose
+         pose={MAP_WXGX(map,estimate[0]),MAP_WYGY(map,estimate[1]),estimate[2]};
      //    std::cout<<"elwp: [ "<<pose.v[0]<<" "<<pose.v[1]<<" "<<pose.v[2]<<" ]"<<"\n";
-         std::cout<<"map origin = ["<<map->origin_x<<" "<<map->origin_y<<" ]"<<"\n";
+    //     std::cout<<"map origin = ["<<map->origin_x<<" "<<map->origin_y<<" ]"<<"\n";
 
          pose= pf_vector_sub(pose,laser_pose);  //robot in world pose
 
@@ -105,10 +106,9 @@ bool ScanProcessor::estimateTransformationLogLh(Eigen::Vector3f& estimate,
 {
     getCompleteHessianDerivs(gridMapUtil,estimate, dataPoints, H, dTr);
 
-    std::cout <<"size = "<<dataPoints.getSize()<<" N = "<<n<<"\n";
-    n=0;
-    std::cout << "\nH\n" << H  << "\n";
-    std::cout << "\ndTr\n" << dTr  << "\n";
+//    std::cout <<"size = "<<dataPoints.getSize()<<" N = "<<n<<"\n";
+//    std::cout << "\nH\n" << H  << "\n";
+//    std::cout << "\ndTr\n" << dTr  << "\n";
 
 
     if ((H(0, 0) != 0.0f) && (H(1, 1) != 0.0f)) {
@@ -116,7 +116,7 @@ bool ScanProcessor::estimateTransformationLogLh(Eigen::Vector3f& estimate,
       //H += Eigen::Matrix3f::Identity() * 1.0f;
       Eigen::Vector3f searchDir (H.inverse() * dTr);
 
-      std::cout << "\nsearchdir\n" << searchDir  << "\n";
+    //  std::cout << "\nsearchdir\n" << searchDir  << "\n";
 
       if (searchDir[2] > 0.2f) {
         searchDir[2] = 0.2f;
@@ -150,7 +150,9 @@ void ScanProcessor::getCompleteHessianDerivs(const map_t *gridMapUtil,
 
        const Eigen::Vector2f& currPoint (dataPoints.getVecEntry(i));  //end point in laser pose
        // end point in map pose
-       Eigen::Vector3f transformedPointData(interpMapValueWithDerivatives(gridMapUtil,transform * currPoint));
+       const Eigen::Vector2f endPoint =transform * currPoint;
+
+       Eigen::Vector3f transformedPointData(interpMapValueWithDerivatives(gridMapUtil,endPoint));
 
        float funVal = 1.0f - transformedPointData[0];
 
@@ -179,10 +181,8 @@ void ScanProcessor::getCompleteHessianDerivs(const map_t *gridMapUtil,
 Eigen::Vector3f ScanProcessor::interpMapValueWithDerivatives(const map_t *gridMapUtil,
                                               const Eigen::Vector2f& coords)
 {
-  if(!MAP_VALID(gridMapUtil, MAP_GXWX(gridMapUtil, coords[0]),
-                             MAP_GXWX(gridMapUtil, coords[1])))
+  if(!MAP_VALID(gridMapUtil, coords[0],coords[1]))
   {
-      n++;
       return Eigen::Vector3f(0.0f, 0.0f, 0.0f);
   }
   //map coords are always positive, floor them by casting to int
