@@ -227,6 +227,9 @@ class AmclNode
     ros::Duration laser_check_interval_;
 
     ScanProcessor scan_processor;
+
+    ros::Publisher pose_pub_amcl;
+    ros::Publisher pose_pub_scan;
 };
 
 }

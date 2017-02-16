@@ -44,6 +44,10 @@ AmclNode::AmclNode():
     laser_scan_filter_->registerCallback(boost::bind(&AmclNode::laserReceived,this, _1));
     initial_pose_sub_ = nh_.subscribe("initialpose", 2, &AmclNode::initialPoseReceived, this);
 
+
+    pose_pub_amcl =nh_.advertise<geometry_msgs::PoseStamped>("amcl_p",2,true);
+    pose_pub_scan =nh_.advertise<geometry_msgs::PoseStamped>("scan_p",2,true);
+
     if(use_map_topic_) {
       map_sub_ = nh_.subscribe("map", 1, &AmclNode::mapReceived, this);
       ROS_INFO("Subscribed to map topic.");
@@ -756,6 +760,8 @@ void AmclNode::laserReceived(const sensor_msgs::LaserScanConstPtr& laser_scan)
 
       pf_vector_t  finalPose = {scan_match_pose[0],scan_match_pose[1],scan_match_pose[2]};
 
+    //  pf_vector_t  finalPose = hyps[max_weight_hyp].pf_pose_mean;
+
       ROS_INFO("amcl pose: [%6.3f %6.3f %6.3f]  scan pose:[%6.3f %6.3f %6.3f]",
              hyps[max_weight_hyp].pf_pose_mean.v[0],
              hyps[max_weight_hyp].pf_pose_mean.v[1],
@@ -763,6 +769,20 @@ void AmclNode::laserReceived(const sensor_msgs::LaserScanConstPtr& laser_scan)
              scan_match_pose[0],
              scan_match_pose[1],
              scan_match_pose[2]);
+
+      geometry_msgs::PoseStamped ptest;
+      ptest.header.frame_id =global_frame_id_;
+      ptest.header.stamp = laser_scan->header.stamp;
+      ptest.pose.position.x = hyps[max_weight_hyp].pf_pose_mean.v[0];
+      ptest.pose.position.y = hyps[max_weight_hyp].pf_pose_mean.v[1];
+      tf::quaternionTFToMsg(tf::createQuaternionFromYaw(hyps[max_weight_hyp].pf_pose_mean.v[2]), ptest.pose.orientation);
+      pose_pub_amcl.publish(ptest);
+
+      ptest.pose.position.x = scan_match_pose[0];
+      ptest.pose.position.y = scan_match_pose[1];
+      tf::quaternionTFToMsg(tf::createQuaternionFromYaw(scan_match_pose[2]),                    ptest.pose.orientation);
+      pose_pub_amcl.publish(ptest);
+
 
       geometry_msgs::PoseWithCovarianceStamped p;
       // Fill in the header

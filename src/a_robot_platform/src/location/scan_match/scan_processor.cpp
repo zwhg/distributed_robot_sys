@@ -28,7 +28,7 @@ Eigen::Vector3f ScanProcessor::PoseUpdate(const DataContainer& dataContainer,
     if(PoseDifferenceLargerThan(newPoseEstimateWorld, AmclPoseHintWorld,
                                 paramMinDistanceDiffForPoseUpdate, paramMinAngleDiffForPoseUpdate))
    {
-
+      //...
    }
     return newPoseEstimateWorld;
 }
