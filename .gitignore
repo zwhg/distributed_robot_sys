@@ -7,6 +7,10 @@
 *.autosave
 *.o
 *Makefile
+*moc_udp_socket.cpp
+*moc_tcp_socket.cpp
+*moc_key_control.cpp
+*moc_mainwindow.cpp
 *ui_mainwindow.h
 
 src/amcl/

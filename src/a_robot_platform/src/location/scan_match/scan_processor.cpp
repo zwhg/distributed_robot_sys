@@ -4,6 +4,8 @@
 
 namespace zw{
 
+int n=0;
+
 ScanProcessor::ScanProcessor()
 {
     paramMinDistanceDiffForPoseUpdate=0.1;
@@ -51,7 +53,8 @@ Eigen::Vector3f ScanProcessor::matchData(const Eigen::Vector3f& beginEstimateWor
         // Take account of the laser pose relative to the robot
          pf_vector_t pose={beginEstimateWorld[0],beginEstimateWorld[1],beginEstimateWorld[2]};  //robot in world pose
          pose = pf_vector_add(pose,laser_pose);    //laser in world pose
-         ROS_INFO("lwp:[%6.3f %6.3f %6.3f]",pose.v[0],pose.v[1],pose.v[2]);
+
+      //   std::cout<<"lwp: [ "<<pose.v[0]<<" "<<pose.v[1]<<" "<<pose.v[2]<<" ]"<<"\n";
 
          int mi,mj;
          mi=MAP_GXWX(map, pose.v[0]);
@@ -60,8 +63,9 @@ Eigen::Vector3f ScanProcessor::matchData(const Eigen::Vector3f& beginEstimateWor
              ROS_ERROR("scan match origin pose not in scale");
              return beginEstimateWorld;
          }
-         Eigen::Vector3f estimate(mj,mj,pose.v[2]);  //laser in map pose
-         ROS_INFO("lmp:[%6.3f %6.3f %6.3f]",estimate[0],estimate[1],estimate[2]);
+         Eigen::Vector3f estimate(mi,mj,pose.v[2]);  //laser in map pose
+
+         std::cout<<"lmp: [ "<<estimate[0]<<" "<<estimate[1]<<" "<<estimate[2]<<" ]"<<"\n";
 
          for(int i=0;i<maxIterations+1;i++)
              estimateTransformationLogLh(estimate,map,dataContainer);
@@ -75,14 +79,15 @@ Eigen::Vector3f ScanProcessor::matchData(const Eigen::Vector3f& beginEstimateWor
          covMatrix = Eigen::Matrix3f::Zero();
          covMatrix = H;
 
-         ROS_INFO("slmp:[%6.3f %6.3f %6.3f]",estimate[0],estimate[1],estimate[2]);
+         std::cout<<"elmp: [ "<<estimate[0]<<" "<<estimate[1]<<" "<<estimate[2]<<" ]"<<"\n";
 
          pose={MAP_WXGX(map,estimate[0]),MAP_WYGY(map,estimate[1]),estimate[2]};  //laser in world pose
-         ROS_INFO("slwp:[%6.3f %6.3f %6.3f]",pose.v[0],pose.v[1],pose.v[2]);
+     //    std::cout<<"elwp: [ "<<pose.v[0]<<" "<<pose.v[1]<<" "<<pose.v[2]<<" ]"<<"\n";
+         std::cout<<"map origin = ["<<map->origin_x<<" "<<map->origin_y<<" ]"<<"\n";
 
          pose= pf_vector_sub(pose,laser_pose);  //robot in world pose
 
-         ROS_INFO("bwp:[%6.3f %6.3f %6.3f]",pose.v[0],pose.v[1],pose.v[2]);
+    //     std::cout<<"rwp: [ "<<pose.v[0]<<" "<<pose.v[1]<<" "<<pose.v[2]<<" ]"<<"\n";
 
          estimate[0]=pose.v[0];
          estimate[1]=pose.v[1];
@@ -100,8 +105,11 @@ bool ScanProcessor::estimateTransformationLogLh(Eigen::Vector3f& estimate,
 {
     getCompleteHessianDerivs(gridMapUtil,estimate, dataPoints, H, dTr);
 
+    std::cout <<"size = "<<dataPoints.getSize()<<" N = "<<n<<"\n";
+    n=0;
     std::cout << "\nH\n" << H  << "\n";
     std::cout << "\ndTr\n" << dTr  << "\n";
+
 
     if ((H(0, 0) != 0.0f) && (H(1, 1) != 0.0f)) {
 
@@ -174,7 +182,7 @@ Eigen::Vector3f ScanProcessor::interpMapValueWithDerivatives(const map_t *gridMa
   if(!MAP_VALID(gridMapUtil, MAP_GXWX(gridMapUtil, coords[0]),
                              MAP_GXWX(gridMapUtil, coords[1])))
   {
-      ROS_INFO("point out of bound");
+      n++;
       return Eigen::Vector3f(0.0f, 0.0f, 0.0f);
   }
   //map coords are always positive, floor them by casting to int
@@ -236,6 +244,9 @@ bool ScanProcessor::LaserScanToDataContainer(const sensor_msgs::LaserScanConstPt
         }
         angle += scan->angle_increment;
     }
+
+  //  std::cout<<"laser size = "<<size<<"\n";
+
     return true;
 }
 

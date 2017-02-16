@@ -102,7 +102,7 @@ bash sh/server_amcl.sh
 
 
 //
-部分代码说明：
+AMCL部分代码说明：
 AMCL中，小车模型选择为diff，有两种一个ODOM_MODEL_DIFF还有一个是改正后的ODOM_MODEL_DIFF_CORRECTED，根据《probabilistic robotics》P136的table5.6所描述的算法，两者唯一的差别是在采样过程中是使用方差还是标准差，书中写的不明显，但应该是标准差用于计算。影响α1-4的选取。
 激光模型有两种BeamModel与LikelihoodFieldModel见《probabilistic robotics》P158的table6.1与P172的table6.3。BeamModel 缺点：不够平滑，计算量大. LikelihoodFieldModel缺点：动态障碍物无法解决，穿墙效应，未知区域无法定位. 实现中的LikelihoodFieldModel为简化的模型，只有hit高斯分布以(z_hit加权系数)及测量均匀分布（z_rand加权系数）。并采用ad-hoc加权方案。（ad-hoc什么鬼？）
 
