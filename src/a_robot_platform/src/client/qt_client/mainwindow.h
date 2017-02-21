@@ -57,6 +57,9 @@ private slots:
     void on_pBtn_open_submap_clicked();
     void on_pBtn_key_Init_IMU_clicked();
 
+    void on_horizontalSlider_valueChanged(int value);
+    void on_pBtn_binarization_clicked(bool checked);
+
 private :
     void KeyControlMsgRefalsh(const zw::KeyControlMsg & kMsg);
     void MsgControlRefalsh(void);
@@ -65,6 +68,8 @@ private :
     void ClearData();
 
 private:
+    bool img_binarization;
+    int th_binarization;
     Ui::MainWindow *ui;
     zw::KeyControl *m_keyControl;
     zw::TcpSocket *m_tcpSocketClient;

@@ -34,25 +34,25 @@ void MapImage::GetQImage(const cv::Mat& image,QImage &img)
     }
 }
 
-void MapImage::GetBinaryImage(const cv::Mat& imgIn,cv::Mat& imgOut)
+void MapImage::GetBinaryImage(const cv::Mat& imgIn,double th,cv::Mat& imgOut )
 {
     Mat dst,edge,gray;
     dst.create( imgIn.size(), imgIn.type() );
     // 将原图像转换为灰度图像
     cvtColor( imgIn, gray, CV_BGR2GRAY );
     // 先用使用 3x3内核来降噪
-    blur( gray, edge, Size(3,3) );
+ //   blur( gray, edge, Size(3,3) );
 //    blur( edge, gray, Size(3,3) );
 //    blur( gray, edge, Size(3,3) );
-    threshold(edge, imgOut, 130, 255, THRESH_BINARY);
+    threshold(gray, imgOut, th, 255, THRESH_BINARY);
 
     int structElement=1;
-    Mat elemet =getStructuringElement(MORPH_RECT,Size(2*structElement+1,2*structElement+1),
-                                      Point(structElement,structElement));
+//    Mat elemet =getStructuringElement(MORPH_RECT,Size(2*structElement+1,2*structElement+1),
+//                                      Point(structElement,structElement));
 
-    erode(imgOut,edge,elemet,Point(-1,-1),3);
-    dilate(edge,imgOut,elemet,Point(-1,-1),3);
-   // imgOut=edge;
+//    erode(imgOut,edge,elemet,Point(-1,-1),3);
+//    dilate(edge,imgOut,elemet,Point(-1,-1),3);
+//    imgOut=edge;
 }
 
 void MapImage::SurfFeatureMatch(const cv::Mat& map,const cv::Mat &subMap)

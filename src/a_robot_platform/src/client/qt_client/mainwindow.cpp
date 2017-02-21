@@ -44,6 +44,9 @@ MainWindow::MainWindow(QWidget *parent) :
     QTimer *cmd_timer =new QTimer();
     QObject::connect(cmd_timer,SIGNAL(timeout()),this,SLOT(cmdTimerUpdate()));
     cmd_timer->start(40);
+
+    img_binarization=false;
+    th_binarization=127;
 }
 
 MainWindow::~MainWindow()
@@ -653,4 +656,42 @@ void MainWindow::on_pBtn_open_submap_clicked()
   //  m_mapImage.SiftFeaturematch(map,submap);
 }
 
+void MainWindow::on_horizontalSlider_valueChanged(int value)
+{
+    if(!map.empty())
+    {
+        QString str="二值化:";
+        if(img_binarization)
+        {
+            th_binarization=value;
+        }
+        str += QString::number(th_binarization);
+        ui->pBtn_binarization->setText(str);
+        ui->horizontalSlider->setValue(th_binarization);
 
+        cv::Mat outmap=map;
+        m_mapImage.GetBinaryImage(map,th_binarization,outmap);
+
+        imshow("binarization",outmap);
+
+//        QImage img ;
+//        m_mapImage.GetQImage(outmap,img);
+//        ui->lbl_map->setPixmap(QPixmap::fromImage(img));
+//        ui->lbl_map->resize(img.width(),img.height());
+//        ui->lbl_map->setScaledContents(true);
+    }
+}
+
+void MainWindow::on_pBtn_binarization_clicked(bool checked)
+{
+    if(checked)
+    {
+        img_binarization=true;
+        ui->pBtn_binarization->setStyleSheet("background-color: rgb(0, 255, 0);");
+    }
+    else
+    {
+        img_binarization=false;
+        ui->pBtn_binarization->setStyleSheet("background-color: rgb(167, 167, 125)");
+    }
+}
