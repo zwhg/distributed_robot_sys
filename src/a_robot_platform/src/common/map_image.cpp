@@ -12,7 +12,8 @@ using namespace std;
 
 MapImage::MapImage()
 {
-
+    filter_cnt=0;
+    sample_cnt=0;
 }
 
 MapImage::~MapImage()
@@ -34,7 +35,7 @@ void MapImage::GetQImage(const cv::Mat& image,QImage &img)
     }
 }
 
-void MapImage::GetBinaryImage(const cv::Mat& imgIn,double th,cv::Mat& imgOut )
+void MapImage::GetBinaryImage(const cv::Mat& imgIn,double th,cv::Mat& imgOut, cv::Mat& sample_imgOut  )
 {
     Mat dst,edge,gray;
     dst.create( imgIn.size(), imgIn.type() );
@@ -45,14 +46,33 @@ void MapImage::GetBinaryImage(const cv::Mat& imgIn,double th,cv::Mat& imgOut )
 //    blur( edge, gray, Size(3,3) );
 //    blur( gray, edge, Size(3,3) );
     threshold(gray, imgOut, th, 255, THRESH_BINARY);
-
     int structElement=1;
-//    Mat elemet =getStructuringElement(MORPH_RECT,Size(2*structElement+1,2*structElement+1),
-//                                      Point(structElement,structElement));
+    Mat elemet =getStructuringElement(MORPH_RECT,Size(2*structElement+1,2*structElement+1),
+                                      Point(structElement,structElement));
 
-//    erode(imgOut,edge,elemet,Point(-1,-1),3);
-//    dilate(edge,imgOut,elemet,Point(-1,-1),3);
-//    imgOut=edge;
+   erode(imgOut,edge,elemet,Point(-1,-1),filter_cnt);
+   dilate(edge,imgOut,elemet,Point(-1,-1),filter_cnt);
+
+   Mat tmp1=imgOut;
+   Mat tmp2=imgOut;
+   for(int i=0;i<sample_cnt;++i)
+   {
+        pyrDown(tmp1,tmp2);
+        tmp1 =tmp2;
+   }
+   threshold(tmp2,  sample_imgOut, th, 255, THRESH_BINARY);
+}
+
+void MapImage::ShowBinaryImage(const string& winname,const cv::Mat& imgIn,double th)
+{
+    if(!imgIn.empty())
+    {
+        cv::Mat outmap= imgIn;
+        cv::Mat sample_map= imgIn;
+        GetBinaryImage(imgIn,th,outmap,sample_map);
+        cv::namedWindow(winname,CV_WINDOW_NORMAL);
+        imshow(winname,sample_map);
+    }
 }
 
 void MapImage::SurfFeatureMatch(const cv::Mat& map,const cv::Mat &subMap)
@@ -225,5 +245,6 @@ void MapImage::SiftFeaturematch(const cv::Mat& map,const cv::Mat &subMap)
                 vector<char>(),DrawMatchesFlags::NOT_DRAW_SINGLE_POINTS);
     imshow("match points",imgOutput);
 }
+
 
 }

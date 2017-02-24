@@ -656,32 +656,6 @@ void MainWindow::on_pBtn_open_submap_clicked()
   //  m_mapImage.SiftFeaturematch(map,submap);
 }
 
-void MainWindow::on_horizontalSlider_valueChanged(int value)
-{
-    if(!map.empty())
-    {
-        QString str="二值化:";
-        if(img_binarization)
-        {
-            th_binarization=value;
-        }
-        str += QString::number(th_binarization);
-        ui->pBtn_binarization->setText(str);
-        ui->horizontalSlider->setValue(th_binarization);
-
-        cv::Mat outmap=map;
-        m_mapImage.GetBinaryImage(map,th_binarization,outmap);
-
-        imshow("binarization",outmap);
-
-//        QImage img ;
-//        m_mapImage.GetQImage(outmap,img);
-//        ui->lbl_map->setPixmap(QPixmap::fromImage(img));
-//        ui->lbl_map->resize(img.width(),img.height());
-//        ui->lbl_map->setScaledContents(true);
-    }
-}
-
 void MainWindow::on_pBtn_binarization_clicked(bool checked)
 {
     if(checked)
@@ -694,4 +668,34 @@ void MainWindow::on_pBtn_binarization_clicked(bool checked)
         img_binarization=false;
         ui->pBtn_binarization->setStyleSheet("background-color: rgb(167, 167, 125)");
     }
+}
+
+void MainWindow::on_horizontalSlider_valueChanged(int value)
+{
+    if(img_binarization)
+    {
+        th_binarization=value;
+    }
+    QString str="二值化:";
+    str += QString::number(th_binarization);
+    ui->pBtn_binarization->setText(str);
+    ui->horizontalSlider->setValue(th_binarization);
+
+    m_mapImage.ShowBinaryImage("sample_map",map,th_binarization);
+ //   m_mapImage.ShowBinaryImage("sample_submap",submap,th_binarization);
+}
+
+void MainWindow::on_Spin_Sample_Count_valueChanged(int arg1)
+{
+    m_mapImage.sample_cnt=arg1;
+
+    m_mapImage.ShowBinaryImage("sample_map",map,th_binarization);
+ //   m_mapImage.ShowBinaryImage("sample_submap",submap,th_binarization);
+}
+
+void MainWindow::on_Spin_Filter_Count_valueChanged(int arg1)
+{
+    m_mapImage.filter_cnt=arg1;
+    m_mapImage.ShowBinaryImage("sample_map",map,th_binarization);
+  //  m_mapImage.ShowBinaryImage("sample_submap",submap,th_binarization);
 }

@@ -60,6 +60,10 @@ private slots:
     void on_horizontalSlider_valueChanged(int value);
     void on_pBtn_binarization_clicked(bool checked);
 
+    void on_Spin_Sample_Count_valueChanged(int arg1);
+
+    void on_Spin_Filter_Count_valueChanged(int arg1);
+
 private :
     void KeyControlMsgRefalsh(const zw::KeyControlMsg & kMsg);
     void MsgControlRefalsh(void);

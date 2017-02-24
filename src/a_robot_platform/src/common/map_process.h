@@ -5,6 +5,9 @@
 #include <assert.h>
 #include "eigen3/Eigen/Eigen"
 #include "../location/amcl/map/map.h"
+#include <nav_msgs/OccupancyGrid.h>
+#include <sensor_msgs/LaserScan.h>
+#include <queue>
 
 namespace zw {
 
@@ -20,7 +23,8 @@ constexpr float kMaxProbability = 1.f - kMinProbability;
 constexpr uint16 kUnknownProbabilityValue = 0;
 constexpr uint16 kUpdateMarker = 1u << 15;
 
-
+constexpr float kMinLaserRange=0.15;
+constexpr float kMaxLaserRange=6.5;
 
 // map coords :low-left
 
@@ -54,11 +58,48 @@ inline Eigen::Vector3f getWorldCoordsPose(const map_t* map, const Eigen::Vector3
  * Compute the map coords for given the cell index
  */
 
+void map_filter(char *out,uint32_t w, uint32_t h);
+
+
+struct CellInfo
+{
+  int x;
+  int y;
+  int status;
+  float grade;
+  float dis_avg;
+  float neighbour[8];
+};
+
+struct SingleScan
+{
+    float dis_avg;
+};
+
+bool CellInfo_cmp(const CellInfo& c1,const CellInfo & c2);
+
+
+
+class MapProcess
+{
+private:
+     std::vector<CellInfo> free_grid_Cell;
+     SingleScan singleScan;
+     int free_space_count;
+public:
+     nav_msgs::OccupancyGrid filter_map;
+public:
+     MapProcess();
+     ~MapProcess();
+     void GetBinaryAndSample(const nav_msgs::OccupancyGridConstPtr& grid ,int th_occ ,int th_free ,int num );
+     int GetFreeSpcaceIndices(const char *grid,int w,int h);
+     void CalNeighbour(const char *grid,int w,int h,float resolution);
+     void CalScan(const sensor_msgs::LaserScanConstPtr& scan,float err);
+};
 
 
 
 
-void map_filter(const char * dat, char *out,uint32_t w, uint32_t h);
 
 }
 

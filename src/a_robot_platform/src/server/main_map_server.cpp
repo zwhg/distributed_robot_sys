@@ -1,4 +1,5 @@
 #include "../map/mapreadandwrite.h"
+#include "../common/map_process.h"
 
 const std::string map_frame_id="map";
 
@@ -13,7 +14,7 @@ int main(int argc, char **argv)
   if(argc>1)
     stem = argv[1];
   else
-    stem= "/home/shenyu/distributed_robot_sys/img/map/gtest";
+    stem= "/home/zw/distributed_robot_sys/img/map/gtest";
   if(! zw::PgmAndYamlToOccupancy(grid,stem))
     return -1;
   grid.info.map_load_time=ros::Time::now();
