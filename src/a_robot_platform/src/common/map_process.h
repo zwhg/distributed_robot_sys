@@ -7,6 +7,7 @@
 #include "../location/amcl/map/map.h"
 #include <nav_msgs/OccupancyGrid.h>
 #include <sensor_msgs/LaserScan.h>
+#include <geometry_msgs/Point32.h>
 #include <queue>
 
 namespace zw {
@@ -83,10 +84,11 @@ bool CellInfo_cmp(const CellInfo& c1,const CellInfo & c2);
 class MapProcess
 {
 private:
-     std::vector<CellInfo> free_grid_Cell;
      SingleScan singleScan;
      int free_space_count;
 public:
+     std::vector<CellInfo> free_grid_Cell;
+     float map_resolution;
      nav_msgs::OccupancyGrid filter_map;
 public:
      MapProcess();
@@ -95,6 +97,7 @@ public:
      int GetFreeSpcaceIndices(const char *grid,int w,int h);
      void CalNeighbour(const char *grid,int w,int h,float resolution);
      void CalScan(const sensor_msgs::LaserScanConstPtr& scan,float err);
+     geometry_msgs:: Point32 GetPoint(const CellInfo & cell ,const nav_msgs::OccupancyGrid& map);
 };
 
 

@@ -53,6 +53,7 @@ MapProcess::MapProcess()
 {
     free_grid_Cell.resize(0);
     free_space_count=0;
+    map_resolution =0.05;
 }
 
 MapProcess::~MapProcess()
@@ -64,6 +65,7 @@ void MapProcess::GetBinaryAndSample(const nav_msgs::OccupancyGridConstPtr& grid 
 {
    int w=grid->info.width/num;
    int h=grid->info.height/num;
+   map_resolution = grid->info.resolution *num;
    char *mapdata = new char[w*h];
    int index=0;
    for(int y=0;y<h;y++)
@@ -90,9 +92,9 @@ void MapProcess::GetBinaryAndSample(const nav_msgs::OccupancyGridConstPtr& grid 
 
    map_filter(mapdata,w,h);
    free_space_count = GetFreeSpcaceIndices(mapdata,w,h);
-   CalNeighbour(mapdata,w,h ,grid->info.resolution *num);
+   CalNeighbour(mapdata,w,h ,map_resolution);
 
-   filter_map.info.resolution = grid->info.resolution *num;
+   filter_map.info.resolution = map_resolution;
    filter_map.info.width = w;
    filter_map.info.height = h;
    filter_map.info.map_load_time=ros::Time::now();
@@ -111,7 +113,7 @@ void MapProcess::GetBinaryAndSample(const nav_msgs::OccupancyGridConstPtr& grid 
 
    ROS_INFO("map info %d X %d map @ %3.2lf m/cell",filter_map.info.width,
             filter_map.info.height,filter_map.info.resolution);
-   ROS_INFO("total cell=%d \nsample cell %d free cell=%d",grid->info.width*grid->info.height,
+   ROS_INFO("total cell=%d \nsample cell=%d  free cell=%d",grid->info.width*grid->info.height,
             w*h,free_space_count);
 }
 
@@ -300,11 +302,21 @@ void MapProcess::CalScan(const sensor_msgs::LaserScanConstPtr& scan ,float err)
 
     for(int i=0;i<free_space_count;i++)
     {
-      if(abs(free_grid_Cell[i].dis_avg- singleScan.dis_avg)<0.4)
+      if(abs(free_grid_Cell[i].dis_avg- singleScan.dis_avg)<err)
         free_grid_Cell[i].status =1;
     }
 
     std::sort(free_grid_Cell.begin(),free_grid_Cell.end(),CellInfo_cmp);
+}
+
+geometry_msgs::Point32 MapProcess::GetPoint(const CellInfo & cell ,const nav_msgs::OccupancyGrid& map)
+{
+    geometry_msgs:: Point32 p;
+
+    p.x= map.info.origin.position.x +(cell.x+0.5)*map.info.resolution ;
+    p.y= map.info.origin.position.y +(cell.y+0.5)*map.info.resolution ;
+    p.z=0;
+    return p;
 }
 
 }

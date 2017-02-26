@@ -5,9 +5,13 @@
 void mapReceived(const nav_msgs::OccupancyGridConstPtr& grid);
 void scanReceived(const sensor_msgs::LaserScanConstPtr& scan);
 
+
+void getFirstPointCloud(sensor_msgs::PointCloud& pfcloud);
+
 zw::MapProcess  m_mapProcess;
 
-int mapfinish=0;
+bool mapfinish=false;
+bool firstFinish=false;
 
 int main(int argc, char **argv)
 {
@@ -24,14 +28,26 @@ int main(int argc, char **argv)
   filter_map_pub =  n.advertise<nav_msgs::OccupancyGrid>("filter_map", 1, true);
   first_points_pub =n.advertise<sensor_msgs::PointCloud>("first_cloud",1, true);
 
+  bool mapflag=true;
+  sensor_msgs::PointCloud pfcloud;
   ros::Rate loop_rate(50);
+
   while(ros::ok())
   {
     ros::spinOnce();
 
-    if(mapfinish==1)
+    if(mapfinish && mapflag)
     {
+        mapflag =false;
         filter_map_pub.publish(m_mapProcess.filter_map);
+        getFirstPointCloud(pfcloud);
+        first_points_pub.publish(pfcloud);
+    }
+    if(firstFinish)
+    {
+        firstFinish =false;
+        getFirstPointCloud(pfcloud);
+        first_points_pub.publish(pfcloud);
     }
     loop_rate.sleep();
   }
@@ -44,11 +60,37 @@ int main(int argc, char **argv)
 void mapReceived(const nav_msgs::OccupancyGridConstPtr& grid)
 {
     m_mapProcess.GetBinaryAndSample(grid,100,0,4);
-    mapfinish=1;
+    mapfinish=true;
 }
 
 void scanReceived(const sensor_msgs::LaserScanConstPtr& scan)
 {
-    if(mapfinish==1)
+    if(mapfinish)
+    {
       m_mapProcess.CalScan(scan,0.4);
+      firstFinish =true;
+    }
+}
+
+void getFirstPointCloud(sensor_msgs::PointCloud& pfcloud)
+{
+
+    pfcloud.header.frame_id="map";
+    pfcloud.header.stamp=ros::Time::now();
+
+    int num=0;
+    for(int i=0;i<m_mapProcess.free_grid_Cell.size();i++)
+    {
+        if(m_mapProcess.free_grid_Cell[i].status!=0)
+            num++;
+    }
+    ROS_INFO("first optimize cell=%d",num);
+
+    pfcloud.points.resize(num);
+
+    for(int i=0;i<num;i++)
+    {
+        pfcloud.points[i]= m_mapProcess.GetPoint(m_mapProcess.free_grid_Cell[i],
+                                                 m_mapProcess.filter_map);
+    }
 }
