@@ -27,6 +27,8 @@ constexpr uint16 kUpdateMarker = 1u << 15;
 constexpr float kMinLaserRange=0.15;
 constexpr float kMaxLaserRange=6.5;
 
+#define OPTIMIZE 3
+
 // map coords :low-left
 
 // compute linear index for given map coords
@@ -97,15 +99,19 @@ public:
      std::vector<CellInfo> free_grid_Cell;
      float map_resolution;
      nav_msgs::OccupancyGrid filter_map;
+     float optimize[OPTIMIZE];
+
+private:
+     int GetFreeSpcaceIndices(const char *grid,int w,int h);
+     void CalNeighbour(const char *grid,int w,int h,float resolution);
+     void calHeading(const sensor_msgs::LaserScanConstPtr& scan,int skip);
 public:
      MapProcess();
      ~MapProcess();
      void GetBinaryAndSample(const nav_msgs::OccupancyGridConstPtr& grid ,int th_occ ,int th_free ,int num );
-     int GetFreeSpcaceIndices(const char *grid,int w,int h);
-     void CalNeighbour(const char *grid,int w,int h,float resolution);
-     void CalScan(const sensor_msgs::LaserScanConstPtr& scan,float perr);
+     void CalScan(const sensor_msgs::LaserScanConstPtr& scan);
      geometry_msgs:: Point32 GetPoint(const CellInfo & cell ,const nav_msgs::OccupancyGrid& map);
-     void calHeading(const sensor_msgs::LaserScanConstPtr& scan,int skip,float perr);
+
 };
 
 

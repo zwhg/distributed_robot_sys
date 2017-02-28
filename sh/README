@@ -65,7 +65,7 @@ src/client 中qt_client为qt上位机程序。可用qt(community)版本直接打
 运行qt客户端
 roscore
 cd distributed_root_sys
-bash sh/map_rviz
+bash sh/map_rviz.sh
 bash sh/google_mapping.sh
 
 2、运行server

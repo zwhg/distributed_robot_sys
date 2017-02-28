@@ -60,7 +60,7 @@ void TcpSocketServer::on_ReadyRead(void)
             }else if(packInfo.fuc == W_REGISTER){
                 m_para.SetAddressValue(packInfo);
 
-                if(packInfo.fuc==CONTROL)
+                if(packInfo.addr==CONTROL)
                 {
                     pthread_mutex_lock(&g_tMutex );
                     cmd_time_out =0;
@@ -100,7 +100,7 @@ void TcpSocketServer::on_ReadyRead(void)
     bool flag =false ;
     pthread_mutex_lock(&g_tMutex );
     cmd_time_out ++ ;
-    if(cmd_time_out >10)
+    if(cmd_time_out >5)
     {
         cmd_time_out=0;
         flag =true;

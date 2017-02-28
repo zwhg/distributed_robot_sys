@@ -6,15 +6,16 @@
 void mapReceived(const nav_msgs::OccupancyGridConstPtr& grid);
 void scanReceived(const sensor_msgs::LaserScanConstPtr& scan);
 
-
-void getFirstPointCloud(sensor_msgs::PointCloud& pfcloud);
-
+void getOptimizePointCloud(sensor_msgs::PointCloud pfcloud[]);
 void sendtf(float x,float y ,float theta);
+
 
 zw::MapProcess  m_mapProcess;
 
 bool mapfinish=false;
 bool firstFinish=false;
+
+
 
 int main(int argc, char **argv)
 {
@@ -23,16 +24,29 @@ int main(int argc, char **argv)
   ROS_INFO("package_name:a_robot_platform  node_name:main_initial_pose_test");
 
   ros::NodeHandle n;
+  ros::NodeHandle nh("~");
+  if(!nh.getParam("optimize1",m_mapProcess.optimize[0]))
+      m_mapProcess.optimize[0]=0.5;
+  if(!nh.getParam("optimize2",m_mapProcess.optimize[1]))
+      m_mapProcess.optimize[1]=0.5;
+  if(!nh.getParam("optimize3",m_mapProcess.optimize[2]))
+      m_mapProcess.optimize[2]=0.5;
+
+  ROS_INFO("optimize=[%6.2f %6.2f %6.2f]",m_mapProcess.optimize[0],
+          m_mapProcess.optimize[1],m_mapProcess.optimize[2]);
+
   ros::Subscriber map_sub = n.subscribe("map", 1, mapReceived);
   ros::Subscriber scan_sub =n.subscribe("scan",1, scanReceived);
 
   ros::Publisher filter_map_pub;
-  ros::Publisher first_points_pub;
+  ros::Publisher optimize_points_pub[OPTIMIZE];
   filter_map_pub =  n.advertise<nav_msgs::OccupancyGrid>("filter_map", 1, true);
-  first_points_pub =n.advertise<sensor_msgs::PointCloud>("first_cloud",1, true);
+  optimize_points_pub[0] =n.advertise<sensor_msgs::PointCloud>("optimize_2",1, true);
+  optimize_points_pub[1] =n.advertise<sensor_msgs::PointCloud>("optimize_3",1, true);
+  optimize_points_pub[2] =n.advertise<sensor_msgs::PointCloud>("optimize_4",1, true);
 
   bool mapflag=true;
-  sensor_msgs::PointCloud pfcloud;
+  sensor_msgs::PointCloud pfcloud[OPTIMIZE];
   ros::Rate loop_rate(50);
 
   while(ros::ok())
@@ -44,14 +58,13 @@ int main(int argc, char **argv)
     {
         mapflag =false;
         filter_map_pub.publish(m_mapProcess.filter_map);
-    //    getFirstPointCloud(pfcloud);
-     //   first_points_pub.publish(pfcloud);
     }
     if(firstFinish)
     {
         firstFinish =false;
-        getFirstPointCloud(pfcloud);
-        first_points_pub.publish(pfcloud);
+        getOptimizePointCloud(pfcloud);
+        for(int i=0;i<OPTIMIZE;i++)
+          optimize_points_pub[i].publish(pfcloud[i]);
     }
     loop_rate.sleep();
   }
@@ -71,34 +84,43 @@ void scanReceived(const sensor_msgs::LaserScanConstPtr& scan)
 {
     if(mapfinish)
     {
-      m_mapProcess.CalScan(scan,0.20);
+      m_mapProcess.CalScan(scan);
       firstFinish =true;
     }
 }
 
-void getFirstPointCloud(sensor_msgs::PointCloud& pfcloud)
+void getOptimizePointCloud(sensor_msgs::PointCloud pfcloud[])
 {
+   int num[OPTIMIZE]={0};
 
-    pfcloud.header.frame_id="map";
-    pfcloud.header.stamp=ros::Time::now();
+   for(int i=0;i<m_mapProcess.free_grid_Cell.size();i++)
+   {
+       if(m_mapProcess.free_grid_Cell[i].status==3)
+       {
+           num[2]++;
+           num[1]++;
+           num[0]++;
+       }
+       else if(m_mapProcess.free_grid_Cell[i].status==2)
+       {
+           num[1]++;
+           num[0]++;
+       }
+       else if(m_mapProcess.free_grid_Cell[i].status==1)
+           num[0]++;
+   }
+   //ROS_INFO("optimize %d/%d",num[1], num[0]);
 
-    int num=0;
-    for(int i=0;i<m_mapProcess.free_grid_Cell.size();i++)
-    {
-        if(m_mapProcess.free_grid_Cell[i].status==2)
-            num++;
-    }
-  //  ROS_INFO("first optimize cell= %d/%d",num, (int)m_mapProcess.free_grid_Cell.size());
-
-    pfcloud.points.resize(num);
-
-    for(int i=0;i<num;i++)
-    {
-        pfcloud.points[i]= m_mapProcess.GetPoint(m_mapProcess.free_grid_Cell[i],
-                                                 m_mapProcess.filter_map);
-    }
+   for(int i=0;i<OPTIMIZE;i++)
+   {
+       pfcloud[i].header.frame_id="map";
+       pfcloud[i].header.stamp=ros::Time::now();
+       pfcloud[i].points.resize(num[i]);
+       for(int j=0;j<num[i];j++)
+           pfcloud[i].points[j]=m_mapProcess.GetPoint(m_mapProcess.free_grid_Cell[j],
+                                                      m_mapProcess.filter_map);
+   }
 }
-
 
 void sendtf(float x,float y ,float theta)
 {
@@ -110,3 +132,5 @@ void sendtf(float x,float y ,float theta)
     tr.setRotation(q);
     br.sendTransform(tf::StampedTransform(tr,ros::Time::now(),"map","odom"));
 }
+
+

@@ -14,7 +14,7 @@ int main(int argc, char **argv)
   if(argc>1)
     stem = argv[1];
   else
-    stem= "/home/zw/distributed_robot_sys/img/map/gtest";
+    stem= "/home/zw/distributed_robot_sys/img/map/gtest1";
   if(! zw::PgmAndYamlToOccupancy(grid,stem))
     return -1;
   grid.info.map_load_time=ros::Time::now();
