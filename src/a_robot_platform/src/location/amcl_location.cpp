@@ -762,7 +762,7 @@ void AmclNode::laserReceived(const sensor_msgs::LaserScanConstPtr& laser_scan)
 
     //  pf_vector_t  finalPose = hyps[max_weight_hyp].pf_pose_mean;
 
-      ROS_INFO("amcl pose: [%6.3f %6.3f %6.3f]  scan pose:[%6.3f %6.3f %6.3f]",
+      ROS_INFO("amcl:[%6.3f %6.3f %6.3f]  scan:[%6.3f %6.3f %6.3f]",
              hyps[max_weight_hyp].pf_pose_mean.v[0],
              hyps[max_weight_hyp].pf_pose_mean.v[1],
              hyps[max_weight_hyp].pf_pose_mean.v[2],

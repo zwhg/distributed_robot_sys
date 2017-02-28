@@ -27,7 +27,9 @@ constexpr uint16 kUpdateMarker = 1u << 15;
 constexpr float kMinLaserRange=0.15;
 constexpr float kMaxLaserRange=6.5;
 
-#define OPTIMIZE 3
+constexpr float kDisiInifinte =100.0f;
+
+#define OPTIMIZE 5
 
 // map coords :low-left
 
@@ -94,17 +96,19 @@ class MapProcess
 {
 private:
      SingleScan singleScan;
-     int valid_cell_count[5];
+     int valid_cell_count[OPTIMIZE+1];
 public:
      std::vector<CellInfo> free_grid_Cell;
      float map_resolution;
      nav_msgs::OccupancyGrid filter_map;
      float optimize[OPTIMIZE];
+     int laser_skip;
 
 private:
      int GetFreeSpcaceIndices(const char *grid,int w,int h);
      void CalNeighbour(const char *grid,int w,int h,float resolution);
      void calHeading(const sensor_msgs::LaserScanConstPtr& scan,int skip);
+     void Optimiz(const sensor_msgs::LaserScanConstPtr& scan,int skip,int pcnt);
 public:
      MapProcess();
      ~MapProcess();

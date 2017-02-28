@@ -3,6 +3,7 @@
 #include <sensor_msgs/PointCloud.h>
 #include  <tf/transform_broadcaster.h>
 
+
 void mapReceived(const nav_msgs::OccupancyGridConstPtr& grid);
 void scanReceived(const sensor_msgs::LaserScanConstPtr& scan);
 
@@ -26,11 +27,17 @@ int main(int argc, char **argv)
   ros::NodeHandle n;
   ros::NodeHandle nh("~");
   if(!nh.getParam("optimize1",m_mapProcess.optimize[0]))
-      m_mapProcess.optimize[0]=0.5;
+      m_mapProcess.optimize[0]=0.2;
   if(!nh.getParam("optimize2",m_mapProcess.optimize[1]))
-      m_mapProcess.optimize[1]=0.5;
+      m_mapProcess.optimize[1]=0.1;
   if(!nh.getParam("optimize3",m_mapProcess.optimize[2]))
       m_mapProcess.optimize[2]=0.5;
+  if(!nh.getParam("optimize4",m_mapProcess.optimize[3]))
+      m_mapProcess.optimize[3]=0.5;
+  if(!nh.getParam("optimize5",m_mapProcess.optimize[4]))
+      m_mapProcess.optimize[4]=0.5;
+  if(!nh.getParam("laser_skip",m_mapProcess.laser_skip))
+      m_mapProcess.laser_skip =20;
 
   ROS_INFO("optimize=[%6.2f %6.2f %6.2f]",m_mapProcess.optimize[0],
           m_mapProcess.optimize[1],m_mapProcess.optimize[2]);
@@ -41,9 +48,12 @@ int main(int argc, char **argv)
   ros::Publisher filter_map_pub;
   ros::Publisher optimize_points_pub[OPTIMIZE];
   filter_map_pub =  n.advertise<nav_msgs::OccupancyGrid>("filter_map", 1, true);
-  optimize_points_pub[0] =n.advertise<sensor_msgs::PointCloud>("optimize_2",1, true);
-  optimize_points_pub[1] =n.advertise<sensor_msgs::PointCloud>("optimize_3",1, true);
-  optimize_points_pub[2] =n.advertise<sensor_msgs::PointCloud>("optimize_4",1, true);
+  for(int i=0;i<OPTIMIZE;i++)
+  {
+    std::string name="optimize_"+std::to_string(i+1);
+    optimize_points_pub[i] =n.advertise<sensor_msgs::PointCloud>(name,1, true);
+  }
+
 
   bool mapflag=true;
   sensor_msgs::PointCloud pfcloud[OPTIMIZE];
@@ -95,19 +105,25 @@ void getOptimizePointCloud(sensor_msgs::PointCloud pfcloud[])
 
    for(int i=0;i<m_mapProcess.free_grid_Cell.size();i++)
    {
-       if(m_mapProcess.free_grid_Cell[i].status==3)
-       {
+       switch (m_mapProcess.free_grid_Cell[i].status) {
+       case 5:{
+           num[4]++;
+       }
+       case 4:{
+           num[3]++;
+       }
+       case 3:{
            num[2]++;
+       }
+       case 2:{
            num[1]++;
+       }
+       case 1:{
            num[0]++;
        }
-       else if(m_mapProcess.free_grid_Cell[i].status==2)
-       {
-           num[1]++;
-           num[0]++;
+       default:
+           break;
        }
-       else if(m_mapProcess.free_grid_Cell[i].status==1)
-           num[0]++;
    }
    //ROS_INFO("optimize %d/%d",num[1], num[0]);
 

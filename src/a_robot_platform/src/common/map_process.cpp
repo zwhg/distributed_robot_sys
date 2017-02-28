@@ -52,18 +52,14 @@ bool CellInfo_cmpdis_err(const CellInfo& c1,const CellInfo & c2)
 bool CellInfo_cmpdis_grade(const CellInfo& c1,const CellInfo & c2)
 {
     if(c1.status ==c2.status)
-      return c1.grade > c2.grade;
-   //   return c1.grade < c2.grade;
+      return c1.grade < c2.grade;
     return c1.status >c2.status ;
 }
 
 MapProcess::MapProcess()
 {
-    valid_cell_count[0]=0;
-    valid_cell_count[1]=0;
-    valid_cell_count[2]=0;
-    valid_cell_count[3]=0;
-    valid_cell_count[4]=0;
+    for(int i=0;i<=OPTIMIZE;i++)
+        valid_cell_count[i]=0;
     free_grid_Cell.resize(0);
 }
 
@@ -77,11 +73,10 @@ void MapProcess::GetBinaryAndSample(const nav_msgs::OccupancyGridConstPtr& grid 
 {
    free_grid_Cell.resize(0);
    map_resolution =0.05;
+
+   for(int i=0;i<=OPTIMIZE;i++)
+       valid_cell_count[i]=0;
    valid_cell_count[0]=grid->info.width*grid->info.height ;
-   valid_cell_count[1]=0;
-   valid_cell_count[2]=0;
-   valid_cell_count[3]=0;
-   valid_cell_count[4]=0;
 
    int w=grid->info.width/num;
    int h=grid->info.height/num;
@@ -137,8 +132,9 @@ void MapProcess::GetBinaryAndSample(const nav_msgs::OccupancyGridConstPtr& grid 
 
 int MapProcess::GetFreeSpcaceIndices(const char *grid,int w,int h)
 {
-  //  CellInfo cell={0,0,0,0,10000,0,0,{0,0,0,0,0,0,0,0}};
-    CellInfo cell={0,0,0,0,0,0,0,{0,0,0,0,0,0,0,0}};
+    CellInfo cell={0,0,0,0,0,0,0,
+                   {kDisiInifinte,kDisiInifinte,kDisiInifinte,kDisiInifinte,
+                    kDisiInifinte,kDisiInifinte,kDisiInifinte,kDisiInifinte}};
     for(int j = 0; j <h; j++)
         for(int i = 0; i < w; i++)
         {
@@ -365,53 +361,17 @@ void MapProcess::CalScan(const sensor_msgs::LaserScanConstPtr& scan )
 //    ROS_INFO("l_dis=%6.2f min_er=%6.2f ma_er=%6.2f",singleScan.dis_avg,
 //             free_grid_Cell[0].dis_err,free_grid_Cell[pcnt-1].dis_err);
 
-    calHeading(scan,10);
+    calHeading(scan,laser_skip);
 
-    ROS_INFO("optimize-4 = %d/%d/%d/%d/%d", valid_cell_count[4],valid_cell_count[3],
-              valid_cell_count[2],valid_cell_count[1],valid_cell_count[0]);
+    ROS_INFO("optimize-4 = %d/%d/%d/%d", valid_cell_count[4],valid_cell_count[3],
+              valid_cell_count[2],valid_cell_count[1]);
 }
 
 void  MapProcess::calHeading(const sensor_msgs::LaserScanConstPtr& scan,int skip)
 {
-    float neighbour[8]={0};
-    int size = (int)scan->ranges.size();
-    float ang= scan->angle_min;
-    int pcnt= valid_cell_count[2];
-    int cnt= size/skip;
+    int pcnt =valid_cell_count[2];
+    Optimiz(scan,skip,pcnt);
 
-    for(int i=0;i<free_grid_Cell.size();i++)
-        free_grid_Cell[i].dis_err = 10000;
-
-    for(int i=0;i<cnt;i++)
-    {
-        for(int j=0;j<8;j++)
-        {
-          int index = i*skip+j*size/8 ;
-          if(index > size)
-            index =index/((index/size)*size);
-          float dist = scan->ranges[index];
-          if ( (dist >kMinLaserRange) && (dist < kMaxLaserRange))
-              neighbour[j]=dist;
-        }
-        for(int k=0;k<pcnt;k++)
-        {
-            float sum=0;
-            float avg=0;
-            for(int j=0;j<8;j++)
-            {
-                avg += neighbour[j];
-                sum += free_grid_Cell[k].neighbour[j]*neighbour[j];
-            }
-            avg /=8;
-            avg = fabs(free_grid_Cell[k].dis_avg - avg);
-            if(sum>free_grid_Cell[k].grade)
-                free_grid_Cell[k].grade =sum ;
-//            if(avg<free_grid_Cell[k].grade)
-//              free_grid_Cell[k].grade = avg;
-            if(avg<free_grid_Cell[k].dis_err)
-                free_grid_Cell[k].dis_err =avg;
-        }
-    }
     std::sort(free_grid_Cell.begin(),free_grid_Cell.end(), CellInfo_cmpdis_grade);
 
     pcnt *= optimize[1];
@@ -432,6 +392,54 @@ void  MapProcess::calHeading(const sensor_msgs::LaserScanConstPtr& scan,int skip
     }
 
     valid_cell_count[4] =pcnt;
+}
+
+void MapProcess::Optimiz(const sensor_msgs::LaserScanConstPtr& scan,int skip ,int pcnt)
+{
+    float neighbour[8]={0};
+    int size = (int)scan->ranges.size();
+    float ang= scan->angle_min;
+    int cnt= size/skip;
+
+    for(int i=0;i<free_grid_Cell.size();i++)
+        free_grid_Cell[i].dis_err = 10000;
+
+    for(int i=0;i<cnt;i++)
+    {
+        for(int j=0;j<8;j++)
+        {
+          int index = i*skip+j*size/8 ;
+          if(index > size)
+            index =index/((index/size)*size);
+          float dist = scan->ranges[index];
+          if ( (dist >kMinLaserRange) && (dist < kMaxLaserRange))
+              neighbour[j]=dist;
+          else
+              neighbour[j] =kDisiInifinte;
+        }
+        for(int k=0;k<pcnt;k++)
+        {
+            float sum=0;
+            float avg=0;
+            int avg_cnt=0;
+            for(int j=0;j<8;j++)
+            {
+                if(neighbour[j]+1<kDisiInifinte)
+                {
+                    avg += neighbour[j];
+                    avg_cnt ++;
+                }
+                float err=(free_grid_Cell[k].neighbour[j]-neighbour[j]);
+                sum += err*err;
+            }
+            avg /=avg_cnt;
+            avg = fabs(free_grid_Cell[k].dis_avg - avg);
+            if(sum>free_grid_Cell[k].grade)
+                free_grid_Cell[k].grade =sum ;
+            if(avg<free_grid_Cell[k].dis_err)
+                free_grid_Cell[k].dis_err =avg;
+        }
+    }
 }
 
 
