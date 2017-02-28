@@ -103,6 +103,7 @@ public:
      nav_msgs::OccupancyGrid filter_map;
      float optimize[OPTIMIZE];
      int laser_skip;
+     int filter_cnt;
 
 private:
      int GetFreeSpcaceIndices(const char *grid,int w,int h);

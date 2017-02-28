@@ -38,6 +38,8 @@ int main(int argc, char **argv)
       m_mapProcess.optimize[4]=0.5;
   if(!nh.getParam("laser_skip",m_mapProcess.laser_skip))
       m_mapProcess.laser_skip =20;
+  if(!nh.getParam("filter_cnt",m_mapProcess.filter_cnt))
+      m_mapProcess.laser_skip =4;
 
   ROS_INFO("optimize=[%6.2f %6.2f %6.2f]",m_mapProcess.optimize[0],
           m_mapProcess.optimize[1],m_mapProcess.optimize[2]);
@@ -86,7 +88,7 @@ int main(int argc, char **argv)
 
 void mapReceived(const nav_msgs::OccupancyGridConstPtr& grid)
 {
-    m_mapProcess.GetBinaryAndSample(grid,100,0,4);
+    m_mapProcess.GetBinaryAndSample(grid,100,0,m_mapProcess.filter_cnt);
     mapfinish=true;
 }
 

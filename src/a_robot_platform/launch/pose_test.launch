@@ -10,6 +10,8 @@
 	<param name="optimize4" value="0.5"/>
 	<param name="optimize5" value="0.5"/>
 	<param name="laser_skip" value="10"/>
+	<param name="filter_cnt" value="2"/>
+
 </node>
 
 </launch>

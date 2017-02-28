@@ -6,7 +6,6 @@ Panels:
       Expanded:
         - /Global Options1
         - /Status1
-        - /PointCloud1
       Splitter Ratio: 0.5
     Tree Height: 747
   - Class: rviz/Selection
@@ -83,17 +82,10 @@ Visualization Manager:
       Size (Pixels): 3
       Size (m): 0.1
       Style: Flat Squares
-      Topic: /optimize_2
+      Topic: /optimize_1
       Unreliable: false
       Use Fixed Frame: true
       Use rainbow: true
-      Value: true
-    - Class: rviz/Axes
-      Enabled: true
-      Length: 1
-      Name: Axes
-      Radius: 0.1
-      Reference Frame: <Fixed Frame>
       Value: true
     - Alpha: 1
       Autocompute Intensity Bounds: true
@@ -145,22 +137,6 @@ Visualization Manager:
             {}
       Update Interval: 0
       Value: true
-    - Alpha: 1
-      Class: rviz/RobotModel
-      Collision Enabled: false
-      Enabled: true
-      Links:
-        All Links Enabled: true
-        Expand Joint Details: false
-        Expand Link Details: false
-        Expand Tree: false
-        Link Tree Style: Links in Alphabetic Order
-      Name: RobotModel
-      Robot Description: robot_description
-      TF Prefix: ""
-      Update Interval: 0
-      Value: true
-      Visual Enabled: true
   Enabled: true
   Global Options:
     Background Color: 48; 48; 48
@@ -185,22 +161,22 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 19.76
+      Distance: 9.94118
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.06
         Stereo Focal Distance: 1
         Swap Stereo Eyes: false
         Value: false
       Focal Point:
-        X: -2.26202
-        Y: 1.20968
-        Z: -7.60226
+        X: 0.0316591
+        Y: -0.761673
+        Z: -3.78923
       Name: Current View
       Near Clip Distance: 0.01
-      Pitch: 1.5648
+      Pitch: 1.5698
       Target Frame: <Fixed Frame>
       Value: Orbit (rviz)
-      Yaw: 4.77178
+      Yaw: 3.16801
     Saved: ~
 Window Geometry:
   Displays:
