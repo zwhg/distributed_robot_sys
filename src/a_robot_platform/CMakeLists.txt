@@ -44,7 +44,7 @@ include_directories(include
 add_executable(main_uart_odom src/server/main_uart_odom.cpp
  src/common/modbus.cpp
  src/common/paras.cpp
- src/server/moc_tcp_server.cpp
+ src/server/moc_tcpsocketserver.cpp
  src/server/tcpsocketserver.cpp
  src/server/uartdriver.cpp
  src/server/uartodom.cpp

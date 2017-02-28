@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<launch>
+
+<include file ="$(find a_robot_platform)/launch/map_server.launch"/>
+
+
+
+<node  name="pose_test" pkg="a_robot_platform" type="main_initial_pose_test" output="screen">
+
+</node>
+
+</launch>

@@ -32,7 +32,9 @@ SOURCES += main.cpp\
     ../../common/paras.cpp \
     ../../common/modbus.cpp \
     ../../common/map_image.cpp \
-    ../udp_socket.cpp
+    ../udp_socket.cpp \
+    ../../server/tcpsocketserver.cpp
+
 
 HEADERS  += mainwindow.h \
     ../key_control.h \
@@ -44,7 +46,8 @@ HEADERS  += mainwindow.h \
     ../../common/map_image.h \
     ../udp_socket.h \
     ../../server/uartlaser.h \
-    ../../server/uartdriver.h
+    ../../server/uartdriver.h \
+    ../../server/tcpsocketserver.h
 
 
 FORMS    += mainwindow.ui

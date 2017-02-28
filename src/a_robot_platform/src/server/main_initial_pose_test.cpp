@@ -1,12 +1,15 @@
 #include "../common/map_process.h"
 #include <ros/ros.h>
 #include <sensor_msgs/PointCloud.h>
+#include  <tf/transform_broadcaster.h>
 
 void mapReceived(const nav_msgs::OccupancyGridConstPtr& grid);
 void scanReceived(const sensor_msgs::LaserScanConstPtr& scan);
 
 
 void getFirstPointCloud(sensor_msgs::PointCloud& pfcloud);
+
+void sendtf(float x,float y ,float theta);
 
 zw::MapProcess  m_mapProcess;
 
@@ -35,13 +38,14 @@ int main(int argc, char **argv)
   while(ros::ok())
   {
     ros::spinOnce();
+    sendtf(0,0 ,0);
 
     if(mapfinish && mapflag)
     {
         mapflag =false;
         filter_map_pub.publish(m_mapProcess.filter_map);
-        getFirstPointCloud(pfcloud);
-        first_points_pub.publish(pfcloud);
+    //    getFirstPointCloud(pfcloud);
+     //   first_points_pub.publish(pfcloud);
     }
     if(firstFinish)
     {
@@ -67,7 +71,7 @@ void scanReceived(const sensor_msgs::LaserScanConstPtr& scan)
 {
     if(mapfinish)
     {
-      m_mapProcess.CalScan(scan,0.4);
+      m_mapProcess.CalScan(scan,0.20);
       firstFinish =true;
     }
 }
@@ -81,10 +85,10 @@ void getFirstPointCloud(sensor_msgs::PointCloud& pfcloud)
     int num=0;
     for(int i=0;i<m_mapProcess.free_grid_Cell.size();i++)
     {
-        if(m_mapProcess.free_grid_Cell[i].status!=0)
+        if(m_mapProcess.free_grid_Cell[i].status==2)
             num++;
     }
-    ROS_INFO("first optimize cell=%d",num);
+  //  ROS_INFO("first optimize cell= %d/%d",num, (int)m_mapProcess.free_grid_Cell.size());
 
     pfcloud.points.resize(num);
 
@@ -93,4 +97,16 @@ void getFirstPointCloud(sensor_msgs::PointCloud& pfcloud)
         pfcloud.points[i]= m_mapProcess.GetPoint(m_mapProcess.free_grid_Cell[i],
                                                  m_mapProcess.filter_map);
     }
+}
+
+
+void sendtf(float x,float y ,float theta)
+{
+    static tf::TransformBroadcaster br;
+    tf::Transform tr;
+    tr.setOrigin(tf::Vector3(x,y,0.0));
+    tf::Quaternion q;
+    q.setRPY(0,0,theta);
+    tr.setRotation(q);
+    br.sendTransform(tf::StampedTransform(tr,ros::Time::now(),"map","odom"));
 }

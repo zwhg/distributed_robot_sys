@@ -37,6 +37,11 @@ inline uint32_t GetGridIndexOfMap(uint32_t w,uint32_t x,uint32_t y)
   return  index;
 }
 
+inline float fabs(float f)
+{
+    return f>=0?f:(-f);
+}
+
 /**
  * Returns the map pose for the given world pose.
  */
@@ -66,9 +71,11 @@ struct CellInfo
 {
   int x;
   int y;
+  float heading;
   int status;
   float grade;
   float dis_avg;
+  float dis_err;
   float neighbour[8];
 };
 
@@ -77,15 +84,15 @@ struct SingleScan
     float dis_avg;
 };
 
-bool CellInfo_cmp(const CellInfo& c1,const CellInfo & c2);
-
+bool CellInfo_cmpdis_err(const CellInfo& c1,const CellInfo & c2);
+bool CellInfo_cmpdis_grade(const CellInfo& c1,const CellInfo & c2);
 
 
 class MapProcess
 {
 private:
      SingleScan singleScan;
-     int free_space_count;
+     int valid_cell_count[5];
 public:
      std::vector<CellInfo> free_grid_Cell;
      float map_resolution;
@@ -96,8 +103,9 @@ public:
      void GetBinaryAndSample(const nav_msgs::OccupancyGridConstPtr& grid ,int th_occ ,int th_free ,int num );
      int GetFreeSpcaceIndices(const char *grid,int w,int h);
      void CalNeighbour(const char *grid,int w,int h,float resolution);
-     void CalScan(const sensor_msgs::LaserScanConstPtr& scan,float err);
+     void CalScan(const sensor_msgs::LaserScanConstPtr& scan,float perr);
      geometry_msgs:: Point32 GetPoint(const CellInfo & cell ,const nav_msgs::OccupancyGrid& map);
+     void calHeading(const sensor_msgs::LaserScanConstPtr& scan,int skip,float perr);
 };
 
 

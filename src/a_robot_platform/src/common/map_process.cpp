@@ -42,17 +42,24 @@ void map_filter(char *out,uint32_t w, uint32_t h)
   }
 }
 
-bool CellInfo_cmp(const CellInfo& c1,const CellInfo & c2)
+bool CellInfo_cmpdis_err(const CellInfo& c1,const CellInfo & c2)
  {
-     if(c1.status==c2.status)
-         return c1.grade > c2.grade;
-     return c1.status > c2.status;
+    return c1.dis_err <c2.dis_err;
  }
+
+bool CellInfo_cmpdis_grade(const CellInfo& c1,const CellInfo & c2)
+{
+      return c1.grade < c2.grade;
+}
 
 MapProcess::MapProcess()
 {
+    valid_cell_count[0]=0;
+    valid_cell_count[1]=0;
+    valid_cell_count[2]=0;
+    valid_cell_count[3]=0;
+    valid_cell_count[4]=0;
     free_grid_Cell.resize(0);
-    free_space_count=0;
     map_resolution =0.05;
 }
 
@@ -63,6 +70,14 @@ MapProcess::~MapProcess()
 
 void MapProcess::GetBinaryAndSample(const nav_msgs::OccupancyGridConstPtr& grid ,int th_occ ,int th_free ,int num )
 {
+   free_grid_Cell.resize(0);
+   map_resolution =0.05;
+   valid_cell_count[0]=grid->info.width*grid->info.height ;
+   valid_cell_count[1]=0;
+   valid_cell_count[2]=0;
+   valid_cell_count[3]=0;
+   valid_cell_count[4]=0;
+
    int w=grid->info.width/num;
    int h=grid->info.height/num;
    map_resolution = grid->info.resolution *num;
@@ -91,7 +106,7 @@ void MapProcess::GetBinaryAndSample(const nav_msgs::OccupancyGridConstPtr& grid 
    }
 
    map_filter(mapdata,w,h);
-   free_space_count = GetFreeSpcaceIndices(mapdata,w,h);
+   valid_cell_count[1]= GetFreeSpcaceIndices(mapdata,w,h);
    CalNeighbour(mapdata,w,h ,map_resolution);
 
    filter_map.info.resolution = map_resolution;
@@ -113,13 +128,11 @@ void MapProcess::GetBinaryAndSample(const nav_msgs::OccupancyGridConstPtr& grid 
 
    ROS_INFO("map info %d X %d map @ %3.2lf m/cell",filter_map.info.width,
             filter_map.info.height,filter_map.info.resolution);
-   ROS_INFO("total cell=%d \nsample cell=%d  free cell=%d",grid->info.width*grid->info.height,
-            w*h,free_space_count);
 }
 
 int MapProcess::GetFreeSpcaceIndices(const char *grid,int w,int h)
 {
-    CellInfo cell={0,0,0,0,0,{0,0,0,0,0,0,0,0}};
+    CellInfo cell={0,0,0,0,10000,0,0,{0,0,0,0,0,0,0,0}};
 
     for(int j = 0; j <h; j++)
         for(int i = 0; i < w; i++)
@@ -136,28 +149,33 @@ int MapProcess::GetFreeSpcaceIndices(const char *grid,int w,int h)
 
 void MapProcess::CalNeighbour(const char *grid,int w,int h ,float resolution)
 {
-    int max_count = floor(kMaxLaserRange/resolution);
   //  int min_count = floor(kMinLaserRange/resolution);
-    for(int i=0;i<free_space_count;i++)
+    float res;
+    int max_count;
+    for(int i=0;i<valid_cell_count[1];i++)
     {
         int k=1;
         int x= free_grid_Cell[i].x;
         int y= free_grid_Cell[i].y;
         float sum=0;
         int count=0;
+        res=resolution;
+        max_count = floor(kMaxLaserRange/res);
         while(k<=max_count)
         {
             if((y+k)<h)
             {
                  if(grid[GetGridIndexOfMap(w,x,y+k)]==kOccGrid)
                  {
-                     free_grid_Cell[i].neighbour[0] = k*resolution ;
-                     sum += k*resolution ;
+                     free_grid_Cell[i].neighbour[0] = k*res ;
+                     sum += k*res ;
                      count++;
                      break;
                  }
+                 k++;
             }
-            k++;
+            else
+                break;
         }
         k=1;
         while(k<=max_count)
@@ -166,13 +184,16 @@ void MapProcess::CalNeighbour(const char *grid,int w,int h ,float resolution)
             {
                  if(grid[GetGridIndexOfMap(w,x+k,y)]==kOccGrid)
                  {
-                     free_grid_Cell[i].neighbour[2] = k*resolution ;
-                     sum += k*resolution ;
+                     free_grid_Cell[i].neighbour[2] = k*res ;
+                     sum += k*res ;
                      count++;
                      break;
                  }
+                 k++;
             }
-            k++;
+            else
+               break;
+
         }
         k=1;
         while(k<=max_count)
@@ -181,13 +202,16 @@ void MapProcess::CalNeighbour(const char *grid,int w,int h ,float resolution)
             {
                  if(grid[GetGridIndexOfMap(w,x,y-k)]==kOccGrid)
                  {
-                     free_grid_Cell[i].neighbour[4] = k*resolution ;
-                     sum += k*resolution ;
+                     free_grid_Cell[i].neighbour[4] = k*res ;
+                     sum += k*res ;
                      count++;
                      break;
                  }
+                 k++;
             }
-            k++;
+            else
+                break;
+
         }
         k=1;
         while(k<=max_count)
@@ -196,17 +220,19 @@ void MapProcess::CalNeighbour(const char *grid,int w,int h ,float resolution)
             {
                  if(grid[GetGridIndexOfMap(w,x-k,y)]==kOccGrid)
                  {
-                     free_grid_Cell[i].neighbour[6] = k*resolution ;
-                     sum += k*resolution ;
+                     free_grid_Cell[i].neighbour[6] = k*res ;
+                     sum += k*res ;
                      count++;
                      break;
                  }
+                 k++;
             }
-            k++;
+            else
+               break;
         }
 
-        resolution *=1.414213;
-        max_count = floor(kMaxLaserRange/resolution);
+        res=resolution*1.414213;
+        max_count = floor(kMaxLaserRange/res);
         k=1;
         while(k<=max_count)
         {
@@ -214,13 +240,16 @@ void MapProcess::CalNeighbour(const char *grid,int w,int h ,float resolution)
             {
                  if(grid[GetGridIndexOfMap(w,x+k,y+k)]==kOccGrid)
                  {
-                     free_grid_Cell[i].neighbour[1] = k*resolution ;
-                     sum += k*resolution ;
+                     free_grid_Cell[i].neighbour[1] = k*res ;
+                     sum += k*res;
                      count++;
                      break;
                  }
+                 k++;
             }
-            k++;
+            else
+                break ;
+
         }
         k=1;
         while(k<=max_count)
@@ -229,13 +258,15 @@ void MapProcess::CalNeighbour(const char *grid,int w,int h ,float resolution)
             {
                  if(grid[GetGridIndexOfMap(w,x+k,y-k)]==kOccGrid)
                  {
-                     free_grid_Cell[i].neighbour[3] = k*resolution ;
-                     sum += k*resolution ;
+                     free_grid_Cell[i].neighbour[3] = k*res ;
+                     sum += k*res ;
                      count++;
                      break;
                  }
+                 k++;
             }
-            k++;
+            else
+                break;
         }
         k=1;
         while(k<=max_count)
@@ -244,13 +275,15 @@ void MapProcess::CalNeighbour(const char *grid,int w,int h ,float resolution)
             {
                  if(grid[GetGridIndexOfMap(w,x-k,y-k)]==kOccGrid)
                  {
-                     free_grid_Cell[i].neighbour[5] = k*resolution ;
-                     sum += k*resolution ;
+                     free_grid_Cell[i].neighbour[5] = k*res ;
+                     sum += k*res ;
                      count++;
                      break;
                  }
+                 k++;
             }
-            k++;
+            else
+                break;
         }
         k=1;
         while(k<=max_count)
@@ -259,16 +292,23 @@ void MapProcess::CalNeighbour(const char *grid,int w,int h ,float resolution)
             {
                  if(grid[GetGridIndexOfMap(w,x-k,y+k)]==kOccGrid)
                  {
-                     free_grid_Cell[i].neighbour[7] = k*resolution ;
-                     sum += k*resolution ;
+                     free_grid_Cell[i].neighbour[7] = k*res ;
+                     sum += k*res;
                      count++;
                      break;
                  }
+                 k++;
             }
-            k++;
+            else
+             break;
         }
 
-        free_grid_Cell[i].dis_avg =sum/count;
+        if(count!=0)
+            free_grid_Cell[i].dis_avg =sum/count;
+        else
+            free_grid_Cell[i].dis_avg =10000.0;
+
+    //    ROS_INFO("[%4d %4d %4.2f]",x,y,free_grid_Cell[i].dis_avg);
     }
 
 //    for(int i=0;i<5;i++)
@@ -280,7 +320,7 @@ void MapProcess::CalNeighbour(const char *grid,int w,int h ,float resolution)
 //        free_grid_Cell[i].neighbour[6],free_grid_Cell[i].neighbour[7]);
 }
 
-void MapProcess::CalScan(const sensor_msgs::LaserScanConstPtr& scan ,float err)
+void MapProcess::CalScan(const sensor_msgs::LaserScanConstPtr& scan ,float perr)
 {
     size_t size = scan->ranges.size();
     float angle = scan->angle_min;
@@ -300,13 +340,29 @@ void MapProcess::CalScan(const sensor_msgs::LaserScanConstPtr& scan ,float err)
     }
     singleScan.dis_avg =sum/count ;
 
-    for(int i=0;i<free_space_count;i++)
+    int pcnt =valid_cell_count[1];
+    for(int i=0;i<pcnt;i++)
     {
-      if(abs(free_grid_Cell[i].dis_avg- singleScan.dis_avg)<err)
-        free_grid_Cell[i].status =1;
+      free_grid_Cell[i].dis_err =fabs(free_grid_Cell[i].dis_avg- singleScan.dis_avg);
     }
 
-    std::sort(free_grid_Cell.begin(),free_grid_Cell.end(),CellInfo_cmp);
+    std::sort(free_grid_Cell.begin(),free_grid_Cell.end(),CellInfo_cmpdis_err);
+//    for(int i=0;i<free_space_count;i++)
+//      ROS_INFO("%f",free_grid_Cell[i].dis_err);
+
+    pcnt *= perr;
+    for(int i=0;i< pcnt;i++)
+      free_grid_Cell[i].status =1;
+
+    valid_cell_count[2]=pcnt;
+
+//    ROS_INFO("l_dis=%6.2f min_er=%6.2f ma_er=%6.2f",singleScan.dis_avg,
+//             free_grid_Cell[0].dis_err,free_grid_Cell[pcnt-1].dis_err);
+
+    calHeading(scan,10,0.5);
+
+    ROS_INFO("optimize-3 cell= %d/%d/%d", valid_cell_count[3],
+              valid_cell_count[2],valid_cell_count[1]);
 }
 
 geometry_msgs::Point32 MapProcess::GetPoint(const CellInfo & cell ,const nav_msgs::OccupancyGrid& map)
@@ -318,6 +374,55 @@ geometry_msgs::Point32 MapProcess::GetPoint(const CellInfo & cell ,const nav_msg
     p.z=0;
     return p;
 }
+
+void  MapProcess::calHeading(const sensor_msgs::LaserScanConstPtr& scan,int skip,float perr)
+{
+    float neighbour[8]={0};
+    int size = (int)scan->ranges.size();
+    float ang= scan->angle_min;
+    int pcnt= valid_cell_count[2];
+    int cnt= size/skip;
+
+    for(int i=0;i<cnt;i++)
+    {
+        for(int j=0;j<8;j++)
+        {
+          int index = i*skip+j*size/9 ;
+          if(index > size)
+            index =index/((index/size)*size);
+          float dist = scan->ranges[index];
+          if ( (dist >kMinLaserRange) && (dist < kMaxLaserRange))
+              neighbour[j]=dist;
+        }
+        for(int k=0;k<pcnt;k++)
+        {
+            float sum=0;
+            float avg=0;
+            for(int j=0;j<8;j++)
+            {
+                avg += neighbour[j];
+                sum += free_grid_Cell[k].neighbour[j]*neighbour[j];
+            }
+            avg /=8;
+            avg = fabs(free_grid_Cell[k].dis_avg - avg);
+//            if(sum>free_grid_Cell[k].grade)
+//                free_grid_Cell[k].grade =sum ;
+            if(avg<free_grid_Cell[k].grade)
+              free_grid_Cell[k].grade = avg;
+        }
+    }
+    std::sort(free_grid_Cell.begin(),free_grid_Cell.end(), CellInfo_cmpdis_grade);
+
+    pcnt *= perr;
+    for(int i=0;i< pcnt;i++)
+    {
+      free_grid_Cell[i].status =2;
+    //  ROS_INFO("%f",free_grid_Cell[i].grade);
+    }
+
+    valid_cell_count[3] =pcnt;
+}
+
 
 }
 

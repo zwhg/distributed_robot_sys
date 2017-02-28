@@ -17,6 +17,7 @@
 #include "../../common/map_image.h"
 #include "../udp_socket.h"
 
+
 #include <QtNetwork>
 
 MainWindow::MainWindow(QWidget *parent) :

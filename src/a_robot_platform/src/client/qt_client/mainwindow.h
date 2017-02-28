@@ -16,6 +16,8 @@
 #include <QProgressBar>
 #include "../../common/map_image.h"
 
+
+
 #define Myhigh 600
 #define Mywidth 600
 #define  MIDD 720
