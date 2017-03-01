@@ -108,6 +108,11 @@ target_link_libraries(main_initial_pose_test
  ${catkin_LIBRARIES})
 
 
+add_executable(main_path_publish src/server/main_path_publish.cpp
+ )
+target_link_libraries(main_path_publish
+ ${catkin_LIBRARIES})
+
 
 add_executable(main_pathplan_server src/server/main_pathplan_server.cpp)
 target_link_libraries(main_pathplan_server

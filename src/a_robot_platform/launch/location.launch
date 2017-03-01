@@ -43,7 +43,7 @@
 	<param name="laser_model_type" value="likelihood_field"/>
 	<param name="odom_model_type" value="diff"/>
 	<param name="update_min_d" value="0.01"/>
-	<param name="update_min_a" value="0.1"/>
+	<param name="update_min_a" value="0.05"/>
 	<param name="resample_interval" value="1"/>
 	<param name="transform_tolerance" value="0.2"/>
 	<param name="recovery_alpha_slow" value="0.0"/>

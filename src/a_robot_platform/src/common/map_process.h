@@ -24,8 +24,7 @@ constexpr float kMaxProbability = 1.f - kMinProbability;
 constexpr uint16 kUnknownProbabilityValue = 0;
 constexpr uint16 kUpdateMarker = 1u << 15;
 
-constexpr float kMinLaserRange=0.15;
-constexpr float kMaxLaserRange=6.5;
+
 
 constexpr float kDisiInifinte =100.0f;
 
