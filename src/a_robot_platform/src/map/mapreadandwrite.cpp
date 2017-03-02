@@ -43,29 +43,25 @@ bool readPgm(nav_msgs::OccupancyGrid& grid,const std::string file_path)
       //const size_t i = x + (grid.info.height - y - 1) * grid.info.width;
       const size_t i=zw::GetGridIndexOfMap(grid.info.width,x,(grid.info.height - y - 1));
       p_value=kOccGrid-((unsigned char)dat[j]*kOccGrid)/255;
-      if(p_value>=(char)(kOccProbaility*kOccGrid))
-        p_value=kOccGrid;
-      else if(p_value <=(char)(kFreeprobaility*kOccGrid))
-        p_value=kFreeGrid;
-      else
-        p_value=kUnknownGrid;
-    //  dat[j]=p_value;
-     // grid.data[i] =p_value;
+
+//      if(p_value>=(char)(kOccProbaility*kOccGrid))
+//        p_value=kOccGrid;
+//      else if(p_value <=(char)(kFreeprobaility*kOccGrid))
+//        p_value=kFreeGrid;
+//      else
+//        p_value=kUnknownGrid;
+
       gmap[i]= dat[j];
       map[i]=p_value;
       j++;
     }
   }
 
-  // filter the islet of the map
 
-  map_liner(gmap, map ,grid.info.width, grid.info.height );
-
-  map_filter(map, grid.info.width, grid.info.height);
-
-  map_filter(map, grid.info.width, grid.info.height, kOccGrid, kUnknownGrid);
-
-  map_filter(map, grid.info.width, grid.info.height, kUnknownGrid, kFreeGrid);
+//  map_liner(gmap, map ,grid.info.width, grid.info.height );
+//  map_filter(map, grid.info.width, grid.info.height);
+//  map_filter(map, grid.info.width, grid.info.height, kOccGrid, kUnknownGrid);
+//  map_filter(map, grid.info.width, grid.info.height, kUnknownGrid, kFreeGrid);
 
   for (size_t k = 0; k < dat_size; ++k) {
       grid.data[k]=map[k];

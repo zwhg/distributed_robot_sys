@@ -4,6 +4,35 @@
 namespace zw {
 
 
+void map_process(char *m,const nav_msgs::OccupancyGrid& map)
+{
+
+    char p_value;
+    unsigned long dat_size = map.info.width*map.info.height;
+    char *gm=new char[dat_size];
+
+    for(int i=0; i<dat_size;i++)
+    {
+      gm[i]= map.data[i];
+      p_value = gm[i];
+
+      if(p_value>=(char)(kOccProbaility*kOccGrid))
+        p_value=kOccGrid;
+      else if(p_value <=(char)(kFreeprobaility*kOccGrid))
+        p_value=kFreeGrid;
+      else
+        p_value=kUnknownGrid;
+      m[i]=p_value ;
+    }
+
+    map_liner(gm, m ,map.info.width, map.info.height);
+    map_filter(m, map.info.width, map.info.height);
+    map_filter(m, map.info.width, map.info.height, kOccGrid, kUnknownGrid);
+    map_filter(m, map.info.width, map.info.height, kUnknownGrid, kFreeGrid);
+
+    delete gm;
+}
+
 void map_liner(const char *g,char *m ,int32_t w ,int32_t h )
 {
     char *mtx=new char [w*h];

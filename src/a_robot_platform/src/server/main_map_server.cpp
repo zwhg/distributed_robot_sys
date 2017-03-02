@@ -10,6 +10,7 @@ int main(int argc, char **argv)
   ROS_INFO("package_name:a_robot_platform  node_name:main_map_server");
   ros::NodeHandle n;
   nav_msgs::OccupancyGrid grid;
+  nav_msgs::OccupancyGrid bmap;
   const char * stem;
   if(argc>1)
     stem = argv[1];
@@ -23,15 +24,30 @@ int main(int argc, char **argv)
   ROS_INFO("Read a %d X %d map @ %3.2lf m/cell",grid.info.width,
            grid.info.height,grid.info.resolution);
   ros::Publisher map_pub;
-  ros::Publisher metadata_pub;
-
-  // Latched publisher for metadata
-  metadata_pub= n.advertise<nav_msgs::MapMetaData>("map_metadata", 1, true);
-  metadata_pub.publish(grid.info);
+  ros::Publisher bmap_pub;
 
   // Latched publisher for data
   map_pub = n.advertise<nav_msgs::OccupancyGrid>("map", 1, true);
   map_pub.publish(grid);
+
+
+  unsigned long dat_size=grid.info.width*grid.info.height;
+
+  bmap.header=grid.header;
+  bmap.info=grid.info;
+  bmap.data.resize(dat_size,-1);
+
+  char *m=new char[dat_size];
+  zw:: map_process(m,grid);
+
+  for (size_t k = 0; k < dat_size; ++k) {
+      bmap.data[k]=m[k];
+  }
+
+  delete m;
+
+  bmap_pub = n.advertise<nav_msgs::OccupancyGrid>("bmap", 1, true);
+  bmap_pub.publish(bmap);
 
   ros::spin();
   ros::shutdown();

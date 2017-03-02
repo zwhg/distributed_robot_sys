@@ -71,6 +71,8 @@ void map_liner(const char *g,char *m ,int32_t w ,int32_t h );
 void map_filter(char *out,int32_t w, int32_t h);
 void map_filter(char *out, int32_t w, int32_t h,char center,char round);
 
+void map_process(char *m,const nav_msgs::OccupancyGrid& map);
+
 
 struct CellInfo
 {

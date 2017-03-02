@@ -6,6 +6,7 @@
 #include <rosbag/view.h>
 #include <boost/foreach.hpp>
 #include "../map/probability_values.h"
+#include "../common/map_process.h"
 
 namespace zw {
 
@@ -406,7 +407,7 @@ void AmclNode::freeMapDependentMemory()
  * Convert an OccupancyGrid map message into the internal
  * representation.  This allocates a map_t and returns it.
  */
-map_t* AmclNode::convertMap( const nav_msgs::OccupancyGrid& map_msg )
+map_t* AmclNode::convertMap( const nav_msgs::OccupancyGrid& map_msg)
 {
   map_t* map = map_alloc();
   ROS_ASSERT(map);
@@ -419,19 +420,33 @@ map_t* AmclNode::convertMap( const nav_msgs::OccupancyGrid& map_msg )
   // Convert to player format
   map->cells = (map_cell_t*)malloc(sizeof(map_cell_t)*map->size_x*map->size_y);
   ROS_ASSERT(map->cells);
-  for(int i=0;i<map->size_x * map->size_y;i++)
+
+  unsigned long dat_size = map->size_x*map->size_y;
+
+
+  for(int i=0; i<dat_size;i++)
   {
-    if(map_msg.data[i] == kFreeGrid){
+     map->cells[i].probability =((unsigned char)map_msg.data[i])/100.0;
+  }
+
+  char *m=new char[dat_size];
+  zw:: map_process(m,map_msg);
+
+  for(int i=0;i< dat_size;i++)
+  {
+    if(m[i] == kFreeGrid){
       map->cells[i].occ_state = -1;
-      map->cells[i].probability = kMinProbability;
-    }else if(map_msg.data[i] == kOccGrid){
+    }else if(m[i] == kOccGrid){
       map->cells[i].occ_state = +1;
-      map->cells[i].probability = kMaxProbability;
     }else{
       map->cells[i].occ_state = 0;
-      map->cells[i].probability = kUnknownProbability;
     }
+
+//     ROS_INFO("%2d   %f", map->cells[i].occ_state, map->cells[i].probability);
   }
+
+  delete m;
+
   return map;
 }
 
