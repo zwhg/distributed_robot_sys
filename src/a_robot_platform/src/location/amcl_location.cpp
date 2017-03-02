@@ -781,7 +781,13 @@ void AmclNode::laserReceived(const sensor_msgs::LaserScanConstPtr& laser_scan)
       ptest.pose.position.x = scan_match_pose[0];
       ptest.pose.position.y = scan_match_pose[1];
       tf::quaternionTFToMsg(tf::createQuaternionFromYaw(scan_match_pose[2]),                    ptest.pose.orientation);
-      pose_pub_amcl.publish(ptest);
+      pose_pub_scan.publish(ptest);
+
+
+      //amcl or scan match ?
+      finalPose.v[0]= hyps[max_weight_hyp].pf_pose_mean.v[0];
+      finalPose.v[1]= hyps[max_weight_hyp].pf_pose_mean.v[1];
+      finalPose.v[2]= hyps[max_weight_hyp].pf_pose_mean.v[2];
 
 
       geometry_msgs::PoseWithCovarianceStamped p;

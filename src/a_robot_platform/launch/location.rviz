@@ -79,16 +79,6 @@ Visualization Manager:
       Use Fixed Frame: true
       Use rainbow: true
       Value: true
-    - Angle Tolerance: 0.1
-      Class: rviz/Odometry
-      Color: 255; 25; 0
-      Enabled: true
-      Keep: 100
-      Length: 1
-      Name: Odometry
-      Position Tolerance: 0.1
-      Topic: /odom
-      Value: true
     - Alpha: 1
       Class: rviz/RobotModel
       Collision Enabled: false
@@ -159,6 +149,36 @@ Visualization Manager:
       Radius: 0.1
       Reference Frame: <Fixed Frame>
       Value: true
+    - Class: rviz/TF
+      Enabled: true
+      Frame Timeout: 15
+      Frames:
+        All Enabled: true
+        base_link:
+          Value: true
+        imu_link:
+          Value: true
+        laser_link:
+          Value: true
+        map:
+          Value: true
+        odom:
+          Value: true
+      Marker Scale: 1
+      Name: TF
+      Show Arrows: true
+      Show Axes: true
+      Show Names: true
+      Tree:
+        map:
+          odom:
+            base_link:
+              imu_link:
+                {}
+              laser_link:
+                {}
+      Update Interval: 0
+      Value: true
   Enabled: true
   Global Options:
     Background Color: 48; 48; 48
@@ -183,22 +203,22 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 12.8714
+      Distance: 1.4206
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.06
         Stereo Focal Distance: 1
         Swap Stereo Eyes: false
         Value: false
       Focal Point:
-        X: 0
-        Y: 0
-        Z: 0
+        X: 0.0289926
+        Y: 0.061299
+        Z: -0.00246715
       Name: Current View
       Near Clip Distance: 0.01
-      Pitch: 1.3348
+      Pitch: 1.5648
       Target Frame: <Fixed Frame>
       Value: Orbit (rviz)
-      Yaw: 4.10176
+      Yaw: 3.15676
     Saved: ~
 Window Geometry:
   Displays:

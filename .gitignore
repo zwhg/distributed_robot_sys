@@ -12,10 +12,16 @@
 *moc_key_control.cpp
 *moc_mainwindow.cpp
 *ui_mainwindow.h
+*build_isolated
+*devel_isolated
+*install_isolated
+*build
+*devel
+*install
+
 
 src/amcl/
 temp/
-googleMapping/
 build/
 devel/
 catkin_generated/

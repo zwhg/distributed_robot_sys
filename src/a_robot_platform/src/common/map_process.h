@@ -67,7 +67,9 @@ inline Eigen::Vector3f getWorldCoordsPose(const map_t* map, const Eigen::Vector3
  * Compute the map coords for given the cell index
  */
 
-void map_filter(char *out,uint32_t w, uint32_t h);
+void map_liner(const char *g,char *m ,int32_t w ,int32_t h );
+void map_filter(char *out,int32_t w, int32_t h);
+void map_filter(char *out, int32_t w, int32_t h,char center,char round);
 
 
 struct CellInfo

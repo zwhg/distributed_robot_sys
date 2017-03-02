@@ -33,6 +33,7 @@ bool readPgm(nav_msgs::OccupancyGrid& grid,const std::string file_path)
   unsigned long dat_size=grid.info.width*grid.info.height;
   grid.data.resize(dat_size,-1);
   char *dat=new char[dat_size];
+  char *gmap=new char[dat_size];
   char *map=new char[dat_size];
   pgm_file.read(dat,dat_size);
   size_t j=0;
@@ -48,20 +49,30 @@ bool readPgm(nav_msgs::OccupancyGrid& grid,const std::string file_path)
         p_value=kFreeGrid;
       else
         p_value=kUnknownGrid;
-      dat[j++]=p_value;
+    //  dat[j]=p_value;
      // grid.data[i] =p_value;
+      gmap[i]= dat[j];
       map[i]=p_value;
+      j++;
     }
   }
-  // filter the islet of the map
-  map_filter(map,grid.info.width, grid.info.height);
 
+  // filter the islet of the map
+
+  map_liner(gmap, map ,grid.info.width, grid.info.height );
+
+  map_filter(map, grid.info.width, grid.info.height);
+
+  map_filter(map, grid.info.width, grid.info.height, kOccGrid, kUnknownGrid);
+
+  map_filter(map, grid.info.width, grid.info.height, kUnknownGrid, kFreeGrid);
 
   for (size_t k = 0; k < dat_size; ++k) {
       grid.data[k]=map[k];
   }
 
   delete map;
+  delete gmap;
   delete dat;
   pgm_file.close();
   //OccupancyToPgmAndYaml(grid,"/home/zw/zw");

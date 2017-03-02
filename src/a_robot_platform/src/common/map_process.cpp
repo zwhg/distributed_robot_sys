@@ -4,7 +4,203 @@
 namespace zw {
 
 
-void map_filter(char *out,uint32_t w, uint32_t h)
+void map_liner(const char *g,char *m ,int32_t w ,int32_t h )
+{
+    char *mtx=new char [w*h];
+    char *mty=new char [w*h];
+    for(int i=0;i<w*h;i++)
+    {
+        mtx[i]=m[i];
+        mty[i]=m[i];
+    }
+    for(int y=0;y<h;y++)
+    {
+        int min=y*w;
+        int max=(y+1)*w;
+        int x=y*w;
+        while(x<max)
+        {
+            if(m[x++]==kOccGrid)
+            {
+                int start=x-1;
+                while((x<max)&&(m[x]==kOccGrid))
+                    x++;
+                int end =x;
+                int gmin= g[start];
+                for(int k=start+1;k<end;k++)
+                {
+                    if(gmin>g[k])
+                        gmin=g[k];
+                }
+                char sc,ec;
+                if(start-1 >=min)
+                    sc =m[start-1];
+                else
+                    sc =kUnknownGrid;
+                if(end<max)
+                    ec =m[end];
+                else
+                    ec =kUnknownGrid;
+                int left=start;
+                int right=end-1;
+                for(int k=start;k<end;k++)
+                {
+                    if(gmin==g[k])
+                    {
+                        left =k;
+                        break;
+                    }
+                    else
+                        mtx[k]=sc;
+                }
+                for(int k=end-1;k>=start;k--)
+                {
+                    if(gmin==g[k])
+                    {
+                        right =k;
+                        break;
+                    }
+                    else
+                        mtx[k]=ec;
+                }
+                while(left+1<right)
+                     mtx[left++]=kUnknownGrid;
+            }
+        }
+    }
+
+    for(int x=0;x<w;x++)
+    {
+        int min=x;
+        int max=h*w+x;
+        int y=x;
+        while(y<max)
+        {
+            if(m[y]==kOccGrid)
+            {
+                int start=y;
+                while((y<max)&&(m[y]==kOccGrid))
+                    y +=w;
+                int end =y;
+
+                int gmin= g[start];
+                for(int k=start+w;k<end;k+=w)
+                {
+                    if(gmin>g[k])
+                        gmin=g[k];
+                }
+                char sc,ec;
+                if(start-w >=min)
+                    sc =m[start-w];
+                else
+                    sc =kUnknownGrid;
+                if(end<max)
+                    ec =m[end];
+                else
+                    ec =kUnknownGrid;
+                int left=start;
+                int right=end-w;
+                for(int k=start;k<end;k+=w)
+                {
+                    if(gmin==g[k])
+                    {
+                        left =k;
+                        break;
+                    }
+                    else
+                        mty[k]=sc;
+                }
+                for(int k=end-w;k>=start;k-=w)
+                {
+                    if(gmin==g[k])
+                    {
+                        right =k;
+                        break;
+                    }
+                    else
+                        mty[k]=ec;
+                }
+                left +=w;
+                while(left<right)
+                {
+                     mty[left]=kUnknownGrid;
+                     left +=w;
+                }
+            }
+            else
+                y +=w;
+        }
+    }
+
+    for(int i=0;i<w*h;i++)
+    {
+        if(m[i] == kOccGrid)
+        {
+            int temp = mtx[i] +mty[i] ;
+            switch (temp)
+            {
+                case 200 :
+                case 100 :
+                case 99 :
+                    m[i]=kOccGrid;
+                    break;
+                case 0:
+                    m[i]=kFreeGrid;
+                    break;
+                case -1:
+                    m[i]=kOccGrid;
+                    break;
+                case -2:
+                default :
+                    m[i]=kUnknownGrid;
+                    break;
+            }
+        }
+    }
+
+    delete mtx;
+    delete mty;
+}
+
+void map_filter(char *out, int32_t w, int32_t h,char center,char round)
+{
+    int index;
+    for(int x=1;x<w-1;x++)
+    {
+         index= GetGridIndexOfMap(w,x,0);
+         if((out[index]==center)&&(out[index-1]==round)&&
+            (out[index+1]==round)&&(out[index+w]==round))
+             out[index] =round;
+         index= GetGridIndexOfMap(w,x,h-1);
+         if((out[index]==center)&&(out[index-1]==round)&&
+            (out[index+1]==round)&&(out[index-w]==round))
+             out[index] =round;
+    }
+    for(int y=1;y<h-1;y++)
+    {
+         index= GetGridIndexOfMap(w,0,y);
+         if((out[index]==center)&&(out[index-w]==round)&&
+            (out[index+w]==round)&&(out[index+1]==round))
+             out[index] =round;
+         index= GetGridIndexOfMap(w,w-1,y);
+         if((out[index]==center)&&(out[index-w]==round)&&
+            (out[index+w]==round)&&(out[index-1]==round))
+             out[index] =round;
+    }
+    for(int y=1;y<h-1;y++)
+    {
+        for(int x=1;x<w-1;x++)
+        {
+            index= GetGridIndexOfMap(w,x,y);
+            if((out[index]==center)&&(out[index-1]==round)&&
+               (out[index+1]==round)&&(out[index+w]==round)&&
+               (out[index-w]==round))
+                out[index] =round;
+        }
+    }
+}
+
+void map_filter(char *out,int32_t w, int32_t h)
 {
   int index;
   for(int x=1;x<w-1;x++)
@@ -434,9 +630,9 @@ void MapProcess::Optimiz(const sensor_msgs::LaserScanConstPtr& scan,int skip ,in
             }
             avg /=avg_cnt;
             avg = fabs(free_grid_Cell[k].dis_avg - avg);
-            if(sum>free_grid_Cell[k].grade)
+            if(sum < free_grid_Cell[k].grade)
                 free_grid_Cell[k].grade =sum ;
-            if(avg<free_grid_Cell[k].dis_err)
+            if(avg < free_grid_Cell[k].dis_err)
                 free_grid_Cell[k].dis_err =avg;
         }
     }

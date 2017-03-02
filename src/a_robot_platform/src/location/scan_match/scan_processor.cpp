@@ -23,7 +23,7 @@ Eigen::Vector3f ScanProcessor::PoseUpdate(const DataContainer& dataContainer,
 {
     Eigen::Vector3f newPoseEstimateWorld;
 
-    newPoseEstimateWorld = matchData(AmclPoseHintWorld,gridMap,dataContainer,lastScanMatchCov,15);
+    newPoseEstimateWorld = matchData(AmclPoseHintWorld,gridMap,dataContainer,lastScanMatchCov,3);
 
     if(PoseDifferenceLargerThan(newPoseEstimateWorld, AmclPoseHintWorld,
                                 paramMinDistanceDiffForPoseUpdate, paramMinAngleDiffForPoseUpdate))

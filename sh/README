@@ -65,20 +65,20 @@ src/client 中qt_client为qt上位机程序。可用qt(community)版本直接打
 运行qt客户端
 roscore
 cd distributed_root_sys
-bash sh/map_rviz.sh
+bash sh/mapping_rviz.sh
 bash sh/google_mapping.sh
 
 2、运行server
 sudo ssh pentium
 cd distributed_root_sys
-bash sh/server_mapping.sh
+bash sh/robot_config.sh
 
 3、连接client->server
 遥控机器人人运动
 保存地图图片
 source googleMapping/install_isolated/setup.bash
 rosservice call /finish_trajectory "stem: 'gtest'"
-或 bash sh/map_save.sh "gtest"
+或 bash sh/google_mapsave.sh "gtest"
 保存位置 .ros/
 
 
@@ -95,8 +95,8 @@ bash sh/location.rviz
 2、运行server
 sudo ssh pentium
 cd ~/distributed_root_sys
-bash sh/server_mapping.sh
-bash sh/server_amcl.sh
+bash sh/robot_config.sh
+bash sh/location.sh
 
 
 
