@@ -1,0 +1,8 @@
+<?xml version="1.0"?>
+<launch>
+
+<node  name="path_publish" pkg="a_robot_platform" type="main_path_publish" output="screen">
+	<param name="pose_cnt" value="1000"/>
+	<param name="dis_diff" value="0.1"/>
+</node>
+</launch>

@@ -16,6 +16,8 @@
 #include <QProgressBar>
 #include "../../common/map_image.h"
 
+
+
 #define Myhigh 600
 #define Mywidth 600
 #define  MIDD 720
@@ -57,6 +59,13 @@ private slots:
     void on_pBtn_open_submap_clicked();
     void on_pBtn_key_Init_IMU_clicked();
 
+    void on_horizontalSlider_valueChanged(int value);
+    void on_pBtn_binarization_clicked(bool checked);
+
+    void on_Spin_Sample_Count_valueChanged(int arg1);
+
+    void on_Spin_Filter_Count_valueChanged(int arg1);
+
 private :
     void KeyControlMsgRefalsh(const zw::KeyControlMsg & kMsg);
     void MsgControlRefalsh(void);
@@ -65,6 +74,8 @@ private :
     void ClearData();
 
 private:
+    bool img_binarization;
+    int th_binarization;
     Ui::MainWindow *ui;
     zw::KeyControl *m_keyControl;
     zw::TcpSocket *m_tcpSocketClient;

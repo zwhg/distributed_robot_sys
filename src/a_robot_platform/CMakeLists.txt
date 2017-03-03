@@ -12,17 +12,42 @@ find_package(catkin REQUIRED COMPONENTS
  std_msgs
  tf
  rosbag
+ message_generation
 )
 set (CMAKE_PREFIX_PATH ~/Qt5.7.0/5.7/gcc_64)
 find_package(Qt5Widgets REQUIRED)
 
 
-catkin_package(
- #   INCLUDE_DIRS include
- #   LIBRARIES robot_platform
-#  CATKIN_DEPENDS roscpp
- # DEPENDS
+# Find Eigen3 (from http://wiki.ros.org/jade/Migration)
+find_package(Eigen3)
+if(NOT EIGEN3_FOUND)
+  # Fallback to cmake_modules
+  find_package(cmake_modules REQUIRED)
+  find_package(Eigen REQUIRED)
+  set(EIGEN3_INCLUDE_DIRS ${EIGEN_INCLUDE_DIRS})
+  set(EIGEN3_LIBRARIES ${EIGEN_LIBRARIES})  # Not strictly necessary as Eigen is head only
+  # Possibly map additional variables to the EIGEN3_ prefix.
+else()
+  set(EIGEN3_INCLUDE_DIRS ${EIGEN3_INCLUDE_DIR})
+endif()
+
+
+add_message_files(
+  FILES
+    SubmapList.msg
+    TrajectorySubmapList.msg
+    SubmapEntry.msg
 )
+
+
+generate_messages(
+  DEPENDENCIES
+    geometry_msgs
+)
+
+catkin_package()
+
+
 
 include_directories(include
     ${yamlcpp_INCLUDE_DIRS} )
@@ -30,7 +55,7 @@ include_directories(include
 add_executable(main_uart_odom src/server/main_uart_odom.cpp
  src/common/modbus.cpp
  src/common/paras.cpp
- src/server/moc_tcp_server.cpp
+ src/server/moc_tcpsocketserver.cpp
  src/server/tcpsocketserver.cpp
  src/server/uartdriver.cpp
  src/server/uartodom.cpp
@@ -67,6 +92,11 @@ add_executable(main_global_location src/server/main_global_location.cpp
  src/location/amcl/map/map_cspace.cpp
  src/location/amcl/map/map_range.c
  src/location/amcl/map/map_store.c
+
+ src/common/map_process.cpp
+ src/location/scan_match/data_point_container.h
+ src/location/scan_match/scan_processor.cpp
+
  )
 target_link_libraries(main_global_location
  ${catkin_LIBRARIES}
@@ -82,14 +112,29 @@ target_link_libraries(main_map_server
  yaml-cpp
  )
 
+add_executable(main_initial_pose_test src/server/main_initial_pose_test.cpp
+ src/common/map_process.cpp
+ )
+target_link_libraries(main_initial_pose_test
+ ${catkin_LIBRARIES})
+
+
+add_executable(main_path_publish src/server/main_path_publish.cpp
+ )
+target_link_libraries(main_path_publish
+ ${catkin_LIBRARIES})
+
+
 add_executable(main_pathplan_server src/server/main_pathplan_server.cpp)
 target_link_libraries(main_pathplan_server
     ${catkin_LIBRARIES}
     )
+
 add_executable(main_test_v  src/server/main_test_v.cpp)
 target_link_libraries(main_test_v
     ${catkin_LIBRARIES}
     )
+
 add_definitions(-std=gnu++11)
 
 qt5_use_modules(main_uart_odom

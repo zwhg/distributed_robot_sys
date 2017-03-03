@@ -29,7 +29,7 @@
    <widget class="QTabWidget" name="tabWidget">
     <property name="geometry">
      <rect>
-      <x>30</x>
+      <x>60</x>
       <y>10</y>
       <width>1021</width>
       <height>911</height>
@@ -424,7 +424,7 @@
          <x>180</x>
          <y>40</y>
          <width>119</width>
-         <height>121</height>
+         <height>126</height>
         </rect>
        </property>
        <layout class="QFormLayout" name="formLayout_5">
@@ -509,7 +509,7 @@
          <x>20</x>
          <y>40</y>
          <width>103</width>
-         <height>121</height>
+         <height>126</height>
         </rect>
        </property>
        <layout class="QFormLayout" name="formLayout_7">
@@ -683,7 +683,6 @@
        <string>UART</string>
       </property>
      </widget>
-
     </widget>
     <widget class="QWidget" name="tab_4">
      <attribute name="title">
@@ -1044,24 +1043,11 @@
      <attribute name="title">
       <string>地图</string>
      </attribute>
-     <widget class="QPushButton" name="pBtn_open_map">
-      <property name="geometry">
-       <rect>
-        <x>0</x>
-        <y>30</y>
-        <width>80</width>
-        <height>23</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>打开地图</string>
-      </property>
-     </widget>
      <widget class="QLabel" name="lbl_map">
       <property name="geometry">
        <rect>
-        <x>91</x>
-        <y>11</y>
+        <x>480</x>
+        <y>10</y>
         <width>521</width>
         <height>581</height>
        </rect>
@@ -1070,31 +1056,71 @@
        <string>map</string>
       </property>
      </widget>
-     <widget class="QLabel" name="lbl_sub_map">
+     <widget class="QWidget" name="">
       <property name="geometry">
        <rect>
-        <x>660</x>
-        <y>10</y>
-        <width>281</width>
-        <height>201</height>
+        <x>10</x>
+        <y>20</y>
+        <width>181</width>
+        <height>158</height>
        </rect>
       </property>
-      <property name="text">
-       <string>submap</string>
-      </property>
-     </widget>
-     <widget class="QPushButton" name="pBtn_open_submap">
-      <property name="geometry">
-       <rect>
-        <x>0</x>
-        <y>60</y>
-        <width>80</width>
-        <height>23</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>打开子图</string>
-      </property>
+      <layout class="QVBoxLayout" name="verticalLayout_3">
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_2">
+         <item>
+          <widget class="QPushButton" name="pBtn_open_submap">
+           <property name="text">
+            <string>打开子图</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="pBtn_open_map">
+           <property name="text">
+            <string>打开地图</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <widget class="QPushButton" name="pBtn_binarization">
+         <property name="text">
+          <string>二值化:127</string>
+         </property>
+         <property name="checkable">
+          <bool>true</bool>
+         </property>
+         <property name="checked">
+          <bool>false</bool>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout">
+         <item>
+          <widget class="QSpinBox" name="Spin_Filter_Count"/>
+         </item>
+         <item>
+          <widget class="QSpinBox" name="Spin_Sample_Count"/>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <widget class="QSlider" name="horizontalSlider">
+         <property name="maximum">
+          <number>255</number>
+         </property>
+         <property name="value">
+          <number>127</number>
+         </property>
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+        </widget>
+       </item>
+      </layout>
      </widget>
     </widget>
    </widget>

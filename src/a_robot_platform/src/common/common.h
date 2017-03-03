@@ -48,6 +48,10 @@ const std::string SERVER_IP="192.168.1.101" ;  // 192.168.1.101
 const std::string CLIENT_IP="192.168.1.101" ;
 const uint16_t SOCKET_PORT= 9527;
 
+constexpr float kMinLaserRange=0.15;
+constexpr float kMaxLaserRange=3.0;
+
+
 }
 
 

@@ -1,14 +1,23 @@
 #include <qdebug.h>
 #include <QtNetwork/QHostAddress>
+#include <QTimer>
 #include "tcpsocketserver.h"
 
 namespace zw {
 
+
+static pthread_mutex_t g_tMutex  = PTHREAD_MUTEX_INITIALIZER;
+
+
 TcpSocketServer::TcpSocketServer()
 {
+    cmd_time_out = 0 ;
     m_listenSocket =new QTcpServer();
     m_listenSocket->listen(QHostAddress::Any , SOCKET_PORT);
     QObject::connect(this->m_listenSocket,SIGNAL(newConnection()),this,SLOT(on_ProcessConnection()));
+    QTimer *timer = new QTimer(this);
+    QObject::connect(timer,SIGNAL(timeout()),this,SLOT(cmdTimeOut()));
+    timer->start(100);
 }
 
 TcpSocketServer::~TcpSocketServer()
@@ -50,6 +59,13 @@ void TcpSocketServer::on_ReadyRead(void)
                 delete packInfo.data;
             }else if(packInfo.fuc == W_REGISTER){
                 m_para.SetAddressValue(packInfo);
+
+                if(packInfo.addr==CONTROL)
+                {
+                    pthread_mutex_lock(&g_tMutex );
+                    cmd_time_out =0;
+                    pthread_mutex_unlock(&g_tMutex );
+                }
 #if 0
                 int32_t dat[2];
                 zw::ParaGetSet  pack = {zw::R_REGISTER,2,zw::CONTROL,dat};
@@ -78,6 +94,33 @@ void TcpSocketServer::on_ReadyRead(void)
         }
     }
 }
+
+ void TcpSocketServer::cmdTimeOut()
+ {
+    bool flag =false ;
+    pthread_mutex_lock(&g_tMutex );
+    cmd_time_out ++ ;
+    if(cmd_time_out >5)
+    {
+        cmd_time_out=0;
+        flag =true;
+    }
+    pthread_mutex_unlock(&g_tMutex);
+
+    if(flag)
+    {
+        int32_t dat[2];
+        Float2Int32 f2is,f2io;
+        Paras m_para;
+        zw::ParaGetSet  pack = {zw::W_REGISTER,2,zw::CONTROL,dat};
+        f2is.f=0;
+        f2io.f=0;
+        dat[0]=f2is.i;
+        dat[1]=f2io.i;
+        m_para.SetAddressValue(pack);
+    }
+
+ }
 
 }
 

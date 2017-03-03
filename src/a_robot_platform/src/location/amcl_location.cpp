@@ -5,6 +5,8 @@
 #include <rosbag/bag.h>
 #include <rosbag/view.h>
 #include <boost/foreach.hpp>
+#include "../map/probability_values.h"
+#include "../common/map_process.h"
 
 namespace zw {
 
@@ -42,6 +44,10 @@ AmclNode::AmclNode():
                                                             odom_frame_id_, 100);
     laser_scan_filter_->registerCallback(boost::bind(&AmclNode::laserReceived,this, _1));
     initial_pose_sub_ = nh_.subscribe("initialpose", 2, &AmclNode::initialPoseReceived, this);
+
+
+    pose_pub_amcl =nh_.advertise<geometry_msgs::PoseStamped>("amcl_p",2,true);
+    pose_pub_scan =nh_.advertise<geometry_msgs::PoseStamped>("scan_p",2,true);
 
     if(use_map_topic_) {
       map_sub_ = nh_.subscribe("map", 1, &AmclNode::mapReceived, this);
@@ -401,7 +407,7 @@ void AmclNode::freeMapDependentMemory()
  * Convert an OccupancyGrid map message into the internal
  * representation.  This allocates a map_t and returns it.
  */
-map_t* AmclNode::convertMap( const nav_msgs::OccupancyGrid& map_msg )
+map_t* AmclNode::convertMap( const nav_msgs::OccupancyGrid& map_msg)
 {
   map_t* map = map_alloc();
   ROS_ASSERT(map);
@@ -414,15 +420,33 @@ map_t* AmclNode::convertMap( const nav_msgs::OccupancyGrid& map_msg )
   // Convert to player format
   map->cells = (map_cell_t*)malloc(sizeof(map_cell_t)*map->size_x*map->size_y);
   ROS_ASSERT(map->cells);
-  for(int i=0;i<map->size_x * map->size_y;i++)
+
+  unsigned long dat_size = map->size_x*map->size_y;
+
+
+  for(int i=0; i<dat_size;i++)
   {
-    if(map_msg.data[i] == 0)
-      map->cells[i].occ_state = -1;
-    else if(map_msg.data[i] == 100)
-      map->cells[i].occ_state = +1;
-    else
-      map->cells[i].occ_state = 0;
+     map->cells[i].probability =((unsigned char)map_msg.data[i])/100.0;
   }
+
+  char *m=new char[dat_size];
+  zw:: map_process(m,map_msg);
+
+  for(int i=0;i< dat_size;i++)
+  {
+    if(m[i] == kFreeGrid){
+      map->cells[i].occ_state = -1;
+    }else if(m[i] == kOccGrid){
+      map->cells[i].occ_state = +1;
+    }else{
+      map->cells[i].occ_state = 0;
+    }
+
+//     ROS_INFO("%2d   %f", map->cells[i].occ_state, map->cells[i].probability);
+  }
+
+  delete m;
+
   return map;
 }
 
@@ -563,6 +587,10 @@ void AmclNode::laserReceived(const sensor_msgs::LaserScanConstPtr& laser_scan)
     ROS_DEBUG("Received laser's pose wrt robot: %.3f %.3f %.3f",
               laser_pose_v.v[0], laser_pose_v.v[1], laser_pose_v.v[2]);
     frame_to_laser_[laser_scan->header.frame_id] = laser_index;
+  //  ROS_INFO("laser_index=%d",laser_index);
+
+    //计算激光坐标系在全局坐标中的坐标
+    scan_processor.SetLaserPose(laser_pose_v);
   } else {
     // we have the laser pose, retrieve laser index
     laser_index = frame_to_laser_[laser_scan->header.frame_id];
@@ -685,8 +713,7 @@ void AmclNode::laserReceived(const sensor_msgs::LaserScanConstPtr& laser_scan)
       resampled = true;
     }
     pf_sample_set_t* set = pf_->sets + pf_->current_set;
-  //  ROS_DEBUG("Num samples: %d\n", set->sample_count);
-     ROS_INFO("Num samples: %d\n", set->sample_count);
+    ROS_DEBUG("Num samples: %d\n", set->sample_count);
 
     // Publish the resulting cloud // TODO: set maximum rate for publishing
     if (!m_force_update) {
@@ -735,20 +762,63 @@ void AmclNode::laserReceived(const sensor_msgs::LaserScanConstPtr& laser_scan)
 
     if(max_weight > 0.0)
     {
-      ROS_DEBUG("Max weight pose: %.3f %.3f %.3f",
-                hyps[max_weight_hyp].pf_pose_mean.v[0],
-                hyps[max_weight_hyp].pf_pose_mean.v[1],
-                hyps[max_weight_hyp].pf_pose_mean.v[2]);
+      Eigen::Vector3f scan_match_pose(hyps[max_weight_hyp].pf_pose_mean.v[0],
+                                      hyps[max_weight_hyp].pf_pose_mean.v[1],
+                                      hyps[max_weight_hyp].pf_pose_mean.v[2]);
+
+      scan_processor.LaserScanToDataContainer(laser_scan,
+                                              scan_processor.dataContainer,
+                                              1/map_->scale);
+      scan_match_pose = scan_processor.PoseUpdate(scan_processor.dataContainer,
+                                                  map_,
+                                                  scan_match_pose);
+
+      pf_vector_t  finalPose = {scan_match_pose[0],scan_match_pose[1],scan_match_pose[2]};
+
+    //  pf_vector_t  finalPose = hyps[max_weight_hyp].pf_pose_mean;
+
+      ROS_INFO("amcl:[%6.3f %6.3f %6.3f]  scan:[%6.3f %6.3f %6.3f]",
+             hyps[max_weight_hyp].pf_pose_mean.v[0],
+             hyps[max_weight_hyp].pf_pose_mean.v[1],
+             hyps[max_weight_hyp].pf_pose_mean.v[2],
+             scan_match_pose[0],
+             scan_match_pose[1],
+             scan_match_pose[2]);
+
+      geometry_msgs::PoseStamped ptest;
+      ptest.header.frame_id =global_frame_id_;
+      ptest.header.stamp = laser_scan->header.stamp;
+      ptest.pose.position.x = hyps[max_weight_hyp].pf_pose_mean.v[0];
+      ptest.pose.position.y = hyps[max_weight_hyp].pf_pose_mean.v[1];
+      tf::quaternionTFToMsg(tf::createQuaternionFromYaw(hyps[max_weight_hyp].pf_pose_mean.v[2]), ptest.pose.orientation);
+      pose_pub_amcl.publish(ptest);
+
+      ptest.pose.position.x = scan_match_pose[0];
+      ptest.pose.position.y = scan_match_pose[1];
+      tf::quaternionTFToMsg(tf::createQuaternionFromYaw(scan_match_pose[2]),                    ptest.pose.orientation);
+      pose_pub_scan.publish(ptest);
+
+
+      //amcl or scan match ?
+      finalPose.v[0]= hyps[max_weight_hyp].pf_pose_mean.v[0];
+      finalPose.v[1]= hyps[max_weight_hyp].pf_pose_mean.v[1];
+      finalPose.v[2]= hyps[max_weight_hyp].pf_pose_mean.v[2];
+
 
       geometry_msgs::PoseWithCovarianceStamped p;
       // Fill in the header
       p.header.frame_id = global_frame_id_;
       p.header.stamp = laser_scan->header.stamp;
       // Copy in the pose
-      p.pose.pose.position.x = hyps[max_weight_hyp].pf_pose_mean.v[0];
-      p.pose.pose.position.y = hyps[max_weight_hyp].pf_pose_mean.v[1];
-      tf::quaternionTFToMsg(tf::createQuaternionFromYaw(hyps[max_weight_hyp].pf_pose_mean.v[2]),
-                            p.pose.pose.orientation);
+   //   p.pose.pose.position.x = hyps[max_weight_hyp].pf_pose_mean.v[0];
+   //   p.pose.pose.position.y = hyps[max_weight_hyp].pf_pose_mean.v[1];
+      p.pose.pose.position.x =finalPose.v[0];
+      p.pose.pose.position.y =finalPose.v[1];
+
+//      tf::quaternionTFToMsg(tf::createQuaternionFromYaw(hyps[max_weight_hyp].pf_pose_mean.v[2]),
+//                            p.pose.pose.orientation);
+      tf::quaternionTFToMsg(tf::createQuaternionFromYaw(finalPose.v[2]),p.pose.pose.orientation);
+
       // Copy in the covariance, converting from 3-D to 6-D
       pf_sample_set_t* set = pf_->sets + pf_->current_set;
       for(int i=0; i<2; i++)
@@ -766,19 +836,16 @@ void AmclNode::laserReceived(const sensor_msgs::LaserScanConstPtr& laser_scan)
       pose_pub_.publish(p);
       last_published_pose = p;
 
-      ROS_DEBUG("New pose: %6.3f %6.3f %6.3f",
-               hyps[max_weight_hyp].pf_pose_mean.v[0],
-               hyps[max_weight_hyp].pf_pose_mean.v[1],
-               hyps[max_weight_hyp].pf_pose_mean.v[2]);
-
       // subtracting base to odom from map to base and send map to odom instead
       tf::Stamped<tf::Pose> odom_to_map;
       try
       {
-        tf::Transform tmp_tf(tf::createQuaternionFromYaw(hyps[max_weight_hyp].pf_pose_mean.v[2]),
-                             tf::Vector3(hyps[max_weight_hyp].pf_pose_mean.v[0],
-                                         hyps[max_weight_hyp].pf_pose_mean.v[1],
-                                         0.0));
+//        tf::Transform tmp_tf(tf::createQuaternionFromYaw(hyps[max_weight_hyp].pf_pose_mean.v[2]),
+//                             tf::Vector3(hyps[max_weight_hyp].pf_pose_mean.v[0],
+//                                         hyps[max_weight_hyp].pf_pose_mean.v[1],
+//                                         0.0));
+        tf::Transform tmp_tf(tf::createQuaternionFromYaw(finalPose.v[2]),
+                             tf::Vector3(finalPose.v[0], finalPose.v[1], 0.0));
         tf::Stamped<tf::Pose> tmp_tf_stamped (tmp_tf.inverse(),
                                               laser_scan->header.stamp,
                                               base_frame_id_);

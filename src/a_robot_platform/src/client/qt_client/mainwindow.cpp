@@ -17,6 +17,7 @@
 #include "../../common/map_image.h"
 #include "../udp_socket.h"
 
+
 #include <QtNetwork>
 
 MainWindow::MainWindow(QWidget *parent) :
@@ -44,6 +45,9 @@ MainWindow::MainWindow(QWidget *parent) :
     QTimer *cmd_timer =new QTimer();
     QObject::connect(cmd_timer,SIGNAL(timeout()),this,SLOT(cmdTimerUpdate()));
     cmd_timer->start(40);
+
+    img_binarization=false;
+    th_binarization=127;
 }
 
 MainWindow::~MainWindow()
@@ -568,7 +572,6 @@ void MainWindow::on_pBtn_key_control_open_clicked(bool checked)
     m_tcpSocketClient->SendMsg(packInfo);
 }
 
-
 void MainWindow::on_pBtn_key_Init_IMU_clicked()
 {
     int32_t dat[1];
@@ -654,4 +657,46 @@ void MainWindow::on_pBtn_open_submap_clicked()
   //  m_mapImage.SiftFeaturematch(map,submap);
 }
 
+void MainWindow::on_pBtn_binarization_clicked(bool checked)
+{
+    if(checked)
+    {
+        img_binarization=true;
+        ui->pBtn_binarization->setStyleSheet("background-color: rgb(0, 255, 0);");
+    }
+    else
+    {
+        img_binarization=false;
+        ui->pBtn_binarization->setStyleSheet("background-color: rgb(167, 167, 125)");
+    }
+}
 
+void MainWindow::on_horizontalSlider_valueChanged(int value)
+{
+    if(img_binarization)
+    {
+        th_binarization=value;
+    }
+    QString str="二值化:";
+    str += QString::number(th_binarization);
+    ui->pBtn_binarization->setText(str);
+    ui->horizontalSlider->setValue(th_binarization);
+
+    m_mapImage.ShowBinaryImage("sample_map",map,th_binarization);
+ //   m_mapImage.ShowBinaryImage("sample_submap",submap,th_binarization);
+}
+
+void MainWindow::on_Spin_Sample_Count_valueChanged(int arg1)
+{
+    m_mapImage.sample_cnt=arg1;
+
+    m_mapImage.ShowBinaryImage("sample_map",map,th_binarization);
+ //   m_mapImage.ShowBinaryImage("sample_submap",submap,th_binarization);
+}
+
+void MainWindow::on_Spin_Filter_Count_valueChanged(int arg1)
+{
+    m_mapImage.filter_cnt=arg1;
+    m_mapImage.ShowBinaryImage("sample_map",map,th_binarization);
+  //  m_mapImage.ShowBinaryImage("sample_submap",submap,th_binarization);
+}

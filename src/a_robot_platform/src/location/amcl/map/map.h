@@ -48,12 +48,14 @@ typedef struct
   // Occupancy state (-1 = free, 0 = unknown, +1 = occ)
   int occ_state;
 
+
+  float probability;
+
   // Distance to the nearest occupied cell
   double occ_dist;
 
   // Wifi levels
   //int wifi_levels[MAP_WIFI_MAX_LEVELS];
-
 } map_cell_t;
 
 
@@ -142,6 +144,7 @@ void map_draw_wifi(map_t *map, struct _rtk_fig_t *fig, int index);
 
 // Compute the cell index for the given map coords.
 #define MAP_INDEX(map, i, j) ((i) + (j) * map->size_x)
+
 
 #ifdef __cplusplus
 }

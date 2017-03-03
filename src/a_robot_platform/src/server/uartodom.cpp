@@ -26,6 +26,9 @@ void *UartOdom::DoPthread(void)
   int16_t i=0;
   while(createPthread)
   {
+    SendVelControl();
+    SendCmd2Hard();
+
     int32_t nRet=0;
     uint8_t data_buf[UARTBUFMAX];
     nRet= read(fd, data_buf, UARTBUFMAX);
@@ -33,10 +36,7 @@ void *UartOdom::DoPthread(void)
     {
       Analysis(data_buf, nRet);
     }
-    SendVelControl();
-    SendCmd2Hard();
 
-    qDebug()<<"ok";
 
 //    Paras m_para;
 //    int32_t dat[6]={i*10,-i*10,i*5,i+2,-i,i++};

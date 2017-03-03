@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<launch>
+
+<include file ="$(find a_robot_platform)/launch/map_server.launch"/>
+
+<node  name="pose_test" pkg="a_robot_platform" type="main_initial_pose_test" output="screen">
+	<param name="optimize1" value="0.2"/>
+	<param name="optimize2" value="0.2"/>
+	<param name="optimize3" value="0.5"/>
+	<param name="optimize4" value="0.5"/>
+	<param name="optimize5" value="0.5"/>
+	<param name="laser_skip" value="10"/>
+	<param name="filter_cnt" value="4"/>
+
+</node>
+
+</launch>

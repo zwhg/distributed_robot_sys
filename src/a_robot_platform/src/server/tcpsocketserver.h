@@ -18,6 +18,7 @@ private:
     QTcpServer *m_listenSocket;
     QTcpSocket *m_readWriteSocket;
     QByteArray buf;
+    volatile int cmd_time_out;
 
 public:
    TcpSocketServer();
@@ -26,6 +27,7 @@ public:
 private slots:
     void on_ProcessConnection();
     void on_ReadyRead(void);
+    void cmdTimeOut();
 };
 
 }
