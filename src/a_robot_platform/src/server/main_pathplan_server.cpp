@@ -2,20 +2,18 @@
 #include <nav_msgs/OccupancyGrid.h>
 #include <geometry_msgs/PoseWithCovarianceStamped.h>
 
-
 void mapCallback(const nav_msgs::OccupancyGridConstPtr& grid)  //get the map point
 {
      //get the height and width of the map
      Height = grid->info.height;
      Width = grid->info.width;
-
      int8_t   n = grid->info.width*grid->info.height;
      map = new int8_t *[n];
      for(int8_t i=0;i<grid->info.height;i++)
      {
          for(int8_t j=0;j<grid->info.width;j++)
          {
-          map[i][j] = grid->data[grid->info.height*i+j];  //convert a one-dimensional array to a two-dimensional array
+          map[i][j] = grid->data[grid->info.height*i+j];     //convert a one-dimensional array to a two-dimensional array
          }
      }
 }
@@ -32,6 +30,11 @@ void PoseCallback(const geometry_msgs::PoseWithCovarianceStamped& start_pose)//g
         r_start_y = r_pose_y;
         i=1;
     }
+}
+void  Linear_Angular_msg(struct Routes *routes)  //根据路径计算线速度与角速度
+{
+  //  for(int i = 0;i<strlen(temp);i++)
+ //   {}
 }
 unsigned char within(int x, int y) //判断输入点的坐标是否在地图中
 {
@@ -78,8 +81,8 @@ void initClose(Close **cls, int sx, int sy, int dx, int dy)  //封闭列表，�
             cls[i][j].cur = &graph[i][j];                                   // Close表所指节点 ，graph数组存储了节点的相关信息
             cls[i][j].vis = !graph[i][j].reachable;                   // 是否被访问
             cls[i][j].from = NULL;                                         // 所来节点，即他的父节点（从父节点走过来）
-            cls[i][j].G = cls[i][j].F = 0;                                   // 初始化G值（起点移动到该点的移动代价）、F值=G+H
-            cls[i][j].H = abs(dx - i) + abs(dy - j);                 // 评价函数值H:从指定方格移动到终点B的估算成本
+            cls[i][j].G = cls[i][j].F = 0;                                    // 初始化G值（起点移动到该点的移动代价）、F值=G+H
+            cls[i][j].H = abs(dx - i) + abs(dy - j);                   // 评价函数值H:从指定方格移动到终点B的估算成本
         }
     }
     cls[sx][sy].F = cls[sx][sy].H;                         //起始点评价初始值
@@ -236,7 +239,6 @@ void printMap()
     }
     ROS_INFO(" ");
 }
-
 Close* getShortest()
 {    // 获取最短路径
     int result = astar();
@@ -276,9 +278,14 @@ int printShortest()  //打印最短路径
         {
             graph[p->cur->x][p->cur->y].value = Pass;
             ROS_INFO("(%d,%d)->\n", p->cur->x, p->cur->y);
+            //save  the  route  point
+            Route[step].x = p->cur->x;
+            Route[step].y = p->cur->y;
             p = p->from;
             step++;
         }
+        Route[step].x = p->cur->x;
+        Route[step].y = p->cur->y;
         ROS_INFO("(%d,%d)\n", p->cur->x, p->cur->y);
         graph[srcX][srcY].value = Source;
         graph[dstX][dstY].value = Destination;
@@ -316,7 +323,6 @@ void printDepth()
     }
     ROS_INFO(" ");
 }
-
 void printSur()
 {
     int i, j;
@@ -330,7 +336,6 @@ void printSur()
     }
     ROS_INFO(" ");
 }
-
 void printH()
 {
     int i, j;

@@ -35,6 +35,9 @@ void *UartOdom::DoPthread(void)
     }
     SendVelControl();
     SendCmd2Hard();
+
+    qDebug()<<"ok";
+
 //    Paras m_para;
 //    int32_t dat[6]={i*10,-i*10,i*5,i+2,-i,i++};
 //    ParaGetSet packInfo={W_REGISTER,6, MSG_IMU,dat};
@@ -78,7 +81,7 @@ void UartOdom::Analysis(uint8_t *arry, int nRet)
             } else if(packInfo.fuc == W_REGISTER){
                 m_para.SetAddressValue(packInfo);
                 int32_t dat[8];
-#if 1
+#if 0
                 if(packInfo.addr==MSG_Ultrasonic){
                     zw::ParaGetSet  pack = {zw::R_REGISTER,8,zw::MSG_Ultrasonic,dat};
                     m_para.GetAddressValue(pack);

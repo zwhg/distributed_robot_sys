@@ -25,7 +25,6 @@ public:
 private:
   void SendVelControl(void);
   void SendCmd2Hard(void);
-
 };
 
 
