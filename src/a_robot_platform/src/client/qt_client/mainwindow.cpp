@@ -10,6 +10,7 @@
 #include <QVector>
 #include <QTextStream>
 #include <QFile>
+#include <QtNetwork>
 
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
@@ -20,7 +21,6 @@
 #include "../udp_socket.h"
 
 
-#include <QtNetwork>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -45,6 +45,8 @@ MainWindow::MainWindow(QWidget *parent) :
     QObject::connect(cmd_timer,SIGNAL(timeout()),this,SLOT(cmdTimerUpdate()));
 
     img_binarization=false;
+    save_pose_file =false;
+    clear_pose_file =false;
     th_binarization=127;
     mapInfo={0,0,0,0,0,0,0};
     carInfo ={0,0,0,0,0};
@@ -72,7 +74,8 @@ void MainWindow::xTimerUpdate(void)
         break;
     case 1:
         PoseRefresh();
-        redrawMap();
+        if(img_binarization)
+           redrawMap();
         break;
     case 2:
         ShowLaser();
@@ -83,6 +86,7 @@ void MainWindow::xTimerUpdate(void)
     default:
         break;
     }
+    SavePoseFiile();
 }
 
 void MainWindow::ConnectStatus(void)
@@ -643,8 +647,14 @@ void MainWindow::on_ultraAll_clicked()
 
 void MainWindow::on_pBtn_open_map_clicked()
 {
+    if(!map.empty())
+    {
+        ui->pBtn_binarization->setChecked(false);
+        img_binarization=false;
+        ui->pBtn_binarization->setStyleSheet("background-color: rgb(167, 167, 125)");
+    }
+
     using namespace cv;
-    QImage img ;
     QString img_name = QFileDialog::getOpenFileName(this,tr("Open Image"),".",tr("Image Files(*.png *.jpg *.pgm *.bmp)"));
 
     QString info_name =img_name;
@@ -687,10 +697,10 @@ void MainWindow::on_pBtn_open_map_clicked()
     mapInfo.map_x = floor(abs(mapInfo.word_x/mapInfo.resolution) +0.5);
     mapInfo.map_y = mapInfo.h - floor(abs(mapInfo.word_y/mapInfo.resolution) +0.5);
 
-    m_mapImage.GetQImage(map,img);
+    m_mapImage.GetQImage(map,text_img);
 
-    ui->lbl_map->setPixmap(QPixmap::fromImage(img));
-    ui->lbl_map->resize(img.width(),img.height());
+    ui->lbl_map->setPixmap(QPixmap::fromImage(text_img));
+    ui->lbl_map->resize(text_img.width(),text_img.height());
     ui->lbl_map->setScaledContents(true);
 
     ui->lbl_map_info_res->setText(QString::number(mapInfo.resolution,'f',3));
@@ -717,20 +727,26 @@ void MainWindow::on_pBtn_open_submap_clicked()
   //  m_mapImage.SiftFeaturematch(map,submap);
 }
 
-void MainWindow::redrawMap(void)
+void MainWindow::reRefreshMap(void)
 {
     if(!map.empty())
     {
-        QImage img;
         cv::Mat outmap;
         cv::Mat sample_map;
         m_mapImage.GetBinaryImage(map,th_binarization,outmap,sample_map);
 
-        m_mapImage.GetQImage(outmap,img);  // outmap or sample_map?
+        m_mapImage.GetQImage(outmap,text_img);  // outmap or sample_map?
+    }
+    redrawMap();
+}
 
+void MainWindow::redrawMap(void)
+{
+    if(!map.empty())
+    {
         //draw xy
         QPainter painter;
-        painter.begin(&img);
+        painter.begin(&text_img);
         QPen pen(Qt::GlobalColor::red,3);
         painter.setPen(pen);
         QPoint o(mapInfo.map_x , mapInfo.map_y);
@@ -758,8 +774,8 @@ void MainWindow::redrawMap(void)
 
         painter.end();
 
-        ui->lbl_map->setPixmap(QPixmap::fromImage(img));
-        ui->lbl_map->resize(img.width(),img.height());
+        ui->lbl_map->setPixmap(QPixmap::fromImage(text_img));
+        ui->lbl_map->resize(text_img.width(),text_img.height());
         ui->lbl_map->setScaledContents(true);
     }
 }
@@ -768,6 +784,7 @@ void MainWindow::on_pBtn_binarization_clicked(bool checked)
 {
     if(checked)
     {
+        reRefreshMap();
         img_binarization=true;
         ui->pBtn_binarization->setStyleSheet("background-color: rgb(0, 255, 0);");
     }else{
@@ -781,6 +798,7 @@ void MainWindow::on_horizontalSlider_valueChanged(int value)
     if(img_binarization)
     {
         th_binarization=value;
+        reRefreshMap();
     }
     QString str="二值化:";
     str += QString::number(th_binarization);
@@ -788,24 +806,31 @@ void MainWindow::on_horizontalSlider_valueChanged(int value)
     ui->horizontalSlider->setValue(th_binarization);
 
     m_mapImage.ShowBinaryImage("sample_map",map,th_binarization);
-    redrawMap();
 }
 
 void MainWindow::on_Spin_Sample_Count_valueChanged(int arg1)
 {
     m_mapImage.sample_cnt=arg1;
     m_mapImage.ShowBinaryImage("sample_map",map,th_binarization);
-    redrawMap();
+    reRefreshMap();
 }
 
 void MainWindow::on_Spin_Filter_Count_valueChanged(int arg1)
 {
     m_mapImage.filter_cnt=arg1;
     m_mapImage.ShowBinaryImage("sample_map",map,th_binarization);
-    redrawMap();
+    reRefreshMap();
 }
 
 void MainWindow::PoseRefresh(void)
+{
+    getCarInfo();
+    ui->lbl_robot_pose_x->setText(QString::number(carInfo.x,'f',3));
+    ui->lbl_robot_pose_y->setText(QString::number(carInfo.y,'f',3));
+    ui->lbl_robot_pose_h->setText(QString::number(carInfo.h,'f',3));
+}
+
+void  MainWindow::getCarInfo(void)
 {
     zw::Paras m_para;
     int32_t dat[3];
@@ -814,11 +839,63 @@ void MainWindow::PoseRefresh(void)
     zw::Float2Int32 ff;
     ff.i=dat[0];
     carInfo.x =ff.f;
-    ui->lbl_robot_pose_x->setText(QString::number(ff.f,'f',3));
     ff.i=dat[1];
     carInfo.y =ff.f;
-    ui->lbl_robot_pose_y->setText(QString::number(ff.f,'f',3));
     ff.i=dat[2];
     carInfo.h =ff.f;
-    ui->lbl_robot_pose_h->setText(QString::number(ff.f,'f',3));
+}
+
+void MainWindow::on_pBtn_save_pose_clicked(bool checked)
+{
+    if(checked)
+        save_pose_file =true;
+    else
+        save_pose_file =false;
+}
+
+void MainWindow::on_pBtn_clear_pose_clicked()
+{
+    clear_pose_file = true;
+}
+
+void MainWindow::SavePoseFiile(void)
+{
+     QString filePath="../pose.txt";
+     static zw::CarInfo lastCarInfo={0,0,0,0,0};
+     getCarInfo();
+     if( (abs(carInfo.x -lastCarInfo.x)>0.01) ||
+         (abs(carInfo.y -lastCarInfo.y)>0.01) ||
+         (abs(carInfo.y -lastCarInfo.y)>0.05) )
+     {
+         QFile f(filePath);
+         if(clear_pose_file)
+         {
+             clear_pose_file = false;
+             if(f.exists())
+             {
+                 f.remove();
+             }
+         }
+
+         if(save_pose_file)
+         {
+              if(!f.open(QIODevice::WriteOnly |QIODevice::Append |QIODevice::Text))
+              {
+                  qDebug()<<"Open pose file failed";
+                  lastCarInfo = carInfo;
+                  return ;
+              }
+              static int cnt=0;
+              if(!f.exists())
+                   cnt=0;
+              QTextStream txtOutput(&f);
+              txtOutput<< cnt++
+                       <<" "<<(int)(carInfo.x*1000)
+                       <<" "<<(int)(carInfo.y*1000)
+                       <<" "<<(int)(carInfo.h*1000)<<endl;
+              f.close();
+         }
+
+         lastCarInfo = carInfo;
+     }
 }

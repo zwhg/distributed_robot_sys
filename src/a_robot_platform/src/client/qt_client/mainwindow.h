@@ -9,6 +9,7 @@
 #include <QMessageBox>
 #include <QPainter>
 #include <QPixmap>
+#include <QImage>
 #include <QDateTime>
 #include <QTimer>
 #include <QPoint>
@@ -64,6 +65,10 @@ private slots:
 
     void on_Spin_Filter_Count_valueChanged(int arg1);
 
+    void on_pBtn_save_pose_clicked(bool checked);
+
+    void on_pBtn_clear_pose_clicked();
+
 private :
     void ConnectStatus(void);
     void KeyControlMsgRefresh(const zw::KeyControlMsg & kMsg);
@@ -74,7 +79,10 @@ private :
     void ShowUltrasonic();
     void ClearData();
     void PoseRefresh(void);
+    void reRefreshMap(void);
     void redrawMap(void);
+    void getCarInfo(void);
+    void SavePoseFiile(void);
 private:
     bool img_binarization;
     int th_binarization;
@@ -88,6 +96,10 @@ private:
     cv::Mat map;
     cv::Mat submap;
     zw::MapImage m_mapImage;
+    QImage text_img;
+
+    bool save_pose_file;
+    bool clear_pose_file;
 
 };
 

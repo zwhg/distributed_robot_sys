@@ -36,7 +36,7 @@
      </rect>
     </property>
     <property name="currentIndex">
-     <number>0</number>
+     <number>1</number>
     </property>
     <widget class="QWidget" name="tab_1">
      <attribute name="title">
@@ -706,8 +706,8 @@
        <rect>
         <x>11</x>
         <y>21</y>
-        <width>171</width>
-        <height>161</height>
+        <width>189</width>
+        <height>201</height>
        </rect>
       </property>
       <layout class="QVBoxLayout" name="verticalLayout_4">
@@ -793,9 +793,9 @@
       <property name="geometry">
        <rect>
         <x>10</x>
-        <y>310</y>
-        <width>171</width>
-        <height>103</height>
+        <y>360</y>
+        <width>191</width>
+        <height>125</height>
        </rect>
       </property>
       <layout class="QVBoxLayout" name="verticalLayout_5">
@@ -893,9 +893,9 @@
       <property name="geometry">
        <rect>
         <x>10</x>
-        <y>200</y>
-        <width>171</width>
-        <height>80</height>
+        <y>240</y>
+        <width>191</width>
+        <height>96</height>
        </rect>
       </property>
       <layout class="QVBoxLayout" name="verticalLayout_6">
@@ -950,6 +950,54 @@
           </widget>
          </item>
         </layout>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>510</y>
+        <width>191</width>
+        <height>101</height>
+       </rect>
+      </property>
+      <layout class="QVBoxLayout" name="verticalLayout_7">
+       <item>
+        <widget class="QLabel" name="label_8">
+         <property name="text">
+          <string>保存姿态到文件</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignCenter</set>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="pBtn_save_pose">
+         <property name="text">
+          <string>保存</string>
+         </property>
+         <property name="checkable">
+          <bool>true</bool>
+         </property>
+         <property name="checked">
+          <bool>false</bool>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="pBtn_clear_pose">
+         <property name="text">
+          <string>清空</string>
+         </property>
+         <property name="checkable">
+          <bool>true</bool>
+         </property>
+         <property name="checked">
+          <bool>false</bool>
+         </property>
+        </widget>
        </item>
       </layout>
      </widget>
@@ -1317,7 +1365,7 @@
      <x>0</x>
      <y>0</y>
      <width>1069</width>
-     <height>25</height>
+     <height>27</height>
     </rect>
    </property>
   </widget>
