@@ -3,4 +3,6 @@
 
 <include file ="$(find a_robot_platform)/launch/config.launch"/>
 <include file ="$(find a_robot_platform)/launch/location.launch"/>
+
+
 </launch>

@@ -849,9 +849,15 @@ void  MainWindow::getCarInfo(void)
 void MainWindow::on_pBtn_save_pose_clicked(bool checked)
 {
     if(checked)
+    {
         save_pose_file =true;
-    else
+        ui->pBtn_save_pose->setStyleSheet("background-color: rgb(0, 255, 0);");
+    }else{
+        ui->pBtn_save_pose->setStyleSheet("background-color: rgb(167, 167, 125)");
         save_pose_file =false;
+    }
+
+
 }
 
 void MainWindow::on_pBtn_clear_pose_clicked()
@@ -864,31 +870,34 @@ void MainWindow::SavePoseFiile(void)
      QString filePath="../pose.txt";
      static zw::CarInfo lastCarInfo={0,0,0,0,0};
      getCarInfo();
+     QFile f(filePath);
+
+     if(clear_pose_file)
+     {
+         clear_pose_file = false;
+         if(f.exists())
+         {
+             f.remove();
+         }
+         lastCarInfo={0,0,0,0,0};
+     }
+
      if( (abs((int)((carInfo.x -lastCarInfo.x)*100))>0) ||
          (abs((int)((carInfo.y -lastCarInfo.y)*100))>0) ||
          (abs((int)((carInfo.h -lastCarInfo.h)*20))>0) )
      {
-         QFile f(filePath);
-         if(clear_pose_file)
-         {
-             clear_pose_file = false;
-             if(f.exists())
-             {
-                 f.remove();
-             }
-         }
-
          if(save_pose_file)
          {
+             static int cnt=0;
+             if(!f.exists())
+                  cnt=0;
+
               if(!f.open(QIODevice::WriteOnly |QIODevice::Append |QIODevice::Text))
               {
                   qDebug()<<"Open pose file failed";
                   lastCarInfo = carInfo;
                   return ;
               }
-              static int cnt=0;
-              if(!f.exists())
-                   cnt=0;
               QTextStream txtOutput(&f);
               txtOutput<< cnt++
                        <<" "<<(int)(carInfo.x*1000)
@@ -896,7 +905,6 @@ void MainWindow::SavePoseFiile(void)
                        <<" "<<(int)(carInfo.h*1000)<<endl;
               f.close();
          }
-
          lastCarInfo = carInfo;
      }
 }
