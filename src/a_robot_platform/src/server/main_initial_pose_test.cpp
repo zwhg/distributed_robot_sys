@@ -44,7 +44,7 @@ int main(int argc, char **argv)
   ROS_INFO("optimize=[%6.2f %6.2f %6.2f]",m_mapProcess.optimize[0],
           m_mapProcess.optimize[1],m_mapProcess.optimize[2]);
 
-  ros::Subscriber map_sub = n.subscribe("map", 1, mapReceived);
+  ros::Subscriber map_sub = n.subscribe("bmap", 1, mapReceived);
   ros::Subscriber scan_sub =n.subscribe("scan",1, scanReceived);
 
   ros::Publisher filter_map_pub;

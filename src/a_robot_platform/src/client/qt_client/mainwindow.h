@@ -41,8 +41,6 @@ protected:
     void keyPressEvent(QKeyEvent *e);
 
 private slots:
-    void ShowLaser();
-    void ShowUltrasonic();
     void on_ultraAll_clicked();
     void on_pBtn_start2connect_clicked(bool checked);
     void on_pBtn_key_control_open_clicked(bool checked);
@@ -67,12 +65,16 @@ private slots:
     void on_Spin_Filter_Count_valueChanged(int arg1);
 
 private :
-    void KeyControlMsgRefalsh(const zw::KeyControlMsg & kMsg);
-    void MsgControlRefalsh(void);
-    void MsgImuRefalsh(void);
-    void MsgUltrasonicRefalsh(void);
+    void ConnectStatus(void);
+    void KeyControlMsgRefresh(const zw::KeyControlMsg & kMsg);
+    void MsgControlRefresh(void);
+    void MsgImuRefresh(void);
+    void MsgUltrasonicRefresh(void);
+    void ShowLaser();
+    void ShowUltrasonic();
     void ClearData();
-
+    void PoseRefresh(void);
+    void redrawMap(void);
 private:
     bool img_binarization;
     int th_binarization;
@@ -81,7 +83,8 @@ private:
     zw::TcpSocket *m_tcpSocketClient;
     zw::UdpSocket *m_udpSocketClient;
 
-
+    zw::MapInfo mapInfo;
+    zw::CarInfo carInfo;
     cv::Mat map;
     cv::Mat submap;
     zw::MapImage m_mapImage;

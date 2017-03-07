@@ -145,7 +145,7 @@ void AmclNode::paraInit()
     if(!private_nh_.getParam("odom_alpha5",alpha5_))
         alpha5_ =0.2;
 
-    //When true skips laser scans when a scan doesnt work for a
+    //When true skips laser scans when a scan doesn't work for a
     //majority of particles
     if(!private_nh_.getParam("do_beamskip",do_beamskip_))
         do_beamskip_ =false;
@@ -731,6 +731,10 @@ void AmclNode::laserReceived(const sensor_msgs::LaserScanConstPtr& laser_scan)
     }
   }
 
+  scan_processor.LaserScanToDataContainer(laser_scan,
+                                          scan_processor.dataContainer,
+                                          1/map_->scale);
+
   if(resampled || force_publication)
   {
     // Read out the current hypotheses
@@ -762,18 +766,13 @@ void AmclNode::laserReceived(const sensor_msgs::LaserScanConstPtr& laser_scan)
 
     if(max_weight > 0.0)
     {
-      Eigen::Vector3f scan_match_pose(hyps[max_weight_hyp].pf_pose_mean.v[0],
-                                      hyps[max_weight_hyp].pf_pose_mean.v[1],
-                                      hyps[max_weight_hyp].pf_pose_mean.v[2]);
+      scan_match_pose_[0]=hyps[max_weight_hyp].pf_pose_mean.v[0];
+      scan_match_pose_[1]=hyps[max_weight_hyp].pf_pose_mean.v[1];
+      scan_match_pose_[2]=hyps[max_weight_hyp].pf_pose_mean.v[2];
 
-      scan_processor.LaserScanToDataContainer(laser_scan,
-                                              scan_processor.dataContainer,
-                                              1/map_->scale);
-      scan_match_pose = scan_processor.PoseUpdate(scan_processor.dataContainer,
+      scan_match_pose_ = scan_processor.PoseUpdate(scan_processor.dataContainer,
                                                   map_,
-                                                  scan_match_pose);
-
-      pf_vector_t  finalPose = {scan_match_pose[0],scan_match_pose[1],scan_match_pose[2]};
+                                                  scan_match_pose_);
 
     //  pf_vector_t  finalPose = hyps[max_weight_hyp].pf_pose_mean;
 
@@ -781,9 +780,9 @@ void AmclNode::laserReceived(const sensor_msgs::LaserScanConstPtr& laser_scan)
              hyps[max_weight_hyp].pf_pose_mean.v[0],
              hyps[max_weight_hyp].pf_pose_mean.v[1],
              hyps[max_weight_hyp].pf_pose_mean.v[2],
-             scan_match_pose[0],
-             scan_match_pose[1],
-             scan_match_pose[2]);
+             scan_match_pose_[0],
+             scan_match_pose_[1],
+             scan_match_pose_[2]);
 
       geometry_msgs::PoseStamped ptest;
       ptest.header.frame_id =global_frame_id_;
@@ -793,17 +792,20 @@ void AmclNode::laserReceived(const sensor_msgs::LaserScanConstPtr& laser_scan)
       tf::quaternionTFToMsg(tf::createQuaternionFromYaw(hyps[max_weight_hyp].pf_pose_mean.v[2]), ptest.pose.orientation);
       pose_pub_amcl.publish(ptest);
 
-      ptest.pose.position.x = scan_match_pose[0];
-      ptest.pose.position.y = scan_match_pose[1];
-      tf::quaternionTFToMsg(tf::createQuaternionFromYaw(scan_match_pose[2]),                    ptest.pose.orientation);
+      ptest.pose.position.x = scan_match_pose_[0];
+      ptest.pose.position.y = scan_match_pose_[1];
+      tf::quaternionTFToMsg(tf::createQuaternionFromYaw(scan_match_pose_[2]),                    ptest.pose.orientation);
       pose_pub_scan.publish(ptest);
 
 
       //amcl or scan match ?
-      finalPose.v[0]= hyps[max_weight_hyp].pf_pose_mean.v[0];
-      finalPose.v[1]= hyps[max_weight_hyp].pf_pose_mean.v[1];
-      finalPose.v[2]= hyps[max_weight_hyp].pf_pose_mean.v[2];
-
+#if 0
+      pf_vector_t  finalPose = {scan_match_pose[0],scan_match_pose[1],scan_match_pose[2]};
+#else
+      pf_vector_t  finalPose ={hyps[max_weight_hyp].pf_pose_mean.v[0],
+                               hyps[max_weight_hyp].pf_pose_mean.v[1],
+                               hyps[max_weight_hyp].pf_pose_mean.v[2]};
+#endif
 
       geometry_msgs::PoseWithCovarianceStamped p;
       // Fill in the header
@@ -858,7 +860,7 @@ void AmclNode::laserReceived(const sensor_msgs::LaserScanConstPtr& laser_scan)
       latest_tf_ = tf::Transform(tf::Quaternion(odom_to_map.getRotation()),
                                  tf::Point(odom_to_map.getOrigin()));
       latest_tf_valid_ = true;
-      if(tf_broadcast_ == true)
+      if(tf_broadcast_)
       {
         // We want to send a transform that is good up until a
         // tolerance time so that odom can be used
@@ -872,8 +874,19 @@ void AmclNode::laserReceived(const sensor_msgs::LaserScanConstPtr& laser_scan)
       ROS_ERROR("No pose!");
     }
   }else if(latest_tf_valid_){
-    if (tf_broadcast_ == true)
+    if (tf_broadcast_)
     {
+
+     scan_match_pose_ = scan_processor.PoseUpdate(scan_processor.dataContainer,
+                                                map_,
+                                                scan_match_pose_);
+
+     ROS_INFO("scan:[%6.3f %6.3f %6.3f]",
+            scan_match_pose_[0],
+            scan_match_pose_[1],
+            scan_match_pose_[2]);
+
+
       // Nothing changed, so we'll just republish the last transform, to keep everybody happy.
       ros::Time transform_expiration = (laser_scan->header.stamp +transform_tolerance_);
       tf::StampedTransform tmp_tf_stamped(latest_tf_.inverse(),transform_expiration,

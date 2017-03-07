@@ -6,7 +6,9 @@ Panels:
       Expanded:
         - /Global Options1
         - /Pose1
-        - /PoseArray1
+        - /Map1
+        - /Axes1
+        - /TF1
       Splitter Ratio: 0.5
     Tree Height: 755
   - Class: rviz/Selection
@@ -131,7 +133,7 @@ Visualization Manager:
       Draw Behind: false
       Enabled: true
       Name: Map
-      Topic: /map
+      Topic: /bmap
       Unreliable: false
       Value: true
     - Arrow Length: 0.3
@@ -144,9 +146,9 @@ Visualization Manager:
       Value: true
     - Class: rviz/Axes
       Enabled: true
-      Length: 1
+      Length: 0.5
       Name: Axes
-      Radius: 0.1
+      Radius: 0.03
       Reference Frame: <Fixed Frame>
       Value: true
     - Class: rviz/TF
@@ -203,22 +205,22 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 1.4206
+      Distance: 7.46141
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.06
         Stereo Focal Distance: 1
         Swap Stereo Eyes: false
         Value: false
       Focal Point:
-        X: 0.0289926
-        Y: 0.061299
-        Z: -0.00246715
+        X: 1.67373
+        Y: 2.16155
+        Z: -0.636757
       Name: Current View
       Near Clip Distance: 0.01
-      Pitch: 1.5648
+      Pitch: 1.4548
       Target Frame: <Fixed Frame>
       Value: Orbit (rviz)
-      Yaw: 3.15676
+      Yaw: 3.19176
     Saved: ~
 Window Geometry:
   Displays:

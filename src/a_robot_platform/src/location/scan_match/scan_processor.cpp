@@ -7,8 +7,8 @@ namespace zw{
 
 ScanProcessor::ScanProcessor()
 {
-    paramMinDistanceDiffForPoseUpdate=0.1;
-    paramMinAngleDiffForPoseUpdate=5;
+    paramMinDistanceDiffForPoseUpdate=0.01;
+    paramMinAngleDiffForPoseUpdate=0.05;
 }
 
 ScanProcessor::~ScanProcessor()
@@ -25,8 +25,7 @@ Eigen::Vector3f ScanProcessor::PoseUpdate(const DataContainer& dataContainer,
 
     newPoseEstimateWorld = matchData(AmclPoseHintWorld,gridMap,dataContainer,lastScanMatchCov,3);
 
-    if(PoseDifferenceLargerThan(newPoseEstimateWorld, AmclPoseHintWorld,
-                                paramMinDistanceDiffForPoseUpdate, paramMinAngleDiffForPoseUpdate))
+    if(PoseDifferenceLargerThan(newPoseEstimateWorld, AmclPoseHintWorld))
    {
       //...
    }
@@ -232,7 +231,7 @@ bool ScanProcessor::LaserScanToDataContainer(const sensor_msgs::LaserScanConstPt
     float angle = scan->angle_min;
     dataContainer.clear();
     dataContainer.setOrigo(Eigen::Vector2f::Zero());
-    float maxRangeForContainer = scan->range_max - 0.1f;
+    float maxRangeForContainer = scan->range_max;
 
     for (size_t i = 0; i < size; ++i)
     {
@@ -251,10 +250,10 @@ bool ScanProcessor::LaserScanToDataContainer(const sensor_msgs::LaserScanConstPt
 }
 
 bool ScanProcessor::PoseDifferenceLargerThan(const Eigen::Vector3f& pose1,
-                                             const Eigen::Vector3f& pose2,
-                                             float distanceDiffThresh,
-                                             float angleDiffThresh)
+                                             const Eigen::Vector3f& pose2)
 {
+    float distanceDiffThresh = paramMinDistanceDiffForPoseUpdate;
+    float angleDiffThresh = paramMinAngleDiffForPoseUpdate ;
     //check distance
     if ( ( (pose1.head<2>() - pose2.head<2>()).norm() ) > distanceDiffThresh)
         return true;

@@ -98,16 +98,18 @@ void UartOdom::Analysis(uint8_t *arry, int nRet)
                 	zw::ParaGetSet pack ={zw::R_REGISTER,6,zw::MSG_IMU,dat};
                 	m_para.GetAddressValue(pack);
                 	qDebug()<<dat[0]<<dat[1]<<dat[2]<<dat[3]<<dat[4]<<dat[5];
-                }                
-                if (packInfo.addr==CONTROL)
+                }
+#endif
+#if 0
+                if (packInfo.addr==MSG_CONTROL)
                 {
                 	zw::ParaGetSet pack ={zw::R_REGISTER,2,zw::CONTROL,dat};
                 	m_para.GetAddressValue(pack);
                 	zw::Float2Int32 ff[2];
-               	for(int i=0;i<2;i++)
-        		{
-        		  ff[i].i = dat[i];
-        		}
+                    for(int i=0;i<2;i++)
+                    {
+                      ff[i].i = dat[i];
+                    }
                 	qDebug()<<ff[0].f<<ff[1].f;
                 }
 #endif

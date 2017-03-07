@@ -26,9 +26,7 @@ public:
 
 private:
  bool PoseDifferenceLargerThan(const Eigen::Vector3f& pose1,                              
-                               const Eigen::Vector3f& pose2,
-                               float distanceDiffThresh,
-                               float angleDiffThresh);
+                               const Eigen::Vector3f& pose2);
  Eigen::Vector3f matchData(const Eigen::Vector3f& beginEstimateWorld,
                            const map_t* gridMap,
                            const DataContainer& dataContainer,
