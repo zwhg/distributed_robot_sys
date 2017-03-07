@@ -429,6 +429,7 @@ map_t* AmclNode::convertMap( const nav_msgs::OccupancyGrid& map_msg)
      map->cells[i].probability =((unsigned char)map_msg.data[i])/100.0;
   }
 
+#if 0
   char *m=new char[dat_size];
   zw:: map_process(m,map_msg);
 
@@ -441,11 +442,19 @@ map_t* AmclNode::convertMap( const nav_msgs::OccupancyGrid& map_msg)
     }else{
       map->cells[i].occ_state = 0;
     }
-
-//     ROS_INFO("%2d   %f", map->cells[i].occ_state, map->cells[i].probability);
   }
-
   delete m;
+#else
+  for(int i=0; i<dat_size;i++)
+  {
+      if(map_msg.data[i]>=(char)(kOccProbaility*kOccGrid))
+         map->cells[i].occ_state=1;
+      else if(map_msg.data[i] <=(char)(kFreeprobaility*kOccGrid))
+         map->cells[i].occ_state=-1;
+      else
+         map->cells[i].occ_state=0;
+  }
+#endif
 
   return map;
 }

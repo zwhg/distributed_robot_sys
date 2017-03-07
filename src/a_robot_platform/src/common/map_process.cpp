@@ -6,7 +6,6 @@ namespace zw {
 
 void map_process(char *m,const nav_msgs::OccupancyGrid& map)
 {
-
     char p_value;
     unsigned long dat_size = map.info.width*map.info.height;
     char *gm=new char[dat_size];

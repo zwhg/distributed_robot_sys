@@ -744,9 +744,10 @@ void MainWindow::redrawMap(void)
 {
     if(!map.empty())
     {
+        QImage img =text_img;
         //draw xy
         QPainter painter;
-        painter.begin(&text_img);
+        painter.begin(&img);
         QPen pen(Qt::GlobalColor::red,3);
         painter.setPen(pen);
         QPoint o(mapInfo.map_x , mapInfo.map_y);
@@ -774,8 +775,8 @@ void MainWindow::redrawMap(void)
 
         painter.end();
 
-        ui->lbl_map->setPixmap(QPixmap::fromImage(text_img));
-        ui->lbl_map->resize(text_img.width(),text_img.height());
+        ui->lbl_map->setPixmap(QPixmap::fromImage(img));
+        ui->lbl_map->resize(img.width(),img.height());
         ui->lbl_map->setScaledContents(true);
     }
 }
@@ -863,9 +864,9 @@ void MainWindow::SavePoseFiile(void)
      QString filePath="../pose.txt";
      static zw::CarInfo lastCarInfo={0,0,0,0,0};
      getCarInfo();
-     if( (abs(carInfo.x -lastCarInfo.x)>0.01) ||
-         (abs(carInfo.y -lastCarInfo.y)>0.01) ||
-         (abs(carInfo.y -lastCarInfo.y)>0.05) )
+     if( (abs((int)((carInfo.x -lastCarInfo.x)*100))>0) ||
+         (abs((int)((carInfo.y -lastCarInfo.y)*100))>0) ||
+         (abs((int)((carInfo.h -lastCarInfo.h)*20))>0) )
      {
          QFile f(filePath);
          if(clear_pose_file)
