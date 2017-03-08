@@ -5,48 +5,84 @@
 namespace zw{
 
 
+
 ScanProcessor::ScanProcessor()
 {
-    paramMinDistanceDiffForPoseUpdate=0.01;
-    paramMinAngleDiffForPoseUpdate=0.05;
+    paramMinDistanceDiffForPoseUpdate=0.08*0.08;
+    paramMinAngleDiffForPoseUpdate=0.1;
+    numDepth = 3;
+    multMap =new map_grid_t[numDepth];
+    for(int i=0; i<numDepth;i++)
+        multMap[i].cell_pbb = nullptr;
 }
 
 ScanProcessor::~ScanProcessor()
 {
+    for(int i=0; i<numDepth;i++)
+    if(multMap[i].cell_pbb!=nullptr)
+        delete multMap[i].cell_pbb;
 
+    delete multMap;
 }
 
 
-Eigen::Vector3f ScanProcessor::PoseUpdate(const DataContainer& dataContainer,
-                               const map_t* gridMap,
-                               const Eigen::Vector3f& AmclPoseHintWorld)
+Eigen::Vector3f ScanProcessor::PoseUpdate(const sensor_msgs::LaserScanConstPtr& scan,
+                                          const Eigen::Vector3f& AmclPoseHintWorld)
 {
-    Eigen::Vector3f newPoseEstimateWorld;
+    LaserScanToDataContainer(scan,1/multMap[0].scale);
 
-    newPoseEstimateWorld = matchData(AmclPoseHintWorld,gridMap,dataContainer,lastScanMatchCov,3);
+    Eigen::Vector3f tmp(AmclPoseHintWorld);
 
-    if(PoseDifferenceLargerThan(newPoseEstimateWorld, AmclPoseHintWorld))
-   {
-      //...
-   }
-    return newPoseEstimateWorld;
+    for(int index = numDepth-1; index>=0; --index)
+    {
+        if(index==0)
+             tmp =matchData(tmp,dataContainer,&(multMap[index]),lastScanMatchCov,5);
+        else
+        {
+             DataContainer d(dataContainer.getSize());
+             d.setFrom(dataContainer,1.0/(1<<index));
+             tmp = matchData(tmp,d,&(multMap[index]),lastScanMatchCov,3);
+        }
+    }
+
+    ROS_INFO("amcl:[%6.3f %6.3f %6.3f]  scan:[%6.3f %6.3f %6.3f]",
+           AmclPoseHintWorld[0],AmclPoseHintWorld[1],AmclPoseHintWorld[2],
+           tmp[0],tmp[1],tmp[2]);
+
+    float pd = (tmp[0] -AmclPoseHintWorld[0])*(tmp[0] -AmclPoseHintWorld[0])+
+              (tmp[1] -AmclPoseHintWorld[1])*(tmp[1] -AmclPoseHintWorld[1]);
+
+    float angleDiff = (tmp[2] - AmclPoseHintWorld[2]);
+
+    if (angleDiff > M_PI) {
+        angleDiff -= M_PI * 2.0f;
+    } else if (angleDiff < -M_PI) {
+        angleDiff += M_PI * 2.0f;
+    }
+
+//    if( (pd< paramMinDistanceDiffForPoseUpdate) || (fabs(angleDiff)<paramMinAngleDiffForPoseUpdate))
+//        return tmp;
+//    else
+//        return AmclPoseHintWorld;
+
+    return tmp;
 }
 
 /*
 arg1 : t-1时刻机器人在世界坐标系下的位姿
-arg2 : 栅格地图
-arg3 : 激光数据
+arg2 :  栅格化的激光数据
+arg3 : 栅格地图
 arg4 : 当前时刻 hassian  矩阵
 arg5 : 最大迭代次数
 ret : t时刻机器人在世界坐标系下的位姿
 */
 Eigen::Vector3f ScanProcessor::matchData(const Eigen::Vector3f& beginEstimateWorld,
-                          const map_t* map,
-                          const DataContainer& dataContainer,
-                          Eigen::Matrix3f& covMatrix,
-                          int maxIterations)
-{
-    if (dataContainer.getSize() != 0) {
+                                         const DataContainer& dataPoints,
+                                         const map_grid_t* map,
+                                         Eigen::Matrix3f& covMatrix,
+                                         int maxIterations)
+{    
+    if (dataPoints.getSize() != 0) {
         //计算激光坐标系在全局坐标中的坐标
         // Take account of the laser pose relative to the robot
          pf_vector_t pose={beginEstimateWorld[0],beginEstimateWorld[1],beginEstimateWorld[2]};  //robot in world pose
@@ -67,7 +103,7 @@ Eigen::Vector3f ScanProcessor::matchData(const Eigen::Vector3f& beginEstimateWor
 
          for(int i=0;i<maxIterations+1;i++)
          {
-             estimateTransformationLogLh(estimate,map,dataContainer);
+             estimateTransformationLogLh(estimate,dataPoints,map);
          }
 
         //normalize angle
@@ -100,15 +136,14 @@ Eigen::Vector3f ScanProcessor::matchData(const Eigen::Vector3f& beginEstimateWor
 
 /*计算 hessian 矩阵 ，并估计t时刻，机器人的位姿*/
 bool ScanProcessor::estimateTransformationLogLh(Eigen::Vector3f& estimate,
-                                 const map_t* gridMapUtil,
-                                 const DataContainer& dataPoints)
+                                 const DataContainer& dataPoints,
+                                 const map_grid_t* gridMap)
 {
-    getCompleteHessianDerivs(gridMapUtil,estimate, dataPoints, H, dTr);
+    getCompleteHessianDerivs(estimate, dataPoints,gridMap, H, dTr);
 
 //    std::cout <<"size = "<<dataPoints.getSize()<<" N = "<<n<<"\n";
 //    std::cout << "\nH\n" << H  << "\n";
 //    std::cout << "\ndTr\n" << dTr  << "\n";
-
 
     if ((H(0, 0) != 0.0f) && (H(1, 1) != 0.0f)) {
 
@@ -130,9 +165,9 @@ bool ScanProcessor::estimateTransformationLogLh(Eigen::Vector3f& estimate,
     return false;
 }
 
-void ScanProcessor::getCompleteHessianDerivs(const map_t *gridMapUtil,
-                                             const Eigen::Vector3f& pose,
+void ScanProcessor::getCompleteHessianDerivs(const Eigen::Vector3f& pose,
                                              const DataContainer& dataPoints,
+                                             const map_grid_t* gridMap,
                                              Eigen::Matrix3f& h,
                                              Eigen::Vector3f& dTr)
 {
@@ -151,7 +186,7 @@ void ScanProcessor::getCompleteHessianDerivs(const map_t *gridMapUtil,
        // end point in map pose
        const Eigen::Vector2f endPoint =transform * currPoint;
 
-       Eigen::Vector3f transformedPointData(interpMapValueWithDerivatives(gridMapUtil,endPoint));
+       Eigen::Vector3f transformedPointData(interpMapValueWithDerivatives(gridMap,endPoint));
 
        float funVal = 1.0f - transformedPointData[0];
 
@@ -177,10 +212,10 @@ void ScanProcessor::getCompleteHessianDerivs(const map_t *gridMapUtil,
      h(2, 1) = h(1, 2);
 }
 
-Eigen::Vector3f ScanProcessor::interpMapValueWithDerivatives(const map_t *gridMapUtil,
+Eigen::Vector3f ScanProcessor::interpMapValueWithDerivatives(const map_grid_t* gridMap,
                                               const Eigen::Vector2f& coords)
 {
-  if(!MAP_VALID(gridMapUtil, coords[0],coords[1]))
+  if(!MAP_VALID(gridMap, coords[0],coords[1]))
   {
       return Eigen::Vector3f(0.0f, 0.0f, 0.0f);
   }
@@ -189,17 +224,17 @@ Eigen::Vector3f ScanProcessor::interpMapValueWithDerivatives(const map_t *gridMa
 
    //get factors for bilinear interpolation
    Eigen::Vector2f factors(coords - indMin.cast<float>());
-   int sizeX = gridMapUtil->size_x;
+   int sizeX = gridMap->size_x;
    int index = indMin[1] * sizeX + indMin[0];
    float intensities[4];
 
-   intensities[0] = gridMapUtil->cells[index].probability;
+   intensities[0] = gridMap->cell_pbb[index];
    ++index;
-   intensities[1] = gridMapUtil->cells[index].probability;
+   intensities[1] = gridMap->cell_pbb[index];
    index += sizeX-1;
-   intensities[2] = gridMapUtil->cells[index].probability;
+   intensities[2] = gridMap->cell_pbb[index];
    ++index;
-   intensities[3] = gridMapUtil->cells[index].probability;
+   intensities[3] = gridMap->cell_pbb[index];
 
    float dx1 = intensities[0] - intensities[1];
    float dx2 = intensities[2] - intensities[3];
@@ -223,8 +258,7 @@ Eigen::Affine2f ScanProcessor::getTransformForState(const Eigen::Vector3f& trans
   return Eigen::Translation2f(transVector[0], transVector[1]) * Eigen::Rotation2Df(transVector[2]);
 }
 
-bool ScanProcessor::LaserScanToDataContainer(const sensor_msgs::LaserScanConstPtr& scan,
-                                             DataContainer &dataContainer,
+void ScanProcessor::LaserScanToDataContainer(const sensor_msgs::LaserScanConstPtr& scan,
                                              float scaleToMap)
 {
     size_t size = scan->ranges.size();
@@ -243,37 +277,60 @@ bool ScanProcessor::LaserScanToDataContainer(const sensor_msgs::LaserScanConstPt
         }
         angle += scan->angle_increment;
     }
-
   //  std::cout<<"laser size = "<<size<<"\n";
-
-    return true;
-}
-
-bool ScanProcessor::PoseDifferenceLargerThan(const Eigen::Vector3f& pose1,
-                                             const Eigen::Vector3f& pose2)
-{
-    float distanceDiffThresh = paramMinDistanceDiffForPoseUpdate;
-    float angleDiffThresh = paramMinAngleDiffForPoseUpdate ;
-    //check distance
-    if ( ( (pose1.head<2>() - pose2.head<2>()).norm() ) > distanceDiffThresh)
-        return true;
-
-    float angleDiff = (pose1.z() - pose2.z());
-
-    if (angleDiff > M_PI) {
-        angleDiff -= M_PI * 2.0f;
-    } else if (angleDiff < -M_PI) {
-        angleDiff += M_PI * 2.0f;
-    }
-
-    if (abs(angleDiff) > angleDiffThresh)
-        return true;
-    return false;
 }
 
 void ScanProcessor::SetLaserPose(const pf_vector_t& p)
 {
     this->laser_pose=p;
+}
+
+
+void ScanProcessor::GetMultiMap(const map_t* gridMap)
+{
+
+    for(int i=0;i<numDepth;i++)
+    {
+        multMap[i].origin_x = gridMap->origin_x;
+        multMap[i].origin_y = gridMap->origin_y;
+        if(i==0)
+        {
+            multMap[i].scale = gridMap->scale ;
+            multMap[i].size_x  = gridMap->size_x ;
+            multMap[i].size_y = gridMap->size_y ;
+            multMap[i].cell_pbb =new float[multMap[i].size_x * multMap[i].size_y];
+            for(int k=0 ; k< multMap[i].size_x * multMap[i].size_y ;k++)
+                multMap[i].cell_pbb[k] = gridMap->cells[k].probability;
+        }else{
+            multMap[i].scale =  (multMap[i-1].scale)*(1<<i) ;
+            multMap[i].size_x = (multMap[i-1].size_x) >> i;
+            multMap[i].size_y = (multMap[i-1].size_y) >> i ;
+            multMap[i].cell_pbb =new float[multMap[i].size_x * multMap[i].size_y];
+
+            int index=0;
+            int num = (1<<i);
+            for(int y=0; y<multMap[i].size_y; y++)
+            {
+                for(int x=0; x<multMap[i].size_x; x++)
+                {
+                   float sum=0;
+                   int cnt=0;
+                   for(int jj=0;jj<num;jj++)
+                   {
+                       for(int ii=0;ii<num;ii++)
+                       {
+                           index= GetGridIndexOfMap(multMap[i].size_x,(x*num+ii),(y*num+jj));
+                           sum+= gridMap->cells[index].probability;
+                           cnt++;
+                       }
+                   }
+                   ROS_ASSERT(cnt==0);
+                   multMap[i].cell_pbb[(y*multMap[i].size_x) + x] = sum/cnt ;
+                }
+            }
+
+        }
+    }
 }
 
 }

@@ -326,6 +326,8 @@ void AmclNode::handleMapMessage(const nav_msgs::OccupancyGrid& msg)
 
     map_ = convertMap(msg);
 
+    scan_processor.GetMultiMap(map_);
+
 #if NEW_UNIFORM_SAMPLING
     // Index of free space
     free_space_indices.resize(0);
@@ -429,7 +431,7 @@ map_t* AmclNode::convertMap( const nav_msgs::OccupancyGrid& map_msg)
      map->cells[i].probability =((unsigned char)map_msg.data[i])/100.0;
   }
 
-#if 0
+#if 1
   char *m=new char[dat_size];
   zw:: map_process(m,map_msg);
 
@@ -740,9 +742,6 @@ void AmclNode::laserReceived(const sensor_msgs::LaserScanConstPtr& laser_scan)
     }
   }
 
-  scan_processor.LaserScanToDataContainer(laser_scan,
-                                          scan_processor.dataContainer,
-                                          1/map_->scale);
 
   if(resampled || force_publication)
   {
@@ -779,19 +778,7 @@ void AmclNode::laserReceived(const sensor_msgs::LaserScanConstPtr& laser_scan)
       scan_match_pose_[1]=hyps[max_weight_hyp].pf_pose_mean.v[1];
       scan_match_pose_[2]=hyps[max_weight_hyp].pf_pose_mean.v[2];
 
-      scan_match_pose_ = scan_processor.PoseUpdate(scan_processor.dataContainer,
-                                                  map_,
-                                                  scan_match_pose_);
-
-    //  pf_vector_t  finalPose = hyps[max_weight_hyp].pf_pose_mean;
-
-      ROS_INFO("amcl:[%6.3f %6.3f %6.3f]  scan:[%6.3f %6.3f %6.3f]",
-             hyps[max_weight_hyp].pf_pose_mean.v[0],
-             hyps[max_weight_hyp].pf_pose_mean.v[1],
-             hyps[max_weight_hyp].pf_pose_mean.v[2],
-             scan_match_pose_[0],
-             scan_match_pose_[1],
-             scan_match_pose_[2]);
+      scan_match_pose_ = scan_processor.PoseUpdate(laser_scan,scan_match_pose_);
 
       geometry_msgs::PoseStamped ptest;
       ptest.header.frame_id =global_frame_id_;
@@ -803,7 +790,7 @@ void AmclNode::laserReceived(const sensor_msgs::LaserScanConstPtr& laser_scan)
 
       ptest.pose.position.x = scan_match_pose_[0];
       ptest.pose.position.y = scan_match_pose_[1];
-      tf::quaternionTFToMsg(tf::createQuaternionFromYaw(scan_match_pose_[2]),                    ptest.pose.orientation);
+      tf::quaternionTFToMsg(tf::createQuaternionFromYaw(scan_match_pose_[2]), ptest.pose.orientation);
       pose_pub_scan.publish(ptest);
 
 
@@ -886,15 +873,7 @@ void AmclNode::laserReceived(const sensor_msgs::LaserScanConstPtr& laser_scan)
     if (tf_broadcast_)
     {
 
-     scan_match_pose_ = scan_processor.PoseUpdate(scan_processor.dataContainer,
-                                                map_,
-                                                scan_match_pose_);
-
-     ROS_INFO("scan:[%6.3f %6.3f %6.3f]",
-            scan_match_pose_[0],
-            scan_match_pose_[1],
-            scan_match_pose_[2]);
-
+    // scan_match_pose_ = scan_processor.PoseUpdate(laser_scan, scan_match_pose_);
 
       // Nothing changed, so we'll just republish the last transform, to keep everybody happy.
       ros::Time transform_expiration = (laser_scan->header.stamp +transform_tolerance_);
