@@ -1,6 +1,6 @@
 #include "scan_processor.h"
 #include <ros/ros.h>
-
+#include "../../map/mapreadandwrite.h"
 
 namespace zw{
 
@@ -302,9 +302,9 @@ void ScanProcessor::GetMultiMap(const map_t* gridMap)
             for(int k=0 ; k< multMap[i].size_x * multMap[i].size_y ;k++)
                 multMap[i].cell_pbb[k] = gridMap->cells[k].probability;
         }else{
-            multMap[i].scale =  (multMap[i-1].scale)*(1<<i) ;
-            multMap[i].size_x = (multMap[i-1].size_x) >> i;
-            multMap[i].size_y = (multMap[i-1].size_y) >> i ;
+            multMap[i].scale =  (multMap[0].scale)*(1<<i) ;
+            multMap[i].size_x = (multMap[0].size_x) >> i;
+            multMap[i].size_y = (multMap[0].size_y) >> i ;
             multMap[i].cell_pbb =new float[multMap[i].size_x * multMap[i].size_y];
 
             int index=0;
@@ -319,17 +319,26 @@ void ScanProcessor::GetMultiMap(const map_t* gridMap)
                    {
                        for(int ii=0;ii<num;ii++)
                        {
-                           index= GetGridIndexOfMap(multMap[i].size_x,(x*num+ii),(y*num+jj));
+                           index= GetGridIndexOfMap(multMap[0].size_x,(x*num+ii),(y*num+jj));
                            sum+= gridMap->cells[index].probability;
                            cnt++;
                        }
                    }
-                   ROS_ASSERT(cnt==0);
                    multMap[i].cell_pbb[(y*multMap[i].size_x) + x] = sum/cnt ;
                 }
             }
-
         }
+
+//        nav_msgs::OccupancyGrid grid;
+//        grid.info.width=multMap[i].size_x;
+//        grid.info.height=multMap[i].size_y;
+//        grid.info.resolution =multMap[i].scale;
+//        grid.data.resize(multMap[i].size_x * multMap[i].size_y,-1);
+
+//        for(int k=0 ; k< multMap[i].size_x * multMap[i].size_y ;k++)
+//            grid.data[k] =(char)(multMap[i].cell_pbb[k]*100);
+//        std::string filename ="/home/zw/g"+std::to_string(i);
+//        OccupancyToPgmAndYaml(grid,filename);
     }
 }
 

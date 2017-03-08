@@ -52,6 +52,13 @@ catkin_package()
 include_directories(include
     ${yamlcpp_INCLUDE_DIRS} )
 
+
+if(CMAKE_COMPILER_IS_GNUCXX)
+    set(CMAKE_CXX_FLAGS "-std=c++11 ${CMAKE_CXX_FLAGS}")
+    message(STATUS "optional:-std=c++11")
+endif(CMAKE_COMPILER_IS_GNUCXX)
+
+
 add_executable(main_uart_odom src/server/main_uart_odom.cpp
  src/common/modbus.cpp
  src/common/paras.cpp
@@ -96,10 +103,11 @@ add_executable(main_global_location src/server/main_global_location.cpp
  src/common/map_process.cpp
  src/location/scan_match/data_point_container.h
  src/location/scan_match/scan_processor.cpp
-
+ src/map/mapreadandwrite.cpp
  )
 target_link_libraries(main_global_location
  ${catkin_LIBRARIES}
+  yaml-cpp
  )
 
 
@@ -129,7 +137,7 @@ add_executable(main_pathplan_server src/server/main_pathplan_server.cpp)
 target_link_libraries(main_pathplan_server
     ${catkin_LIBRARIES}
 )
-add_definitions(-std=gnu++11)
+
 
 qt5_use_modules(main_uart_odom
   Core

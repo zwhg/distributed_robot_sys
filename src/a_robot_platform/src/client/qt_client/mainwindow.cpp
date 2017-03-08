@@ -856,8 +856,6 @@ void MainWindow::on_pBtn_save_pose_clicked(bool checked)
         ui->pBtn_save_pose->setStyleSheet("background-color: rgb(167, 167, 125)");
         save_pose_file =false;
     }
-
-
 }
 
 void MainWindow::on_pBtn_clear_pose_clicked()
