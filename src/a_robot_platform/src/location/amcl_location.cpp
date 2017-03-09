@@ -778,7 +778,7 @@ void AmclNode::laserReceived(const sensor_msgs::LaserScanConstPtr& laser_scan)
       scan_match_pose_[1]=hyps[max_weight_hyp].pf_pose_mean.v[1];
       scan_match_pose_[2]=hyps[max_weight_hyp].pf_pose_mean.v[2];
 
-      scan_match_pose_ = scan_processor.PoseUpdate(laser_scan,scan_match_pose_);
+      scan_match_pose_ = scan_processor.PoseUpdate(laser_scan, map_, scan_match_pose_);
 
       geometry_msgs::PoseStamped ptest;
       ptest.header.frame_id =global_frame_id_;
@@ -794,9 +794,25 @@ void AmclNode::laserReceived(const sensor_msgs::LaserScanConstPtr& laser_scan)
       pose_pub_scan.publish(ptest);
 
 
+#if 0
+      pf_sample_set_t* mset = pf_->sets + pf_->current_set;
+      if(mset->sample_count < pf_->max_samples-1)
+      {
+          pf_sample_t *msample = mset->samples + mset->sample_count++;
+          msample->pose ={scan_match_pose_[0],
+                          scan_match_pose_[1],
+                          scan_match_pose_[2]};
+
+          for (int i = 0; i < mset->sample_count; i++)
+          {
+            msample = mset->samples + i;
+            msample->weight = 1/mset->sample_count;
+          }
+      }
+#endif
       //amcl or scan match ?
 #if 0
-      pf_vector_t  finalPose = {scan_match_pose[0],scan_match_pose[1],scan_match_pose[2]};
+      pf_vector_t  finalPose = {scan_match_pose_[0],scan_match_pose_[1],scan_match_pose_[2]};
 #else
       pf_vector_t  finalPose ={hyps[max_weight_hyp].pf_pose_mean.v[0],
                                hyps[max_weight_hyp].pf_pose_mean.v[1],

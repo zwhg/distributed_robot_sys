@@ -8,9 +8,9 @@ namespace zw{
 
 ScanProcessor::ScanProcessor()
 {
-    paramMinDistanceDiffForPoseUpdate=0.08*0.08;
+    paramMinDistanceDiffForPoseUpdate=0.05*0.05;
     paramMinAngleDiffForPoseUpdate=0.1;
-    numDepth = 3;
+    numDepth = 2;
     multMap =new map_grid_t[numDepth];
     for(int i=0; i<numDepth;i++)
         multMap[i].cell_pbb = nullptr;
@@ -27,6 +27,7 @@ ScanProcessor::~ScanProcessor()
 
 
 Eigen::Vector3f ScanProcessor::PoseUpdate(const sensor_msgs::LaserScanConstPtr& scan,
+                                          const map_t* map,
                                           const Eigen::Vector3f& AmclPoseHintWorld)
 {
     LaserScanToDataContainer(scan,1/multMap[0].scale);
@@ -45,14 +46,41 @@ Eigen::Vector3f ScanProcessor::PoseUpdate(const sensor_msgs::LaserScanConstPtr& 
         }
     }
 
-    ROS_INFO("amcl:[%6.3f %6.3f %6.3f]  scan:[%6.3f %6.3f %6.3f]",
-           AmclPoseHintWorld[0],AmclPoseHintWorld[1],AmclPoseHintWorld[2],
-           tmp[0],tmp[1],tmp[2]);
+//    ROS_INFO("\namcl:[%6.3f %6.3f %6.3f]  scan:[%6.3f %6.3f %6.3f]",
+//           AmclPoseHintWorld[0],AmclPoseHintWorld[1],AmclPoseHintWorld[2],
+//           tmp[0],tmp[1],tmp[2]);
 
-    float pd = (tmp[0] -AmclPoseHintWorld[0])*(tmp[0] -AmclPoseHintWorld[0])+
-              (tmp[1] -AmclPoseHintWorld[1])*(tmp[1] -AmclPoseHintWorld[1]);
 
-    float angleDiff = (tmp[2] - AmclPoseHintWorld[2]);
+    Eigen::Vector3f scanmatch=tmp;
+
+
+    uniformPoseGenerator(scanmatch, map, 0.05, 0.05, 100);
+    for(int i=0;i<poseSets.size();i++)
+        poseSets[i].grade = getPoseSetGrade(dataContainer,map,poseSets[i],1);
+
+    Eigen::Vector3f best;
+
+    best = getBestSet();
+//    if(poseSets[0].grade <=10)
+//        best = scanmatch ;
+
+    for(int i=0;i<poseSets.size()/10;i++)
+        ROS_INFO("rp:[%6.3f %6.3f %6.3f],g=%6.6f",
+                 poseSets[i].pose[0],poseSets[i].pose[1],
+                poseSets[i].pose[2],poseSets[i].grade);
+
+
+    ROS_INFO("\na:[%6.3f %6.3f %6.3f]\n"
+               "s:[%6.3f %6.3f %6.3f]\n"
+               "b:[%6.3f %6.3f %6.3f],g=%6.3f/%d\n",
+               AmclPoseHintWorld[0],AmclPoseHintWorld[1],AmclPoseHintWorld[2],
+               scanmatch[0],scanmatch[1],scanmatch[2],
+               best[0],best[1],best[2],poseSets[0].grade,dataContainer.getSize());
+
+
+    float pd = (best[0] -AmclPoseHintWorld[0])*(best[0] -AmclPoseHintWorld[0])+
+              (best[1] -AmclPoseHintWorld[1])*(best[1] -AmclPoseHintWorld[1]);
+    float angleDiff = (best[2] - AmclPoseHintWorld[2]);
 
     if (angleDiff > M_PI) {
         angleDiff -= M_PI * 2.0f;
@@ -60,12 +88,11 @@ Eigen::Vector3f ScanProcessor::PoseUpdate(const sensor_msgs::LaserScanConstPtr& 
         angleDiff += M_PI * 2.0f;
     }
 
-//    if( (pd< paramMinDistanceDiffForPoseUpdate) || (fabs(angleDiff)<paramMinAngleDiffForPoseUpdate))
-//        return tmp;
-//    else
-//        return AmclPoseHintWorld;
 
-    return tmp;
+    if( (pd< paramMinDistanceDiffForPoseUpdate) && (fabs(angleDiff)<paramMinAngleDiffForPoseUpdate))
+         return best;
+    else
+         return AmclPoseHintWorld;
 }
 
 /*
@@ -322,9 +349,12 @@ void ScanProcessor::GetMultiMap(const map_t* gridMap)
                            index= GetGridIndexOfMap(multMap[0].size_x,(x*num+ii),(y*num+jj));
                            sum+= gridMap->cells[index].probability;
                            cnt++;
+//                           if(sum<gridMap->cells[index].probability)
+//                               sum = gridMap->cells[index].probability;
                        }
                    }
                    multMap[i].cell_pbb[(y*multMap[i].size_x) + x] = sum/cnt ;
+                 //  multMap[i].cell_pbb[(y*multMap[i].size_x) + x] = sum ;
                 }
             }
         }
@@ -341,6 +371,97 @@ void ScanProcessor::GetMultiMap(const map_t* gridMap)
 //        OccupancyToPgmAndYaml(grid,filename);
     }
 }
+
+
+void ScanProcessor::uniformPoseGenerator(const Eigen::Vector3f& center,
+                                         const map_t* map,
+                                         float dwindows ,
+                                         float awindows,
+                                         int num)
+{
+    poseSets.clear();
+    float delta ;
+    poseSet_t p;
+
+    p.grade=0;
+    for(int i=0;i<num;i++)
+    {
+       delta =(1-drand48()*2)*dwindows;
+       p.pose[0] = center[0] + delta ;    //robot in world pose;
+       p.pose[1] = center[1] + delta ;
+       p.pose[2] = center[2];
+//       delta =(1-drand48()*2)*awindows;
+//       p.pose[2] = center[2] + delta;
+
+//       if ( p.pose[2] > M_PI) {
+//            p.pose[2] -= M_PI * 2.0f;
+//       } else if ( p.pose[2] < -M_PI) {
+//            p.pose[2] += M_PI * 2.0f;
+//       }
+
+       poseSets.push_back(p);
+     //  ROS_INFO("randpose:[%6.3f %6.3f]\n",p.pose[0],p.pose[1]);
+    }
+}
+
+float ScanProcessor::getPoseSetGrade(const DataContainer& dataPoints,
+                                     const map_t* map,
+                                     const poseSet_t& set,
+                                     int skip)
+{
+    int size = dataPoints.getSize();
+    int index ,mi, mj;
+
+    Eigen::Vector3f lpw(set.pose[0]+laser_pose.v[0],      //laser pose in world
+                        set.pose[1]+laser_pose.v[1],
+                        set.pose[2]);
+
+    Eigen::Affine2f transform(getTransformForState(lpw));  //laser pose in world transform
+
+    double z=0,p=0,pz=0 ;
+
+    for (int i = 0; i < size; i+=skip)
+    {
+        const Eigen::Vector2f& currPoint(dataPoints.getVecEntry(i)*map->scale);  //end point in laser pose
+        // end point in map pose
+        const Eigen::Vector2f endPoint =transform * currPoint;  //end point in world
+
+        mi=MAP_GXWX(map, endPoint[0]);
+        mj=MAP_GYWY(map, endPoint[1]);
+
+//        if(MAP_VALID(map, mi, mj))
+//        {
+//            index = MAP_INDEX(map, mi, mj);
+//            if(map->cells[index].occ_state ==1)
+//                grade ++;
+//        //    else if(map->cells[index].occ_state == -1)
+//                //grade --;
+//        }
+        if(!MAP_VALID(map, mi, mj))
+          z = map->max_occ_dist;
+        else
+          z = map->cells[MAP_INDEX(map,mi,mj)].occ_dist;
+        pz=0;
+        // Gaussian model
+        // NOTE: this should have a normalization of 1/(sqrt(2pi)*sigma)
+        pz =exp(-(z * z) / 2*0.1*0.1);
+        p +=pz;
+    }
+
+    return p;
+}
+
+ Eigen::Vector3f ScanProcessor::getBestSet(void)
+ {
+  std::sort(poseSets.begin(),poseSets.end(), cmp_grade);
+  return poseSets[0].pose ;
+ }
+
+
+ bool cmp_grade(const poseSet_t& s1,const poseSet_t& s2)
+ {
+     return s1.grade >s2.grade ;
+ }
 
 }
 

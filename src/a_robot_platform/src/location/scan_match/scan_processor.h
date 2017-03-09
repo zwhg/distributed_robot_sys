@@ -24,6 +24,14 @@ typedef struct
 
 } map_grid_t;
 
+typedef struct
+{
+    Eigen::Vector3f pose;
+    float grade;
+}poseSet_t;
+
+
+bool cmp_grade(const poseSet_t& s1,const poseSet_t& s2);
 
 class ScanProcessor{
 
@@ -33,6 +41,7 @@ public:
 
 
  Eigen::Vector3f PoseUpdate(const sensor_msgs::LaserScanConstPtr& scan,
+                            const map_t* map,
                             const Eigen::Vector3f& AmclPoseHintWorld);
  void SetLaserPose(const pf_vector_t& p);
 
@@ -64,6 +73,21 @@ private:
 
  Eigen::Affine2f getTransformForState(const Eigen::Vector3f& transVector);
 
+ void uniformPoseGenerator(const Eigen::Vector3f& center,
+                           const map_t* map,
+                           float dwindows,
+                           float awindows,
+                           int num);
+
+ float getPoseSetGrade(const DataContainer& dataPoints,
+                      const map_t* map,
+                      const poseSet_t& set,
+                      int skip);
+
+
+
+ Eigen::Vector3f getBestSet(void);
+
 
 public:
  pf_vector_t laser_pose;
@@ -76,6 +100,8 @@ private:
  map_grid_t *multMap;
  DataContainer dataContainer;
 
+ std::vector<poseSet_t> poseSets;
+
 
 protected:
   Eigen::Vector3f dTr;
@@ -85,8 +111,8 @@ protected:
 };
 
 
-}
 
+}
 
 
 #endif
