@@ -1,6 +1,8 @@
 #include "scan_processor.h"
 #include <ros/ros.h>
 #include "../../map/mapreadandwrite.h"
+#include <fcntl.h>
+
 
 namespace zw{
 
@@ -33,54 +35,80 @@ Eigen::Vector3f ScanProcessor::PoseUpdate(const sensor_msgs::LaserScanConstPtr& 
     LaserScanToDataContainer(scan,1/multMap[0].scale);
 
     Eigen::Vector3f tmp(AmclPoseHintWorld);
+#if 1
+    uniformPoseGenerator(tmp, map, 0.08, 0.05, 200);
+    for(int i=0;i<poseSets.size();i++)
+        poseSets[i].grade = getPoseSetGrade(dataContainer,map,poseSets[i],2);
 
+    Eigen::Vector3f best,avg(0.0,0.0,0.0);
+
+    best = getBestSet();
+
+    for(int i=0;i<10;i++)
+    {
+        ROS_INFO("rp:[%6.3f %6.3f %6.3f],g=%6.6f",
+                 poseSets[i].pose[0],poseSets[i].pose[1],
+                 poseSets[i].pose[2],poseSets[i].grade);
+        avg[0] +=poseSets[i].pose[0] ;
+        avg[1] +=poseSets[i].pose[1] ;
+        avg[2] +=fabs(poseSets[i].pose[2]);
+    }
+    avg /=10;
+    if(best[2]<0)
+        avg[2]=-avg[2];
+
+    static int i=0;
+    const char *filePath="../mposetest.txt";
+    if(i==0)
+    {
+        if(access(filePath,F_OK)==0)
+        {
+            remove(filePath);
+        }
+    }
+    std::string str=std::to_string(i++)+" "+
+                    std::to_string((int)(AmclPoseHintWorld[0]*1000))+" "+
+                    std::to_string((int)(AmclPoseHintWorld[1]*1000))+" "+
+                    std::to_string((int)(AmclPoseHintWorld[2]*1000))+" "+
+                    std::to_string((int)(avg[0]*1000))+" "+
+                    std::to_string((int)(avg[1]*1000))+" "+
+                    std::to_string((int)(avg[2]*1000))+"\n";
+    int len =str.length();
+    const char * buf = str.c_str();
+
+    int fd=open(filePath,O_CREAT|O_WRONLY|O_APPEND,S_IRWXU|S_IRWXG|S_IRWXO);
+    if(-1==fd)
+    {
+      printf("test.txt not exist !\n");
+    }
+    write(fd,buf,len);
+    close(fd);
+
+
+    ROS_INFO("\na:[%6.3f %6.3f %6.3f]\n"
+               "b:[%6.3f %6.3f %6.3f]\n"
+               "g:[%6.3f %6.3f %6.3f]\n",
+               AmclPoseHintWorld[0],AmclPoseHintWorld[1],AmclPoseHintWorld[2],
+               best[0],best[1],best[2],
+               avg[0],avg[1],avg[2]);
+
+    return avg ;
+#else
     for(int index = numDepth-1; index>=0; --index)
     {
         if(index==0)
-             tmp =matchData(tmp,dataContainer,&(multMap[index]),lastScanMatchCov,5);
+             tmp =matchData(tmp,dataContainer,&(multMap[index]),lastScanMatchCov,4);
         else
         {
              DataContainer d(dataContainer.getSize());
              d.setFrom(dataContainer,1.0/(1<<index));
-             tmp = matchData(tmp,d,&(multMap[index]),lastScanMatchCov,3);
+             tmp = matchData(tmp,d,&(multMap[index]),lastScanMatchCov,2);
         }
     }
 
-//    ROS_INFO("\namcl:[%6.3f %6.3f %6.3f]  scan:[%6.3f %6.3f %6.3f]",
-//           AmclPoseHintWorld[0],AmclPoseHintWorld[1],AmclPoseHintWorld[2],
-//           tmp[0],tmp[1],tmp[2]);
-
-
-    Eigen::Vector3f scanmatch=tmp;
-
-
-    uniformPoseGenerator(scanmatch, map, 0.05, 0.05, 100);
-    for(int i=0;i<poseSets.size();i++)
-        poseSets[i].grade = getPoseSetGrade(dataContainer,map,poseSets[i],1);
-
-    Eigen::Vector3f best;
-
-    best = getBestSet();
-//    if(poseSets[0].grade <=10)
-//        best = scanmatch ;
-
-    for(int i=0;i<poseSets.size()/10;i++)
-        ROS_INFO("rp:[%6.3f %6.3f %6.3f],g=%6.6f",
-                 poseSets[i].pose[0],poseSets[i].pose[1],
-                poseSets[i].pose[2],poseSets[i].grade);
-
-
-    ROS_INFO("\na:[%6.3f %6.3f %6.3f]\n"
-               "s:[%6.3f %6.3f %6.3f]\n"
-               "b:[%6.3f %6.3f %6.3f],g=%6.3f/%d\n",
-               AmclPoseHintWorld[0],AmclPoseHintWorld[1],AmclPoseHintWorld[2],
-               scanmatch[0],scanmatch[1],scanmatch[2],
-               best[0],best[1],best[2],poseSets[0].grade,dataContainer.getSize());
-
-
-    float pd = (best[0] -AmclPoseHintWorld[0])*(best[0] -AmclPoseHintWorld[0])+
-              (best[1] -AmclPoseHintWorld[1])*(best[1] -AmclPoseHintWorld[1]);
-    float angleDiff = (best[2] - AmclPoseHintWorld[2]);
+    float pd = (tmp[0] -AmclPoseHintWorld[0])*(tmp[0] -AmclPoseHintWorld[0])+
+              (tmp[1] -AmclPoseHintWorld[1])*(tmp[1] -AmclPoseHintWorld[1]);
+    float angleDiff = (tmp[2] - AmclPoseHintWorld[2]);
 
     if (angleDiff > M_PI) {
         angleDiff -= M_PI * 2.0f;
@@ -88,11 +116,59 @@ Eigen::Vector3f ScanProcessor::PoseUpdate(const sensor_msgs::LaserScanConstPtr& 
         angleDiff += M_PI * 2.0f;
     }
 
+    Eigen::Vector3f scanmatch=tmp;
 
-    if( (pd< paramMinDistanceDiffForPoseUpdate) && (fabs(angleDiff)<paramMinAngleDiffForPoseUpdate))
-         return best;
-    else
-         return AmclPoseHintWorld;
+    if( (pd< 2*paramMinDistanceDiffForPoseUpdate) &&
+        (fabs(angleDiff)<paramMinAngleDiffForPoseUpdate))
+    {
+        uniformPoseGenerator(scanmatch, map, 0.05, 0.05, 100);
+        for(int i=0;i<poseSets.size();i++)
+            poseSets[i].grade = getPoseSetGrade(dataContainer,map,poseSets[i],1);
+
+        Eigen::Vector3f best;
+
+        best = getBestSet();
+        if(poseSets[0].grade <=10)
+            best = scanmatch ;
+
+        for(int i=0;i<poseSets.size()/10;i++)
+            ROS_INFO("rp:[%6.3f %6.3f %6.3f],g=%6.6f",
+                     poseSets[i].pose[0],poseSets[i].pose[1],
+                    poseSets[i].pose[2],poseSets[i].grade);
+
+        ROS_INFO("\na:[%6.3f %6.3f %6.3f]\n"
+                   "s:[%6.3f %6.3f %6.3f]\n"
+                   "b:[%6.3f %6.3f %6.3f],g=%6.3f/%d\n",
+                   AmclPoseHintWorld[0],AmclPoseHintWorld[1],AmclPoseHintWorld[2],
+                   scanmatch[0],scanmatch[1],scanmatch[2],
+                   best[0],best[1],best[2],poseSets[0].grade,dataContainer.getSize());
+
+//        pd = (best[0] -AmclPoseHintWorld[0])*(best[0] -AmclPoseHintWorld[0])+
+//                  (best[1] -AmclPoseHintWorld[1])*(best[1] -AmclPoseHintWorld[1]);
+//        angleDiff = (best[2] - AmclPoseHintWorld[2]);
+
+//        if (angleDiff > M_PI) {
+//            angleDiff -= M_PI * 2.0f;
+//        } else if (angleDiff < -M_PI) {
+//            angleDiff += M_PI * 2.0f;
+//        }
+
+//        if( (pd< paramMinDistanceDiffForPoseUpdate) &&
+//            (fabs(angleDiff)<paramMinAngleDiffForPoseUpdate))
+//             return best;
+//        else
+//             return AmclPoseHintWorld;
+
+        return best;
+    }else{
+        ROS_INFO("\na:[%6.3f %6.3f %6.3f]\n"
+                   "s:[%6.3f %6.3f %6.3f]\n",
+                   AmclPoseHintWorld[0],AmclPoseHintWorld[1],AmclPoseHintWorld[2],
+                   scanmatch[0],scanmatch[1],scanmatch[2]);
+
+        return AmclPoseHintWorld;
+    }
+#endif
 }
 
 /*
@@ -390,14 +466,14 @@ void ScanProcessor::uniformPoseGenerator(const Eigen::Vector3f& center,
        p.pose[0] = center[0] + delta ;    //robot in world pose;
        p.pose[1] = center[1] + delta ;
        p.pose[2] = center[2];
-//       delta =(1-drand48()*2)*awindows;
-//       p.pose[2] = center[2] + delta;
+       delta =(1-drand48()*2)*awindows;
+       p.pose[2] = center[2] + delta;
 
-//       if ( p.pose[2] > M_PI) {
-//            p.pose[2] -= M_PI * 2.0f;
-//       } else if ( p.pose[2] < -M_PI) {
-//            p.pose[2] += M_PI * 2.0f;
-//       }
+       if ( p.pose[2] > M_PI) {
+            p.pose[2] -= M_PI * 2.0f;
+       } else if ( p.pose[2] < -M_PI) {
+            p.pose[2] += M_PI * 2.0f;
+       }
 
        poseSets.push_back(p);
      //  ROS_INFO("randpose:[%6.3f %6.3f]\n",p.pose[0],p.pose[1]);
@@ -428,15 +504,19 @@ float ScanProcessor::getPoseSetGrade(const DataContainer& dataPoints,
 
         mi=MAP_GXWX(map, endPoint[0]);
         mj=MAP_GYWY(map, endPoint[1]);
+#if 0
+        if(MAP_VALID(map, mi, mj))
+        {
+            index = MAP_INDEX(map, mi, mj);
+            if(map->cells[index].occ_dist==0)
+                p +=2;
+            else if(map->cells[index].occ_dist==1)
+                p++ ;
 
-//        if(MAP_VALID(map, mi, mj))
-//        {
-//            index = MAP_INDEX(map, mi, mj);
-//            if(map->cells[index].occ_state ==1)
-//                grade ++;
-//        //    else if(map->cells[index].occ_state == -1)
-//                //grade --;
-//        }
+        //    else if(map->cells[index].occ_state == -1)
+                //grade --;
+        }
+#else
         if(!MAP_VALID(map, mi, mj))
           z = map->max_occ_dist;
         else
@@ -444,9 +524,12 @@ float ScanProcessor::getPoseSetGrade(const DataContainer& dataPoints,
         pz=0;
         // Gaussian model
         // NOTE: this should have a normalization of 1/(sqrt(2pi)*sigma)
-        pz =exp(-(z * z) / 2*0.1*0.1);
-        p +=pz;
+        pz +=0.9*exp(-(z * z) / 2*0.05*0.05);
+        pz += 0.1* 1.0/3;
+        p +=pz*pz*pz;
+#endif
     }
+
 
     return p;
 }

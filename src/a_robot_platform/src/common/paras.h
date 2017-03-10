@@ -27,7 +27,7 @@ typedef enum
     MSG_IMU = 0x0040,  //show msg  acc_x,y,z  gyr_x_y_z   //int16_t
     MSG_Ultrasonic = 0x0060,  //超声  int
     BTN_SWITCH =0x0080,   //状态开关，键盘控制(bit 0),IMU 初始化(bit 1)
-
+    ADD_PID = 0x1000,   //pid 参数
 }ParaAddress;
 
 
@@ -50,7 +50,6 @@ public:
     static void get_distance(double *dis);
     static void set_distance(double *dis);
     void ResetKeyRegister(void);
-
 };
 
 }

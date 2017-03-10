@@ -26,7 +26,7 @@ void *UartOdomPthread::DoPthread(void)
 {
   ros::NodeHandle n;
   ros::Subscriber key_sub =n.subscribe("cmd_vel",2,cmd_keyCallback);
-  ros::Subscriber pose_sub = n.subscribe<geometry_msgs::PoseWithCovarianceStamped>("amcl_pose", 2,PoseReceived);
+  ros::Subscriber pose_sub = n.subscribe<geometry_msgs::PoseStamped>("scan_p", 2,PoseReceived);
   ros::Publisher odom_pub = n.advertise<nav_msgs::Odometry>("odom", 100);
   ros::Publisher imu_pub =n.advertise<sensor_msgs::Imu>("imu",100);
 
@@ -165,16 +165,16 @@ void UartOdomPthread::cmd_keyCallback(const geometry_msgs::Twist::ConstPtr & cmd
     }
 }
 
-void UartOdomPthread::PoseReceived(const geometry_msgs::PoseWithCovarianceStampedConstPtr pose)
+void UartOdomPthread::PoseReceived(const geometry_msgs::PoseStampedConstPtr pose)
 {
   int32_t ctr_msg[3];
   zw::ParaGetSet car_para={zw::R_REGISTER,3,zw::MSG_CONTROL+2,ctr_msg};
   zw::Float2Int32 mf;
-  mf.f=(float)pose->pose.pose.position.x;
+  mf.f=(float)pose->pose.position.x;
   ctr_msg[0]=mf.i;
-  mf.f=(float)pose->pose.pose.position.y;
+  mf.f=(float)pose->pose.position.y;
   ctr_msg[1]=mf.i;
-  mf.f =(float)(tf::getYaw(pose->pose.pose.orientation));
+  mf.f =(float)(tf::getYaw(pose->pose.orientation));
   ctr_msg[2]=mf.i;
   zw::Paras m_para;
   m_para.SetAddressValue(car_para);

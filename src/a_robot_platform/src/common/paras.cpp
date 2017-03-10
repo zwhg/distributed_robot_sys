@@ -41,6 +41,19 @@ static volatile zw::ElementTable dataTable[]=
     {MSG_Ultrasonic+7,0},
 
     {BTN_SWITCH,0},
+
+    {ADD_PID, 	    500},  //PID1    //速度PID   X100
+    {ADD_PID+1,		15},
+    {ADD_PID+2,     0},
+    {ADD_PID+3,  	50},   //PID2   //转角PID	X100
+    {ADD_PID+4,   	10},
+    {ADD_PID+5,   	0},
+    {ADD_PID+6,   	0},    //PID3  //pose     X100
+    {ADD_PID+7,  	0},
+    {ADD_PID+8,   	0},
+    {ADD_PID+6,   	0},    //PID4  //heading   X100
+    {ADD_PID+7,  	0},
+    {ADD_PID+8,   	0},
 };
 
 

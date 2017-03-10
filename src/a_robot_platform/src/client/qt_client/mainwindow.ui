@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1069</width>
-    <height>995</height>
+    <height>1037</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -29,10 +29,10 @@
    <widget class="QTabWidget" name="tabMain">
     <property name="geometry">
      <rect>
-      <x>40</x>
-      <y>-10</y>
-      <width>1021</width>
-      <height>911</height>
+      <x>20</x>
+      <y>30</y>
+      <width>2014</width>
+      <height>931</height>
      </rect>
     </property>
     <property name="currentIndex">
@@ -691,8 +691,8 @@
      <widget class="QLabel" name="lbl_map">
       <property name="geometry">
        <rect>
-        <x>310</x>
-        <y>70</y>
+        <x>250</x>
+        <y>180</y>
         <width>521</width>
         <height>581</height>
        </rect>
@@ -793,106 +793,6 @@
       <property name="geometry">
        <rect>
         <x>10</x>
-        <y>360</y>
-        <width>191</width>
-        <height>125</height>
-       </rect>
-      </property>
-      <layout class="QVBoxLayout" name="verticalLayout_5">
-       <item>
-        <widget class="QLabel" name="label_3">
-         <property name="text">
-          <string>实时位姿</string>
-         </property>
-         <property name="alignment">
-          <set>Qt::AlignCenter</set>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <layout class="QHBoxLayout" name="horizontalLayout_12">
-         <item>
-          <widget class="QLabel" name="lbl_robot_pose_x">
-           <property name="text">
-            <string>0.00</string>
-           </property>
-           <property name="alignment">
-            <set>Qt::AlignCenter</set>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QLabel" name="lbl_robot_pose_y">
-           <property name="text">
-            <string>0.00</string>
-           </property>
-           <property name="alignment">
-            <set>Qt::AlignCenter</set>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QLabel" name="lbl_robot_pose_h">
-           <property name="text">
-            <string>0.00</string>
-           </property>
-           <property name="alignment">
-            <set>Qt::AlignCenter</set>
-           </property>
-          </widget>
-         </item>
-        </layout>
-       </item>
-       <item>
-        <widget class="QLabel" name="label_4">
-         <property name="text">
-          <string>目标位姿</string>
-         </property>
-         <property name="alignment">
-          <set>Qt::AlignCenter</set>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <layout class="QHBoxLayout" name="horizontalLayout_13">
-         <item>
-          <widget class="QLabel" name="lbl_robot_epose_x">
-           <property name="text">
-            <string>0.00</string>
-           </property>
-           <property name="alignment">
-            <set>Qt::AlignCenter</set>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QLabel" name="lbl_robot_epose_y">
-           <property name="text">
-            <string>0.00</string>
-           </property>
-           <property name="alignment">
-            <set>Qt::AlignCenter</set>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QLabel" name="lbl_robot_epose_h">
-           <property name="text">
-            <string>0.00</string>
-           </property>
-           <property name="alignment">
-            <set>Qt::AlignCenter</set>
-           </property>
-          </widget>
-         </item>
-        </layout>
-       </item>
-      </layout>
-     </widget>
-     <widget class="QWidget" name="layoutWidget">
-      <property name="geometry">
-       <rect>
-        <x>10</x>
         <y>240</y>
         <width>191</width>
         <height>96</height>
@@ -953,13 +853,13 @@
        </item>
       </layout>
      </widget>
-     <widget class="QWidget" name="">
+     <widget class="QWidget" name="layoutWidget">
       <property name="geometry">
        <rect>
-        <x>10</x>
-        <y>510</y>
+        <x>250</x>
+        <y>20</y>
         <width>191</width>
-        <height>101</height>
+        <height>114</height>
        </rect>
       </property>
       <layout class="QVBoxLayout" name="verticalLayout_7">
@@ -990,6 +890,252 @@
         <widget class="QPushButton" name="pBtn_clear_pose">
          <property name="text">
           <string>清空</string>
+         </property>
+         <property name="checkable">
+          <bool>true</bool>
+         </property>
+         <property name="checked">
+          <bool>false</bool>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>360</y>
+        <width>191</width>
+        <height>215</height>
+       </rect>
+      </property>
+      <layout class="QVBoxLayout" name="verticalLayout_10">
+       <item>
+        <layout class="QVBoxLayout" name="verticalLayout_5">
+         <item>
+          <widget class="QLabel" name="label_3">
+           <property name="text">
+            <string>实时位姿</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignCenter</set>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <layout class="QHBoxLayout" name="horizontalLayout_12">
+           <item>
+            <widget class="QLabel" name="lbl_robot_pose_x">
+             <property name="text">
+              <string>0.00</string>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignCenter</set>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QLabel" name="lbl_robot_pose_y">
+             <property name="text">
+              <string>0.00</string>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignCenter</set>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QLabel" name="lbl_robot_pose_h">
+             <property name="text">
+              <string>0.00</string>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignCenter</set>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </item>
+         <item>
+          <widget class="QLabel" name="label_4">
+           <property name="text">
+            <string>目标位姿</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignCenter</set>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_20">
+         <item>
+          <layout class="QVBoxLayout" name="verticalLayout_9">
+           <item>
+            <widget class="QLineEdit" name="lbl_robot_epose_x">
+             <property name="text">
+              <string>0.00</string>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignCenter</set>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QLineEdit" name="lbl_robot_epose_y">
+             <property name="text">
+              <string>0.00</string>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignCenter</set>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QLineEdit" name="lbl_robot_epose_h">
+             <property name="text">
+              <string>0.00</string>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignCenter</set>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </item>
+         <item>
+          <widget class="QPushButton" name="pBtn_start_navigation">
+           <property name="text">
+            <string>开始导航</string>
+           </property>
+           <property name="checkable">
+            <bool>true</bool>
+           </property>
+           <property name="checked">
+            <bool>false</bool>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>600</y>
+        <width>191</width>
+        <height>197</height>
+       </rect>
+      </property>
+      <layout class="QVBoxLayout" name="verticalLayout_11">
+       <item>
+        <layout class="QVBoxLayout" name="verticalLayout_8">
+         <item>
+          <layout class="QHBoxLayout" name="horizontalLayout_16">
+           <item>
+            <widget class="QLabel" name="label_9">
+             <property name="text">
+              <string>位置PID</string>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignCenter</set>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QLabel" name="label_10">
+             <property name="text">
+              <string>航向PID</string>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignCenter</set>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </item>
+         <item>
+          <layout class="QHBoxLayout" name="horizontalLayout_17">
+           <item>
+            <widget class="QLineEdit" name="let_pose_pid_P">
+             <property name="text">
+              <string>0</string>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignCenter</set>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QLineEdit" name="let_angle_pid_P_2">
+             <property name="text">
+              <string>0</string>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignCenter</set>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </item>
+         <item>
+          <layout class="QHBoxLayout" name="horizontalLayout_18">
+           <item>
+            <widget class="QLineEdit" name="let_pose_pid_I">
+             <property name="text">
+              <string>0</string>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignCenter</set>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QLineEdit" name="let_angle_pid_I">
+             <property name="text">
+              <string>0</string>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignCenter</set>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </item>
+         <item>
+          <layout class="QHBoxLayout" name="horizontalLayout_19">
+           <item>
+            <widget class="QLineEdit" name="let_pose_pid_D">
+             <property name="text">
+              <string>0</string>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignCenter</set>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QLineEdit" name="let_pose_pid_D_2">
+             <property name="text">
+              <string>0</string>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignCenter</set>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <widget class="QPushButton" name="pBtn_PID_confirm">
+         <property name="text">
+          <string>确定</string>
          </property>
          <property name="checkable">
           <bool>true</bool>

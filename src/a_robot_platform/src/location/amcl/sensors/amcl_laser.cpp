@@ -410,14 +410,13 @@ double AMCLLaser::LikelihoodFieldModelProb(AMCLLaserData *data, pf_sample_set_t*
       // Off-map penalized as max distance
       
       if(!MAP_VALID(self->map, mi, mj)){
-	pz += self->z_hit * max_dist_prob;
-      }
-      else{
-	z = self->map->cells[MAP_INDEX(self->map,mi,mj)].occ_dist;
-	if(z < beam_skip_distance){
-	  obs_count[beam_ind] += 1;
-	}
-	pz += self->z_hit * exp(-(z * z) / z_hit_denom);
+         pz += self->z_hit * max_dist_prob;
+      }else{
+         z = self->map->cells[MAP_INDEX(self->map,mi,mj)].occ_dist;
+         if(z < beam_skip_distance){
+             obs_count[beam_ind] += 1;
+          }
+          pz += self->z_hit * exp(-(z * z) / z_hit_denom);
       }
        
       // Gaussian model
@@ -432,10 +431,9 @@ double AMCLLaser::LikelihoodFieldModelProb(AMCLLaserData *data, pf_sample_set_t*
       // TODO: outlier rejection for short readings
             
       if(!do_beamskip){
-	log_p += log(pz);
-      }
-      else{
-	self->temp_obs[j][beam_ind] = pz; 
+         log_p += log(pz);
+      }else{
+         self->temp_obs[j][beam_ind] = pz;
       }
     }
     if(!do_beamskip){
@@ -448,11 +446,10 @@ double AMCLLaser::LikelihoodFieldModelProb(AMCLLaserData *data, pf_sample_set_t*
     int skipped_beam_count = 0; 
     for (beam_ind = 0; beam_ind < self->max_beams; beam_ind++){
       if((obs_count[beam_ind] / static_cast<double>(set->sample_count)) > beam_skip_threshold){
-	obs_mask[beam_ind] = true;
-      }
-      else{
-	obs_mask[beam_ind] = false;
-	skipped_beam_count++; 
+          obs_mask[beam_ind] = true;
+      }else{
+          obs_mask[beam_ind] = false;
+          skipped_beam_count++;
       }
     }
 
