@@ -10,6 +10,9 @@
 
 namespace zw {
 
+
+#define PUBLISH_SCAN_MATCH  0
+
 typedef struct
 {
   // Map origin; the map is a viewport onto a conceptual larger map.
@@ -85,6 +88,10 @@ private:
                       const poseSet_t& set,
                       int skip);
 
+ void writePoseToTxt(const char *path,
+                     const Eigen::Vector3f& p1,
+                     const Eigen::Vector3f& p2,
+                     int& i);
 
 
  Eigen::Vector3f getBestSet(void);
@@ -92,7 +99,9 @@ private:
 
 public:
  pf_vector_t laser_pose;
+#ifdef PUBLISH_SCAN_MATCH
  sensor_msgs::PointCloud ptcloud;
+#endif
 
 
 

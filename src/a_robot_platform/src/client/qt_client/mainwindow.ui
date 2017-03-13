@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1069</width>
-    <height>1037</height>
+    <height>897</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -29,8 +29,8 @@
    <widget class="QTabWidget" name="tabMain">
     <property name="geometry">
      <rect>
-      <x>20</x>
-      <y>30</y>
+      <x>0</x>
+      <y>0</y>
       <width>2014</width>
       <height>931</height>
      </rect>
@@ -901,7 +901,7 @@
        </item>
       </layout>
      </widget>
-     <widget class="QWidget" name="">
+     <widget class="QWidget" name="layoutWidget">
       <property name="geometry">
        <rect>
         <x>10</x>
@@ -1022,7 +1022,7 @@
        </item>
       </layout>
      </widget>
-     <widget class="QWidget" name="">
+     <widget class="QWidget" name="layoutWidget">
       <property name="geometry">
        <rect>
         <x>10</x>
@@ -1511,7 +1511,7 @@
      <x>0</x>
      <y>0</y>
      <width>1069</width>
-     <height>27</height>
+     <height>25</height>
     </rect>
    </property>
   </widget>

@@ -10,7 +10,7 @@ namespace zw{
 
 ScanProcessor::ScanProcessor()
 {
-    paramMinDistanceDiffForPoseUpdate=0.05*0.05;
+    paramMinDistanceDiffForPoseUpdate=0.1*0.1;
     paramMinAngleDiffForPoseUpdate=0.1;
     numDepth = 2;
     multMap =new map_grid_t[numDepth];
@@ -35,65 +35,7 @@ Eigen::Vector3f ScanProcessor::PoseUpdate(const sensor_msgs::LaserScanConstPtr& 
     LaserScanToDataContainer(scan,1/multMap[0].scale);
 
     Eigen::Vector3f tmp(AmclPoseHintWorld);
-#if 0
-    uniformPoseGenerator(tmp, map, 0.08, 0.05, 200);
-    for(int i=0;i<poseSets.size();i++)
-        poseSets[i].grade = getPoseSetGrade(dataContainer,map,poseSets[i],2);
 
-    Eigen::Vector3f best,avg(0.0,0.0,0.0);
-
-    best = getBestSet();
-
-    for(int i=0;i<10;i++)
-    {
-        ROS_INFO("rp:[%6.3f %6.3f %6.3f],g=%6.6f",
-                 poseSets[i].pose[0],poseSets[i].pose[1],
-                 poseSets[i].pose[2],poseSets[i].grade);
-        avg[0] +=poseSets[i].pose[0] ;
-        avg[1] +=poseSets[i].pose[1] ;
-        avg[2] +=fabs(poseSets[i].pose[2]);
-    }
-    avg /=10;
-    if(best[2]<0)
-        avg[2]=-avg[2];
-
-    static int i=0;
-    const char *filePath="../mposetest.txt";
-    if(i==0)
-    {
-        if(access(filePath,F_OK)==0)
-        {
-            remove(filePath);
-        }
-    }
-    std::string str=std::to_string(i++)+" "+
-                    std::to_string((int)(AmclPoseHintWorld[0]*1000))+" "+
-                    std::to_string((int)(AmclPoseHintWorld[1]*1000))+" "+
-                    std::to_string((int)(AmclPoseHintWorld[2]*1000))+" "+
-                    std::to_string((int)(avg[0]*1000))+" "+
-                    std::to_string((int)(avg[1]*1000))+" "+
-                    std::to_string((int)(avg[2]*1000))+"\n";
-    int len =str.length();
-    const char * buf = str.c_str();
-
-    int fd=open(filePath,O_CREAT|O_WRONLY|O_APPEND,S_IRWXU|S_IRWXG|S_IRWXO);
-    if(-1==fd)
-    {
-      printf("test.txt not exist !\n");
-    }
-    write(fd,buf,len);
-    close(fd);
-
-
-    ROS_INFO("\na:[%6.3f %6.3f %6.3f]\n"
-               "b:[%6.3f %6.3f %6.3f]\n"
-               "g:[%6.3f %6.3f %6.3f]\n",
-               AmclPoseHintWorld[0],AmclPoseHintWorld[1],AmclPoseHintWorld[2],
-               best[0],best[1],best[2],
-               avg[0],avg[1],avg[2]);
-
-    return avg ;
-#else
     for(int index = numDepth-1; index>=0; --index)
     {
         if(index==0)
@@ -119,48 +61,44 @@ Eigen::Vector3f ScanProcessor::PoseUpdate(const sensor_msgs::LaserScanConstPtr& 
     Eigen::Vector3f scanmatch=tmp;
 
     if( (pd< 2*paramMinDistanceDiffForPoseUpdate) &&
-        (fabs(angleDiff)<paramMinAngleDiffForPoseUpdate))
+        (fabs(angleDiff)<paramMinAngleDiffForPoseUpdate) && false)
     {
-        uniformPoseGenerator(scanmatch, map, 0.05, 0.05, 100);
+        uniformPoseGenerator(scanmatch, map, 0.08, 0.05, 200);
         for(int i=0;i<poseSets.size();i++)
-            poseSets[i].grade = getPoseSetGrade(dataContainer,map,poseSets[i],1);
+            poseSets[i].grade = getPoseSetGrade(dataContainer,map,poseSets[i],2);
 
-        Eigen::Vector3f best;
+        Eigen::Vector3f best,avg(0.0,0.0,0.0);
 
         best = getBestSet();
-        if(poseSets[0].grade <=10)
-            best = scanmatch ;
 
-        for(int i=0;i<poseSets.size()/10;i++)
+        for(int i=0;i<10;i++)
+        {
             ROS_INFO("rp:[%6.3f %6.3f %6.3f],g=%6.6f",
                      poseSets[i].pose[0],poseSets[i].pose[1],
-                    poseSets[i].pose[2],poseSets[i].grade);
+                     poseSets[i].pose[2],poseSets[i].grade);
+            avg[0] +=poseSets[i].pose[0] ;
+            avg[1] +=poseSets[i].pose[1] ;
+            avg[2] +=fabs(poseSets[i].pose[2]);
+        }
+        avg /=10;
+        if(best[2]<0)
+            avg[2]=-avg[2];
+
 
         ROS_INFO("\na:[%6.3f %6.3f %6.3f]\n"
                    "s:[%6.3f %6.3f %6.3f]\n"
-                   "b:[%6.3f %6.3f %6.3f],g=%6.3f/%d\n",
+                   "b:[%6.3f %6.3f %6.3f],g=%6.3f/%d\n"
+                   "v:[%6.3f %6.3f %6.3f]\n",
                    AmclPoseHintWorld[0],AmclPoseHintWorld[1],AmclPoseHintWorld[2],
                    scanmatch[0],scanmatch[1],scanmatch[2],
-                   best[0],best[1],best[2],poseSets[0].grade,dataContainer.getSize());
-
-//        pd = (best[0] -AmclPoseHintWorld[0])*(best[0] -AmclPoseHintWorld[0])+
-//                  (best[1] -AmclPoseHintWorld[1])*(best[1] -AmclPoseHintWorld[1]);
-//        angleDiff = (best[2] - AmclPoseHintWorld[2]);
-
-//        if (angleDiff > M_PI) {
-//            angleDiff -= M_PI * 2.0f;
-//        } else if (angleDiff < -M_PI) {
-//            angleDiff += M_PI * 2.0f;
-//        }
-
-//        if( (pd< paramMinDistanceDiffForPoseUpdate) &&
-//            (fabs(angleDiff)<paramMinAngleDiffForPoseUpdate))
-//             return best;
-//        else
-//             return AmclPoseHintWorld;
+                   best[0],best[1],best[2],poseSets[0].grade,dataContainer.getSize(),
+                   avg[0],avg[1],avg[2]);
 
         return best;
     }else{
+        static int i=0;
+        writePoseToTxt("../mposetest.txt", AmclPoseHintWorld, scanmatch, i);
+
         ROS_INFO("\na:[%6.3f %6.3f %6.3f]\n"
                    "s:[%6.3f %6.3f %6.3f]\n",
                    AmclPoseHintWorld[0],AmclPoseHintWorld[1],AmclPoseHintWorld[2],
@@ -168,7 +106,6 @@ Eigen::Vector3f ScanProcessor::PoseUpdate(const sensor_msgs::LaserScanConstPtr& 
 
         return AmclPoseHintWorld;
     }
-#endif
 }
 
 /*
@@ -275,18 +212,21 @@ void ScanProcessor::getCompleteHessianDerivs(const Eigen::Vector3f& pose,
                                              Eigen::Vector3f& dTr)
 {
      int size = dataPoints.getSize();
-     Eigen::Affine2f transform(getTransformForState(pose));  //laser pose in map transform
-
+     //laser pose in map transform
+  //   Eigen::Affine2f transform(getTransformForState(pose)*Eigen::Rotation2Df(3.1415926));
+     Eigen::Affine2f transform(getTransformForState(pose));
      float sinRot = sin(pose[2]);
      float cosRot = cos(pose[2]);
 
      h = Eigen::Matrix3f::Zero();
      dTr = Eigen::Vector3f::Zero();
 
+#ifdef PUBLISH_SCAN_MATCH
      ptcloud.points.empty();
      ptcloud.points.resize(size);
      ptcloud.header.frame_id ="map";
      ptcloud.header.stamp=ros::Time::now();
+#endif
 
      for (int i = 0; i < size; ++i) {
 
@@ -294,12 +234,14 @@ void ScanProcessor::getCompleteHessianDerivs(const Eigen::Vector3f& pose,
        // end point in map pose
        const Eigen::Vector2f endPoint =transform * currPoint;
 
-       geometry_msgs:: Point32 p;
 
-       p.x= gridMap->origin_x + (endPoint[0]+0.5)*gridMap->scale;
-       p.y= gridMap->origin_y + (endPoint[1]+0.5)*gridMap->scale;
+#ifdef PUBLISH_SCAN_MATCH
+       geometry_msgs:: Point32 p;
+       p.x= MAP_WXGX(gridMap,endPoint[0]);
+       p.y= MAP_WYGY(gridMap,endPoint[1]);
        p.z= 0;
        ptcloud.points.push_back(p);
+#endif
 
        Eigen::Vector3f transformedPointData(interpMapValueWithDerivatives(gridMap,endPoint));
 
@@ -387,7 +329,7 @@ void ScanProcessor::LaserScanToDataContainer(const sensor_msgs::LaserScanConstPt
         if ( (dist > scan->range_min) && (dist < scan->range_max))
         {
             dist *= scaleToMap;
-            dataContainer.add(Eigen::Vector2f(cos(angle) * dist, sin(angle) * dist));
+            dataContainer.add(Eigen::Vector2f(-cos(angle) * dist, -sin(angle) * dist));
         }
         angle += scan->angle_increment;
     }
@@ -551,11 +493,43 @@ float ScanProcessor::getPoseSetGrade(const DataContainer& dataPoints,
   return poseSets[0].pose ;
  }
 
+ void ScanProcessor:: writePoseToTxt(const char *filePath,
+                                     const Eigen::Vector3f& p1,
+                                     const Eigen::Vector3f& p2,
+                                     int& i)
+ {
+     if(i==0)
+     {
+         if(access(filePath,F_OK)==0)
+         {
+             remove(filePath);
+         }
+     }
+     std::string str=std::to_string(i++)+" "+
+                     std::to_string((int)(p1[0]*1000))+" "+
+                     std::to_string((int)(p1[1]*1000))+" "+
+                     std::to_string((int)(p1[2]*1000))+" "+
+                     std::to_string((int)(p2[0]*1000))+" "+
+                     std::to_string((int)(p2[1]*1000))+" "+
+                     std::to_string((int)(p2[2]*1000))+"\n";
+     int len =str.length();
+     const char * buf = str.c_str();
+
+     int fd=open(filePath,O_CREAT|O_WRONLY|O_APPEND,S_IRWXU|S_IRWXG|S_IRWXO);
+     if(-1==fd)
+     {
+       printf("test.txt not exist !\n");
+     }
+     write(fd,buf,len);
+     close(fd);
+ }
 
  bool cmp_grade(const poseSet_t& s1,const poseSet_t& s2)
  {
      return s1.grade >s2.grade ;
  }
+
+
 
 }
 
