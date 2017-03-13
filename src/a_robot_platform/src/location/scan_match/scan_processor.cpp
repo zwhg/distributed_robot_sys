@@ -35,7 +35,7 @@ Eigen::Vector3f ScanProcessor::PoseUpdate(const sensor_msgs::LaserScanConstPtr& 
     LaserScanToDataContainer(scan,1/multMap[0].scale);
 
     Eigen::Vector3f tmp(AmclPoseHintWorld);
-#if 1
+#if 0
     uniformPoseGenerator(tmp, map, 0.08, 0.05, 200);
     for(int i=0;i<poseSets.size();i++)
         poseSets[i].grade = getPoseSetGrade(dataContainer,map,poseSets[i],2);
@@ -97,12 +97,12 @@ Eigen::Vector3f ScanProcessor::PoseUpdate(const sensor_msgs::LaserScanConstPtr& 
     for(int index = numDepth-1; index>=0; --index)
     {
         if(index==0)
-             tmp =matchData(tmp,dataContainer,&(multMap[index]),lastScanMatchCov,4);
+             tmp =matchData(tmp,dataContainer,&(multMap[index]),lastScanMatchCov,5);
         else
         {
              DataContainer d(dataContainer.getSize());
              d.setFrom(dataContainer,1.0/(1<<index));
-             tmp = matchData(tmp,d,&(multMap[index]),lastScanMatchCov,2);
+             tmp = matchData(tmp,d,&(multMap[index]),lastScanMatchCov,3);
         }
     }
 
@@ -283,11 +283,23 @@ void ScanProcessor::getCompleteHessianDerivs(const Eigen::Vector3f& pose,
      h = Eigen::Matrix3f::Zero();
      dTr = Eigen::Vector3f::Zero();
 
+     ptcloud.points.empty();
+     ptcloud.points.resize(size);
+     ptcloud.header.frame_id ="map";
+     ptcloud.header.stamp=ros::Time::now();
+
      for (int i = 0; i < size; ++i) {
 
        const Eigen::Vector2f& currPoint (dataPoints.getVecEntry(i));  //end point in laser pose
        // end point in map pose
        const Eigen::Vector2f endPoint =transform * currPoint;
+
+       geometry_msgs:: Point32 p;
+
+       p.x= gridMap->origin_x + (endPoint[0]+0.5)*gridMap->scale;
+       p.y= gridMap->origin_y + (endPoint[1]+0.5)*gridMap->scale;
+       p.z= 0;
+       ptcloud.points.push_back(p);
 
        Eigen::Vector3f transformedPointData(interpMapValueWithDerivatives(gridMap,endPoint));
 
@@ -368,12 +380,11 @@ void ScanProcessor::LaserScanToDataContainer(const sensor_msgs::LaserScanConstPt
     float angle = scan->angle_min;
     dataContainer.clear();
     dataContainer.setOrigo(Eigen::Vector2f::Zero());
-    float maxRangeForContainer = scan->range_max;
 
     for (size_t i = 0; i < size; ++i)
     {
         float dist = scan->ranges[i];
-        if ( (dist > scan->range_min) && (dist < maxRangeForContainer))
+        if ( (dist > scan->range_min) && (dist < scan->range_max))
         {
             dist *= scaleToMap;
             dataContainer.add(Eigen::Vector2f(cos(angle) * dist, sin(angle) * dist));

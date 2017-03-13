@@ -46,6 +46,8 @@ AmclNode::AmclNode():
     initial_pose_sub_ = nh_.subscribe("initialpose", 2, &AmclNode::initialPoseReceived, this);
 
 
+    test =nh_.advertise<sensor_msgs::PointCloud>("test",1, true);
+
     pose_pub_amcl =nh_.advertise<geometry_msgs::PoseStamped>("amcl_p",2,true);
     pose_pub_scan =nh_.advertise<geometry_msgs::PoseStamped>("scan_p",2,true);
 
@@ -793,6 +795,8 @@ void AmclNode::laserReceived(const sensor_msgs::LaserScanConstPtr& laser_scan)
       tf::quaternionTFToMsg(tf::createQuaternionFromYaw(scan_match_pose_[2]), ptest.pose.orientation);
       pose_pub_scan.publish(ptest);
 
+
+      test.publish(scan_processor.ptcloud);
 
 #if 0
       pf_sample_set_t* mset = pf_->sets + pf_->current_set;

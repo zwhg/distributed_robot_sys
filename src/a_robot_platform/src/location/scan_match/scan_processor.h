@@ -6,6 +6,7 @@
 #include "../../common/map_process.h"
 #include "../amcl/map/map.h"
 #include  "../amcl/pf/pf_vector.h"
+#include "sensor_msgs/PointCloud.h"
 
 namespace zw {
 
@@ -91,6 +92,8 @@ private:
 
 public:
  pf_vector_t laser_pose;
+ sensor_msgs::PointCloud ptcloud;
+
 
 
 private:
