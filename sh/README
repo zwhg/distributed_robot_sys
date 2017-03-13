@@ -1,0 +1,110 @@
+a_robot_platform 功能说明
+src/中包含客户端和服务器
+
+包a_robot_platform含以下几个节点:
+
+1、main_uart_laser
+input arg: /dev/ttyUSBx (ttyUSB1 默认)
+通过串口，解析雷神激光数据.
+publish:
+发布雷达消息sensor_msgs::LaserScan，主题scan，坐标系laser_link.
+subscribe:
+订阅std_msgs::Int32消息，主题main_uart_laser/startOrstop(1是start，控制激光开关).
+
+2、main_uart_odom
+input arg: /dev/ttyUSBx (ttyUSB0 默认)
+通过串口，与机器人本体相连，实时控制机器人各项参数.
+作为tcp服务器，与客户端相连，端口号9527，客户端可定时查看已定义的数据类型.
+
+subscribe：
+订阅geometry_msgs::Twist消息，主题cmd_vel，该消息由导航模块发布
+订阅geometry_msgs::PoseWithCovarianceStamped消息，主题amcl_pose,该消息由定位模块发布
+
+publish:
+发布nav_msgs::Odometry消息,主题odom,坐标系odom,子坐标系base_link;
+发布sensor_msgs::Imu消息，主题imu,坐标系imu_link
+广播odom->base_link的tf变换
+
+3、main_map_server
+input arg: /home/zw/gt (默认地图文件，包含.pgm（p5格式）和.yaml)
+将地图文件转换成柵格地图消息发布
+
+publish:
+发布nav_msgs::MapMetaData消息，主题map_metadata
+发布nav_msgs::OccupancyGrid，主题map
+
+4、main_global_location
+amcl定位模块
+
+subscribe:
+订阅sensor_msgs::LaserScan消息，主题"scan"
+订阅geometry_msgs::PoseWithCovarianceStamped消息，主题"initialpose"
+订阅nav_msgs::OccupancyGrid消息，主题"map"
+
+server:
+服务std_srvs::Empty::Request，std_srvs::Empty::Response，主题"global_localization"
+服务std_srvs::Empty::Request，std_srvs::Empty::Response，主题"request_nomotion_update"
+服务nav_msgs::SetMap::Request, nav_msgs::SetMap::Response，主题"set_map"
+
+publish:
+发布geometry_msgs::PoseWithCovarianceStamped消息，主题"amcl_pose"
+发布geometry_msgs::PoseArray消息，主题"particlecloud"
+
+
+
+
+src/client 中qt_client为qt上位机程序。可用qt(community)版本直接打开
+功能：
+1.tcp 连接server 端口号9527
+2.键盘控制指令下发，wasd，zxcv
+
+
+#######构图过程:
+
+1、运行client
+运行qt客户端
+roscore
+cd distributed_root_sys
+bash sh/mapping_rviz.sh
+bash sh/google_mapping.sh
+
+2、运行server
+sudo ssh pentium
+cd distributed_root_sys
+bash sh/robot_config.sh
+
+3、连接client->server
+遥控机器人人运动
+保存地图图片
+source googleMapping/install_isolated/setup.bash
+rosservice call /finish_trajectory "stem: 'gtest'"
+或 bash sh/google_mapsave.sh "gtest"
+保存位置 .ros/
+
+
+
+
+######定位过程:
+
+1、运行客户端
+ssh 192168.1.100
+roscore 
+cd ~/distributed_root_sys
+bash sh/location.rviz
+
+2、运行server
+sudo ssh pentium
+cd ~/distributed_root_sys
+bash sh/robot_config.sh
+bash sh/location.sh
+
+
+
+
+//
+AMCL部分代码说明：
+AMCL中，小车模型选择为diff，有两种一个ODOM_MODEL_DIFF还有一个是改正后的ODOM_MODEL_DIFF_CORRECTED，根据《probabilistic robotics》P136的table5.6所描述的算法，两者唯一的差别是在采样过程中是使用方差还是标准差，书中写的不明显，但应该是标准差用于计算。影响α1-4的选取。
+激光模型有两种BeamModel与LikelihoodFieldModel见《probabilistic robotics》P158的table6.1与P172的table6.3。BeamModel 缺点：不够平滑，计算量大. LikelihoodFieldModel缺点：动态障碍物无法解决，穿墙效应，未知区域无法定位. 实现中的LikelihoodFieldModel为简化的模型，只有hit高斯分布以(z_hit加权系数)及测量均匀分布（z_rand加权系数）。并采用ad-hoc加权方案。（ad-hoc什么鬼？）
+
+
+

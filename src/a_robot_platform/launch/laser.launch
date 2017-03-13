@@ -1,0 +1,7 @@
+<?xml version="1.0"?>
+<launch>
+
+<node name="laser" pkg="a_robot_platform" type="main_uart_laser" args= "/dev/ttyUSB1" output="screen"> 
+</node>
+
+</launch>
