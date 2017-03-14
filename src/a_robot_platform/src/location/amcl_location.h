@@ -234,6 +234,7 @@ class AmclNode
 
     ros::Publisher test;
 
+
 };
 
 }

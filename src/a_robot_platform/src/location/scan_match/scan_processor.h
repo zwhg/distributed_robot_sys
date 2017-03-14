@@ -97,6 +97,7 @@ private:
 
 public:
  pf_vector_t laser_pose;
+
  sensor_msgs::PointCloud ptcloud;
 
 
@@ -110,9 +111,12 @@ public:
 
 
 
+
 private:
+
  map_grid_t *multMap;
  DataContainer dataContainer;
+
  std::vector<poseSet_t> poseSets;
 
 

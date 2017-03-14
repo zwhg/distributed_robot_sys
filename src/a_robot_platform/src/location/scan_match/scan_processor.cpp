@@ -15,6 +15,7 @@ ScanProcessor::ScanProcessor()
     numDepth = 2;
     publishScan =false;
     writePose =false;
+
     multMap =new map_grid_t[numDepth];
     for(int i=0; i<numDepth;i++)
         multMap[i].cell_pbb = nullptr;
@@ -41,7 +42,9 @@ Eigen::Vector3f ScanProcessor::PoseUpdate(const sensor_msgs::LaserScanConstPtr& 
     for(int index = numDepth-1; index>=0; --index)
     {
         if(index==0)
-             tmp =matchData(tmp,dataContainer,&(multMap[index]),lastScanMatchCov,6);
+
+            tmp =matchData(tmp,dataContainer,&(multMap[index]),lastScanMatchCov,6);
+
         else
         {
              DataContainer d(dataContainer.getSize());
@@ -62,6 +65,7 @@ Eigen::Vector3f ScanProcessor::PoseUpdate(const sensor_msgs::LaserScanConstPtr& 
 
     Eigen::Vector3f scanmatch=tmp;
 
+
     if( (pd< 2*poseDiff) &&
         (fabs(angleDiff)<angleDiff) && false)
     {
@@ -72,7 +76,9 @@ Eigen::Vector3f ScanProcessor::PoseUpdate(const sensor_msgs::LaserScanConstPtr& 
         Eigen::Vector3f best,avg(0.0,0.0,0.0);
 
         best = getBestSet();
+
       #if 0
+
         for(int i=0;i<10;i++)
         {
             ROS_INFO("rp:[%6.3f %6.3f %6.3f],g=%6.6f",
@@ -94,6 +100,7 @@ Eigen::Vector3f ScanProcessor::PoseUpdate(const sensor_msgs::LaserScanConstPtr& 
                    scanmatch[0],scanmatch[1],scanmatch[2],
                    best[0],best[1],best[2],poseSets[0].grade,dataContainer.getSize(),
                    avg[0],avg[1],avg[2]);
+
       #endif
 
         ROS_INFO("\na:[%6.3f %6.3f %6.3f]\n"
@@ -104,19 +111,9 @@ Eigen::Vector3f ScanProcessor::PoseUpdate(const sensor_msgs::LaserScanConstPtr& 
                    best[0],best[1],best[2],poseSets[0].grade,dataContainer.getSize());
 
         return best;
-
     }else{
-        if(writePose)
-        {
-            static int i=0;
-            writePoseToTxt("../mposetest.txt", AmclPoseHintWorld, scanmatch, i);
-        }
-
-        ROS_INFO("\na:[%6.3f %6.3f %6.3f]\n"
-                   "s:[%6.3f %6.3f %6.3f]\n",
-                   AmclPoseHintWorld[0],AmclPoseHintWorld[1],AmclPoseHintWorld[2],
-                   scanmatch[0],scanmatch[1],scanmatch[2]);
-
+        static int i=0;
+        writePoseToTxt("../mposetest.txt", AmclPoseHintWorld, scanmatch, i);
         return scanmatch;
     }
 }
@@ -251,7 +248,6 @@ void ScanProcessor::getCompleteHessianDerivs(const Eigen::Vector3f& pose,
        // end point in map pose
        const Eigen::Vector2f endPoint =transform * currPoint;
 
-
        if(pub)
        {
           geometry_msgs:: Point32 p;
@@ -260,6 +256,7 @@ void ScanProcessor::getCompleteHessianDerivs(const Eigen::Vector3f& pose,
           p.z= 0;
           ptcloud.points.push_back(p);
        }
+
 
        Eigen::Vector3f transformedPointData(interpMapValueWithDerivatives(gridMap,endPoint));
 
@@ -347,7 +344,9 @@ void ScanProcessor::LaserScanToDataContainer(const sensor_msgs::LaserScanConstPt
         if ( (dist > scan->range_min) && (dist < scan->range_max))
         {
             dist *= scaleToMap;
+
             dataContainer.add(Eigen::Vector2f(-cos(angle) * dist, -sin(angle) * dist));  //note '-' ,because laser urdf
+
         }
         angle += scan->angle_increment;
     }
@@ -499,7 +498,6 @@ float ScanProcessor::getPoseSetGrade(const DataContainer& dataPoints,
         p +=pz*pz*pz;
 #endif
     }
-
     return p;
 }
 

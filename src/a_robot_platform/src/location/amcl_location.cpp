@@ -48,6 +48,7 @@ AmclNode::AmclNode():
 
     test =nh_.advertise<sensor_msgs::PointCloud>("test",1, true);
 
+
     pose_pub_amcl =nh_.advertise<geometry_msgs::PoseStamped>("amcl_p",2,true);
     pose_pub_scan =nh_.advertise<geometry_msgs::PoseStamped>("scan_p",2,true);
 
@@ -271,6 +272,7 @@ void AmclNode::paraInit()
 
     if(!private_nh_.getParam("write_pose",scan_processor.writePose))
         scan_processor.writePose=false;
+
 
     updatePoseFromServer();
 }
