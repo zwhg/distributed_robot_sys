@@ -232,9 +232,7 @@ class AmclNode
     ros::Publisher pose_pub_amcl;
     ros::Publisher pose_pub_scan;
 
-#ifdef PUBLISH_SCAN_MATCH
     ros::Publisher test;
-#endif
 
 };
 

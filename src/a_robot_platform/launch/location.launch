@@ -52,5 +52,11 @@
 	<param name="odom_frame_id" value="odom"/>
 	<param name="base_frame_id" value="base_link"/>
 	<param name="global_frame_id" value="map"/>
+
+        <param name="pose_diff" value="0.01"/>
+        <param name="angle_diff" value="0.1"/>
+        <param name="map_depth_num" value="2"/>
+        <param name="publish_scan" value="false"/>
+        <param name="write_pose" value="false"/>
 </node>
 </launch>
