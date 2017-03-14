@@ -11,8 +11,6 @@
 namespace zw {
 
 
-#define PUBLISH_SCAN_MATCH  0
-
 typedef struct
 {
   // Map origin; the map is a viewport onto a conceptual larger map.
@@ -99,16 +97,23 @@ private:
 
 public:
  pf_vector_t laser_pose;
-#ifdef PUBLISH_SCAN_MATCH
+
  sensor_msgs::PointCloud ptcloud;
-#endif
+
+
+
+public:
+ float poseDiff;
+ float angleDiff;
+ int numDepth;
+ bool publishScan;
+ bool writePose;
+
 
 
 
 private:
- float paramMinDistanceDiffForPoseUpdate;
- float paramMinAngleDiffForPoseUpdate;
- int numDepth;
+
  map_grid_t *multMap;
  DataContainer dataContainer;
 

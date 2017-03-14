@@ -22,7 +22,8 @@ AmclNode::AmclNode():
         laser_(NULL),
         private_nh_("~"),
         initial_pose_hyp_(NULL),
-        first_map_received_(false)
+        first_map_received_(false),
+        scan_processor()
 {
     boost::recursive_mutex::scoped_lock l(configuration_mutex_);
     paraInit();
@@ -45,9 +46,8 @@ AmclNode::AmclNode():
     laser_scan_filter_->registerCallback(boost::bind(&AmclNode::laserReceived,this, _1));
     initial_pose_sub_ = nh_.subscribe("initialpose", 2, &AmclNode::initialPoseReceived, this);
 
-#ifdef PUBLISH_SCAN_MATCH
     test =nh_.advertise<sensor_msgs::PointCloud>("test",1, true);
-#endif
+
 
     pose_pub_amcl =nh_.advertise<geometry_msgs::PoseStamped>("amcl_p",2,true);
     pose_pub_scan =nh_.advertise<geometry_msgs::PoseStamped>("scan_p",2,true);
@@ -257,6 +257,23 @@ void AmclNode::paraInit()
            bag_scan_period=-1.0;
         bag_scan_period_.fromSec(bag_scan_period);
     }
+
+    if(!private_nh_.getParam("pose_diff",scan_processor.poseDiff))
+        scan_processor.poseDiff=0.01;
+
+    if(!private_nh_.getParam("angle_diff",scan_processor.angleDiff))
+        scan_processor.angleDiff=0.1;
+
+    if(!private_nh_.getParam("map_depth_num",scan_processor.numDepth))
+        scan_processor.numDepth=2;
+
+    if(!private_nh_.getParam("publish_scan",scan_processor.publishScan))
+        scan_processor.publishScan=false;
+
+    if(!private_nh_.getParam("write_pose",scan_processor.writePose))
+        scan_processor.writePose=false;
+
+
     updatePoseFromServer();
 }
 
@@ -796,14 +813,14 @@ void AmclNode::laserReceived(const sensor_msgs::LaserScanConstPtr& laser_scan)
       tf::quaternionTFToMsg(tf::createQuaternionFromYaw(scan_match_pose_[2]), ptest.pose.orientation);
       pose_pub_scan.publish(ptest);
 
-#ifdef PUBLISH_SCAN_MATCH
-      test.publish(scan_processor.ptcloud);
-#endif
+      if(scan_processor.publishScan)
+         test.publish(scan_processor.ptcloud);
 
 
-#if 0
+
+#if 1
       pf_sample_set_t* mset = pf_->sets + pf_->current_set;
-      if(mset->sample_count < pf_->max_samples-1)
+      for(int i=0 ; (i<50) && (mset->sample_count < pf_->max_samples) ; i++)
       {
           pf_sample_t *msample = mset->samples + mset->sample_count++;
           msample->pose ={scan_match_pose_[0],

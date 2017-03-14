@@ -10,9 +10,12 @@ namespace zw{
 
 ScanProcessor::ScanProcessor()
 {
-    paramMinDistanceDiffForPoseUpdate=0.1*0.1;
-    paramMinAngleDiffForPoseUpdate=0.1;
+    poseDiff=0.1*0.1;
+    angleDiff=0.1;
     numDepth = 2;
+    publishScan =false;
+    writePose =false;
+
     multMap =new map_grid_t[numDepth];
     for(int i=0; i<numDepth;i++)
         multMap[i].cell_pbb = nullptr;
@@ -39,12 +42,13 @@ Eigen::Vector3f ScanProcessor::PoseUpdate(const sensor_msgs::LaserScanConstPtr& 
     for(int index = numDepth-1; index>=0; --index)
     {
         if(index==0)
-             tmp =matchData(tmp,dataContainer,&(multMap[index]),lastScanMatchCov,5);
+            tmp =matchData(tmp,dataContainer,&(multMap[index]),lastScanMatchCov,6);
+
         else
         {
              DataContainer d(dataContainer.getSize());
              d.setFrom(dataContainer,1.0/(1<<index));
-             tmp = matchData(tmp,d,&(multMap[index]),lastScanMatchCov,3);
+             tmp = matchData(tmp,d,&(multMap[index]),lastScanMatchCov,2);
         }
     }
 
@@ -60,16 +64,19 @@ Eigen::Vector3f ScanProcessor::PoseUpdate(const sensor_msgs::LaserScanConstPtr& 
 
     Eigen::Vector3f scanmatch=tmp;
 
-    if( (pd< 2*paramMinDistanceDiffForPoseUpdate) &&
-        (fabs(angleDiff)<paramMinAngleDiffForPoseUpdate) && false)
+
+    if( (pd< 2*poseDiff) &&
+        (fabs(angleDiff)<angleDiff) && false)
     {
-        uniformPoseGenerator(scanmatch, map, 0.08, 0.05, 200);
+        uniformPoseGenerator(scanmatch, map, 0.025, 0.05, 100);
         for(int i=0;i<poseSets.size();i++)
-            poseSets[i].grade = getPoseSetGrade(dataContainer,map,poseSets[i],2);
+            poseSets[i].grade = getPoseSetGrade(dataContainer,map,poseSets[i],1);
 
         Eigen::Vector3f best,avg(0.0,0.0,0.0);
 
         best = getBestSet();
+
+      #if 0
 
         for(int i=0;i<10;i++)
         {
@@ -84,7 +91,6 @@ Eigen::Vector3f ScanProcessor::PoseUpdate(const sensor_msgs::LaserScanConstPtr& 
         if(best[2]<0)
             avg[2]=-avg[2];
 
-
         ROS_INFO("\na:[%6.3f %6.3f %6.3f]\n"
                    "s:[%6.3f %6.3f %6.3f]\n"
                    "b:[%6.3f %6.3f %6.3f],g=%6.3f/%d\n"
@@ -94,17 +100,27 @@ Eigen::Vector3f ScanProcessor::PoseUpdate(const sensor_msgs::LaserScanConstPtr& 
                    best[0],best[1],best[2],poseSets[0].grade,dataContainer.getSize(),
                    avg[0],avg[1],avg[2]);
 
+      #endif
+
+        ROS_INFO("\na:[%6.3f %6.3f %6.3f]\n"
+                   "s:[%6.3f %6.3f %6.3f]\n"
+                   "b:[%6.3f %6.3f %6.3f],g=%6.3f/%d\n",
+                   AmclPoseHintWorld[0],AmclPoseHintWorld[1],AmclPoseHintWorld[2],
+                   scanmatch[0],scanmatch[1],scanmatch[2],
+                   best[0],best[1],best[2],poseSets[0].grade,dataContainer.getSize());
+
         return best;
     }else{
-        static int i=0;
-        writePoseToTxt("../mposetest.txt", AmclPoseHintWorld, scanmatch, i);
-
+        if(writePose)
+        {
+            static int i=0;
+            writePoseToTxt("../mposetest.txt", AmclPoseHintWorld, scanmatch, i);
+        }
         ROS_INFO("\na:[%6.3f %6.3f %6.3f]\n"
                    "s:[%6.3f %6.3f %6.3f]\n",
                    AmclPoseHintWorld[0],AmclPoseHintWorld[1],AmclPoseHintWorld[2],
                    scanmatch[0],scanmatch[1],scanmatch[2]);
-
-        return AmclPoseHintWorld;
+        return scanmatch;
     }
 }
 
@@ -140,10 +156,18 @@ Eigen::Vector3f ScanProcessor::matchData(const Eigen::Vector3f& beginEstimateWor
          Eigen::Vector3f estimate(mi,mj,pose.v[2]);  //laser in map pose
 
       //   std::cout<<"lmp: [ "<<estimate[0]<<" "<<estimate[1]<<" "<<estimate[2]<<" ]"<<"\n";
-
+         Eigen::Vector3f temp;
          for(int i=0;i<maxIterations+1;i++)
          {
+             temp=estimate;
              estimateTransformationLogLh(estimate,dataPoints,map);
+             if((fabs(estimate[0]-temp[0])<1.1)&&
+                (fabs(estimate[1]-temp[1])<1.1)&&
+                (fabs(estimate[2]-temp[2])<0.02))
+             {
+                 ROS_INFO("Iteration =%d",i);
+                 break ;
+             }
          }
 
         //normalize angle
@@ -191,7 +215,6 @@ bool ScanProcessor::estimateTransformationLogLh(Eigen::Vector3f& estimate,
       Eigen::Vector3f searchDir (H.inverse() * dTr);
 
     //  std::cout << "\nsearchdir\n" << searchDir  << "\n";
-
       if (searchDir[2] > 0.2f) {
         searchDir[2] = 0.2f;
         ROS_INFO("SearchDir angle change too large\n");;
@@ -221,12 +244,16 @@ void ScanProcessor::getCompleteHessianDerivs(const Eigen::Vector3f& pose,
      h = Eigen::Matrix3f::Zero();
      dTr = Eigen::Vector3f::Zero();
 
-#ifdef PUBLISH_SCAN_MATCH
-     ptcloud.points.empty();
-     ptcloud.points.resize(size);
-     ptcloud.header.frame_id ="map";
-     ptcloud.header.stamp=ros::Time::now();
-#endif
+     bool pub= false;
+
+     if(publishScan && fabs(gridMap->scale - multMap[0].scale)<0.001)
+     {
+         ptcloud.points.clear();
+         ptcloud.points.resize(size);
+         ptcloud.header.frame_id ="map";
+         ptcloud.header.stamp=ros::Time::now();
+         pub= true;
+     }
 
      for (int i = 0; i < size; ++i) {
 
@@ -234,14 +261,15 @@ void ScanProcessor::getCompleteHessianDerivs(const Eigen::Vector3f& pose,
        // end point in map pose
        const Eigen::Vector2f endPoint =transform * currPoint;
 
+       if(pub)
+       {
+          geometry_msgs:: Point32 p;
+          p.x= MAP_WXGX(gridMap, endPoint[0]);
+          p.y= MAP_WYGY(gridMap, endPoint[1]);
+          p.z= 0;
+          ptcloud.points.push_back(p);
+       }
 
-#ifdef PUBLISH_SCAN_MATCH
-       geometry_msgs:: Point32 p;
-       p.x= MAP_WXGX(gridMap,endPoint[0]);
-       p.y= MAP_WYGY(gridMap,endPoint[1]);
-       p.z= 0;
-       ptcloud.points.push_back(p);
-#endif
 
        Eigen::Vector3f transformedPointData(interpMapValueWithDerivatives(gridMap,endPoint));
 
@@ -329,7 +357,9 @@ void ScanProcessor::LaserScanToDataContainer(const sensor_msgs::LaserScanConstPt
         if ( (dist > scan->range_min) && (dist < scan->range_max))
         {
             dist *= scaleToMap;
-            dataContainer.add(Eigen::Vector2f(-cos(angle) * dist, -sin(angle) * dist));
+
+            dataContainer.add(Eigen::Vector2f(-cos(angle) * dist, -sin(angle) * dist));  //note '-' ,because laser urdf
+
         }
         angle += scan->angle_increment;
     }
@@ -418,7 +448,6 @@ void ScanProcessor::uniformPoseGenerator(const Eigen::Vector3f& center,
        delta =(1-drand48()*2)*dwindows;
        p.pose[0] = center[0] + delta ;    //robot in world pose;
        p.pose[1] = center[1] + delta ;
-       p.pose[2] = center[2];
        delta =(1-drand48()*2)*awindows;
        p.pose[2] = center[2] + delta;
 
@@ -482,8 +511,6 @@ float ScanProcessor::getPoseSetGrade(const DataContainer& dataPoints,
         p +=pz*pz*pz;
 #endif
     }
-
-
     return p;
 }
 
