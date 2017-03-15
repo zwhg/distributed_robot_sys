@@ -59,6 +59,8 @@
         <param name="publish_scan" value="true"/>
         <param name="write_pose" value="false"/>
  　　　　　　　<param name="max_itera" value="6"/>
+        <param name="add_close_loop" value="true"/>
+ 　　　　　　　<param name="use_amcl_pose" value="false"/>
 
 </node>
 </launch>
