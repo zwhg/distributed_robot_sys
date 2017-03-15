@@ -23,7 +23,9 @@ AmclNode::AmclNode():
         private_nh_("~"),
         initial_pose_hyp_(NULL),
         first_map_received_(false),
-        scan_processor()
+        scan_processor(),
+        add_close_loop(true),
+        use_amcl_pose(false)
 {
     boost::recursive_mutex::scoped_lock l(configuration_mutex_);
     paraInit();
@@ -273,6 +275,14 @@ void AmclNode::paraInit()
     if(!private_nh_.getParam("write_pose",scan_processor.writePose))
         scan_processor.writePose=false;
 
+    if(!private_nh_.getParam("max_itera",scan_processor.maxIterations))
+        scan_processor.maxIterations=6;
+
+    if(!private_nh_.getParam("add_close_loop",add_close_loop))
+        add_close_loop=true;
+
+    if(!private_nh_.getParam("use_amcl_pose",use_amcl_pose))
+        use_amcl_pose=false;
 
     updatePoseFromServer();
 }
@@ -816,32 +826,35 @@ void AmclNode::laserReceived(const sensor_msgs::LaserScanConstPtr& laser_scan)
       if(scan_processor.publishScan)
          test.publish(scan_processor.ptcloud);
 
-
-
-#if 0
-      pf_sample_set_t* mset = pf_->sets + pf_->current_set;
-      if(mset->sample_count < pf_->max_samples-1)
-      {
-          pf_sample_t *msample = mset->samples + mset->sample_count++;
-          msample->pose ={scan_match_pose_[0],
-                          scan_match_pose_[1],
-                          scan_match_pose_[2]};
-
-          for (int i = 0; i < mset->sample_count; i++)
+    if(add_close_loop)
+    {
+          pf_sample_set_t* mset = pf_->sets + pf_->current_set;
+          for(int i=0 ; (i<50) && (mset->sample_count < pf_->max_samples) ; i++)
           {
-            msample = mset->samples + i;
-            msample->weight = 1/mset->sample_count;
+              pf_sample_t *msample = mset->samples + mset->sample_count++;
+              msample->pose ={scan_match_pose_[0],
+                              scan_match_pose_[1],
+                              scan_match_pose_[2]};
+
+              for (int i = 0; i < mset->sample_count; i++)
+              {
+                msample = mset->samples + i;
+                msample->weight = 1/mset->sample_count;
+              }
           }
-      }
-#endif
+          ROS_INFO("sample count= %d",mset->sample_count);
+    }
       //amcl or scan match ?
-#if 0
-      pf_vector_t  finalPose = {scan_match_pose_[0],scan_match_pose_[1],scan_match_pose_[2]};
-#else
-      pf_vector_t  finalPose ={hyps[max_weight_hyp].pf_pose_mean.v[0],
-                               hyps[max_weight_hyp].pf_pose_mean.v[1],
-                               hyps[max_weight_hyp].pf_pose_mean.v[2]};
-#endif
+     pf_vector_t  finalPose ;
+    if(use_amcl_pose)
+    {
+        finalPose = {hyps[max_weight_hyp].pf_pose_mean.v[0],
+                     hyps[max_weight_hyp].pf_pose_mean.v[1],
+                     hyps[max_weight_hyp].pf_pose_mean.v[2]};
+    }else{
+        finalPose = {scan_match_pose_[0],scan_match_pose_[1],scan_match_pose_[2]};
+    }
+
 
       geometry_msgs::PoseWithCovarianceStamped p;
       // Fill in the header

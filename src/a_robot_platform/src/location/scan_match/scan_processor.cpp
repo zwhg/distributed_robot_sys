@@ -10,13 +10,14 @@ namespace zw{
 
 ScanProcessor::ScanProcessor()
 {
-    poseDiff=0.1*0.1;
-    angleDiff=0.1;
+    poseDiff=0.025;
+    angleDiff=0.05;
     numDepth = 2;
     publishScan =false;
     writePose =false;
-
+    maxIterations =6;
     multMap =new map_grid_t[numDepth];
+
     for(int i=0; i<numDepth;i++)
         multMap[i].cell_pbb = nullptr;
 }
@@ -41,10 +42,8 @@ Eigen::Vector3f ScanProcessor::PoseUpdate(const sensor_msgs::LaserScanConstPtr& 
 
     for(int index = numDepth-1; index>=0; --index)
     {
-        if(index==0)
-
-            tmp =matchData(tmp,dataContainer,&(multMap[index]),lastScanMatchCov,6);
-
+        if(index==0)        
+            tmp =matchData(tmp,dataContainer,&(multMap[index]),lastScanMatchCov,maxIterations);
         else
         {
              DataContainer d(dataContainer.getSize());
@@ -53,23 +52,25 @@ Eigen::Vector3f ScanProcessor::PoseUpdate(const sensor_msgs::LaserScanConstPtr& 
         }
     }
 
-    float pd = (tmp[0] -AmclPoseHintWorld[0])*(tmp[0] -AmclPoseHintWorld[0])+
-              (tmp[1] -AmclPoseHintWorld[1])*(tmp[1] -AmclPoseHintWorld[1]);
-    float angleDiff = (tmp[2] - AmclPoseHintWorld[2]);
+    float pd = sqrt((tmp[0] -AmclPoseHintWorld[0])*(tmp[0] -AmclPoseHintWorld[0])+
+              (tmp[1] -AmclPoseHintWorld[1])*(tmp[1] -AmclPoseHintWorld[1]));
+    float pa = (tmp[2] - AmclPoseHintWorld[2]);
 
-    if (angleDiff > M_PI) {
-        angleDiff -= M_PI * 2.0f;
-    } else if (angleDiff < -M_PI) {
-        angleDiff += M_PI * 2.0f;
+    pa =fabs(pa);
+
+    if (pa > M_PI) {
+        pa -= M_PI ;
     }
 
     Eigen::Vector3f scanmatch=tmp;
+    Eigen::Vector3f finalPose;
 
 
-    if( (pd< 2*poseDiff) &&
-        (fabs(angleDiff)<angleDiff) && false)
+    if( (pd < poseDiff) &&
+        (pa < angleDiff) && false)
     {
-        uniformPoseGenerator(scanmatch, map, 0.025, 0.05, 100);
+        uniformPoseGenerator(scanmatch, map, 0.025, 0.02, 100);
+
         for(int i=0;i<poseSets.size();i++)
             poseSets[i].grade = getPoseSetGrade(dataContainer,map,poseSets[i],1);
 
@@ -109,13 +110,24 @@ Eigen::Vector3f ScanProcessor::PoseUpdate(const sensor_msgs::LaserScanConstPtr& 
                    AmclPoseHintWorld[0],AmclPoseHintWorld[1],AmclPoseHintWorld[2],
                    scanmatch[0],scanmatch[1],scanmatch[2],
                    best[0],best[1],best[2],poseSets[0].grade,dataContainer.getSize());
-
-        return best;
+          finalPose = best;
+      //  return best;
     }else{
-        static int i=0;
-        writePoseToTxt("../mposetest.txt", AmclPoseHintWorld, scanmatch, i);
-        return scanmatch;
+        ROS_INFO("\na:[%6.3f %6.3f %6.3f]\n"
+                   "s:[%6.3f %6.3f %6.3f]",
+                   AmclPoseHintWorld[0],AmclPoseHintWorld[1],AmclPoseHintWorld[2],
+                   scanmatch[0],scanmatch[1],scanmatch[2]);
+           finalPose = scanmatch ;
+        //   return scanmatch;
     }
+
+    if(writePose)
+    {
+       static int i=0;
+       writePoseToTxt("../mpt.txt", AmclPoseHintWorld, scanmatch , i);
+     //  writePoseToTxt("../mpt.txt", AmclPoseHintWorld, finalPose, i);
+    }
+    return finalPose;
 }
 
 /*
@@ -150,11 +162,20 @@ Eigen::Vector3f ScanProcessor::matchData(const Eigen::Vector3f& beginEstimateWor
          Eigen::Vector3f estimate(mi,mj,pose.v[2]);  //laser in map pose
 
       //   std::cout<<"lmp: [ "<<estimate[0]<<" "<<estimate[1]<<" "<<estimate[2]<<" ]"<<"\n";
-
-         for(int i=0;i<maxIterations+1;i++)
+         Eigen::Vector3f temp;
+         int i=0;
+         for(i=0;i<maxIterations+1;i++)
          {
+             temp=estimate;
              estimateTransformationLogLh(estimate,dataPoints,map);
+             if((fabs(estimate[0]-temp[0])<0.25)&&
+                (fabs(estimate[1]-temp[1])<0.25)&&
+                (fabs(estimate[2]-temp[2])<0.02))
+             {                
+                 break ;
+             }
          }
+         ROS_INFO("Iteration =%d",i);
 
         //normalize angle
          float angle = fmod(fmod(estimate[2], 2.0f*M_PI) + 2.0f*M_PI, 2.0f*M_PI);
@@ -201,7 +222,6 @@ bool ScanProcessor::estimateTransformationLogLh(Eigen::Vector3f& estimate,
       Eigen::Vector3f searchDir (H.inverse() * dTr);
 
     //  std::cout << "\nsearchdir\n" << searchDir  << "\n";
-
       if (searchDir[2] > 0.2f) {
         searchDir[2] = 0.2f;
         ROS_INFO("SearchDir angle change too large\n");;
@@ -427,16 +447,28 @@ void ScanProcessor::uniformPoseGenerator(const Eigen::Vector3f& center,
 {
     poseSets.clear();
     float delta ;
-    poseSet_t p;
-
+    poseSet_t p;  
     p.grade=0;
+
+    p.pose=center;
+    poseSets.push_back(p);
+
     for(int i=0;i<num;i++)
     {
-       delta =(1-drand48()*2)*dwindows;
-       p.pose[0] = center[0] + delta ;    //robot in world pose;
-       p.pose[1] = center[1] + delta ;
-       delta =(1-drand48()*2)*awindows;
-       p.pose[2] = center[2] + delta;
+       do{
+            delta = drand48();
+        }while(delta==0.0);
+       p.pose[0] = center[0] + (1-delta*2)*dwindows;    //robot in world pose;
+
+       do{
+            delta = drand48();
+       }while(delta==0.0);
+       p.pose[1] = center[1] + (1-delta*2)*dwindows;
+
+       do{
+            delta = drand48();
+       }while(delta==0.0);
+       p.pose[2] = center[2] + (1-drand48()*2)*awindows;
 
        if ( p.pose[2] > M_PI) {
             p.pose[2] -= M_PI * 2.0f;
