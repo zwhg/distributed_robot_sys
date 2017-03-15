@@ -108,6 +108,7 @@ public:
  int numDepth;
  bool publishScan;
  bool writePose;
+ int maxIterations;
 
 
 

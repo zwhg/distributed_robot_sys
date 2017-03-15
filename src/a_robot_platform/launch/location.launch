@@ -12,8 +12,8 @@
 	<param name="laser_min_range" value="0.15"/>
 	<param name="laser_max_range" value="3.0"/>
 	<param name="laser_max_beams" value="360"/>
-	<param name="min_particles" value="500"/>
-	<param name="max_particles" value="5000"/>
+	<param name="min_particles" value="400"/>
+	<param name="max_particles" value="3000"/>
 	<param name="kld_err" value="0.05"/>
 	<param name="kld_z" value="0.99"/>
 	<param name="odom_alpha1" value="0.5"/>
@@ -53,11 +53,12 @@
 	<param name="base_frame_id" value="base_link"/>
 	<param name="global_frame_id" value="map"/>
 
-        <param name="pose_diff" value="0.01"/>
-        <param name="angle_diff" value="0.1"/>
+        <param name="pose_diff" value="0.025"/>
+        <param name="angle_diff" value="0.05"/>
         <param name="map_depth_num" value="2"/>
         <param name="publish_scan" value="true"/>
-        <param name="write_pose" value="fasle"/>
+        <param name="write_pose" value="false"/>
+ 　　　　　　　<param name="max_itera" value="6"/>
 
 </node>
 </launch>

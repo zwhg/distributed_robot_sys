@@ -273,6 +273,8 @@ void AmclNode::paraInit()
     if(!private_nh_.getParam("write_pose",scan_processor.writePose))
         scan_processor.writePose=false;
 
+    if(!private_nh_.getParam("max_itera",scan_processor.maxIterations))
+        scan_processor.maxIterations=6;
 
     updatePoseFromServer();
 }
@@ -833,6 +835,7 @@ void AmclNode::laserReceived(const sensor_msgs::LaserScanConstPtr& laser_scan)
             msample->weight = 1/mset->sample_count;
           }
       }
+      ROS_INFO("sample count= %d",mset->sample_count);
 #endif
       //amcl or scan match ?
 #if 0

@@ -10,13 +10,14 @@ namespace zw{
 
 ScanProcessor::ScanProcessor()
 {
-    poseDiff=0.1*0.1;
-    angleDiff=0.1;
+    poseDiff=0.025;
+    angleDiff=0.05;
     numDepth = 2;
     publishScan =false;
     writePose =false;
-
+    maxIterations =6;
     multMap =new map_grid_t[numDepth];
+
     for(int i=0; i<numDepth;i++)
         multMap[i].cell_pbb = nullptr;
 }
@@ -42,7 +43,7 @@ Eigen::Vector3f ScanProcessor::PoseUpdate(const sensor_msgs::LaserScanConstPtr& 
     for(int index = numDepth-1; index>=0; --index)
     {
         if(index==0)
-            tmp =matchData(tmp,dataContainer,&(multMap[index]),lastScanMatchCov,6);
+            tmp =matchData(tmp,dataContainer,&(multMap[index]),lastScanMatchCov,maxIterations);
 
         else
         {
@@ -52,23 +53,25 @@ Eigen::Vector3f ScanProcessor::PoseUpdate(const sensor_msgs::LaserScanConstPtr& 
         }
     }
 
-    float pd = (tmp[0] -AmclPoseHintWorld[0])*(tmp[0] -AmclPoseHintWorld[0])+
-              (tmp[1] -AmclPoseHintWorld[1])*(tmp[1] -AmclPoseHintWorld[1]);
-    float angleDiff = (tmp[2] - AmclPoseHintWorld[2]);
+    float pd = sqrt((tmp[0] -AmclPoseHintWorld[0])*(tmp[0] -AmclPoseHintWorld[0])+
+              (tmp[1] -AmclPoseHintWorld[1])*(tmp[1] -AmclPoseHintWorld[1]));
+    float pa = (tmp[2] - AmclPoseHintWorld[2]);
 
-    if (angleDiff > M_PI) {
-        angleDiff -= M_PI * 2.0f;
-    } else if (angleDiff < -M_PI) {
-        angleDiff += M_PI * 2.0f;
+    pa =fabs(pa);
+
+    if (pa > M_PI) {
+        pa -= M_PI ;
     }
 
     Eigen::Vector3f scanmatch=tmp;
 
+//    ROS_INFO("posediff= %f,anglediff= %f",pd,fabs(angleDiff));
+//    ROS_INFO("posediff= %f,anglediff= %f",poseDiff,pa);
 
-    if( (pd< 2*poseDiff) &&
-        (fabs(angleDiff)<angleDiff) && false)
+    if( (pd< poseDiff) &&
+        (pa<angleDiff) && true)
     {
-        uniformPoseGenerator(scanmatch, map, 0.025, 0.05, 100);
+        uniformPoseGenerator(scanmatch, map, 0.025, 0.02, 100);
         for(int i=0;i<poseSets.size();i++)
             poseSets[i].grade = getPoseSetGrade(dataContainer,map,poseSets[i],1);
 
@@ -157,18 +160,19 @@ Eigen::Vector3f ScanProcessor::matchData(const Eigen::Vector3f& beginEstimateWor
 
       //   std::cout<<"lmp: [ "<<estimate[0]<<" "<<estimate[1]<<" "<<estimate[2]<<" ]"<<"\n";
          Eigen::Vector3f temp;
-         for(int i=0;i<maxIterations+1;i++)
+         int i=0;
+         for(i=0;i<maxIterations+1;i++)
          {
              temp=estimate;
              estimateTransformationLogLh(estimate,dataPoints,map);
-             if((fabs(estimate[0]-temp[0])<1.1)&&
-                (fabs(estimate[1]-temp[1])<1.1)&&
+             if((fabs(estimate[0]-temp[0])<0.25)&&
+                (fabs(estimate[1]-temp[1])<0.25)&&
                 (fabs(estimate[2]-temp[2])<0.02))
-             {
-                 ROS_INFO("Iteration =%d",i);
+             {                
                  break ;
              }
          }
+         ROS_INFO("Iteration =%d",i);
 
         //normalize angle
          float angle = fmod(fmod(estimate[2], 2.0f*M_PI) + 2.0f*M_PI, 2.0f*M_PI);
