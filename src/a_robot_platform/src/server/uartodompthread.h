@@ -12,9 +12,9 @@
 #include <tf/transform_broadcaster.h>
 #include <math.h>
 #include <termios.h>
+#include "../nav/nav.h"
 
 namespace zw {
-
 
 
 class UartOdomPthread
@@ -22,6 +22,8 @@ class UartOdomPthread
 
 private:
   pthread_t id;
+  static NavPara m_navPara;
+  static geometry_msgs::Twist vel;
 
 public:
   UartOdomPthread();

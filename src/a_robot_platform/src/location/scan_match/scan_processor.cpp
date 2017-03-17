@@ -40,17 +40,26 @@ Eigen::Vector3f ScanProcessor::PoseUpdate(const sensor_msgs::LaserScanConstPtr& 
 
     Eigen::Vector3f tmp(AmclPoseHintWorld);
 
+    bool flag =true;
+
     for(int index = numDepth-1; index>=0; --index)
     {
-        if(index==0)        
-            tmp =matchData(tmp,dataContainer,&(multMap[index]),lastScanMatchCov,maxIterations);
-        else
+        if(index==0)
         {
-             DataContainer d(dataContainer.getSize());
-             d.setFrom(dataContainer,1.0/(1<<index));
-             tmp = matchData(tmp,d,&(multMap[index]),lastScanMatchCov,2);
+            tmp =matchData(tmp,dataContainer,&(multMap[index]),lastScanMatchCov,maxIterations, flag);
+        }else{
+            DataContainer d(dataContainer.getSize());
+            d.setFrom(dataContainer,1.0/(1<<index));
+            tmp = matchData(tmp,d,&(multMap[index]),lastScanMatchCov,2,flag);
+        }
+        if(!flag)
+        {
+            tmp = AmclPoseHintWorld;
+            ROS_INFO("scan match failed!");
+            break;
         }
     }
+
 
     float pd = sqrt((tmp[0] -AmclPoseHintWorld[0])*(tmp[0] -AmclPoseHintWorld[0])+
               (tmp[1] -AmclPoseHintWorld[1])*(tmp[1] -AmclPoseHintWorld[1]));
@@ -113,6 +122,9 @@ Eigen::Vector3f ScanProcessor::PoseUpdate(const sensor_msgs::LaserScanConstPtr& 
           finalPose = best;
       //  return best;
     }else{
+        if((pd >0.3)||(pa>0.5))
+            ROS_INFO("scan match change too large!");
+
         ROS_INFO("\na:[%6.3f %6.3f %6.3f]\n"
                    "s:[%6.3f %6.3f %6.3f]",
                    AmclPoseHintWorld[0],AmclPoseHintWorld[1],AmclPoseHintWorld[2],
@@ -142,7 +154,8 @@ Eigen::Vector3f ScanProcessor::matchData(const Eigen::Vector3f& beginEstimateWor
                                          const DataContainer& dataPoints,
                                          const map_grid_t* map,
                                          Eigen::Matrix3f& covMatrix,
-                                         int maxIterations)
+                                         int maxIterations,
+                                         bool & flag )
 {    
     if (dataPoints.getSize() != 0) {
         //计算激光坐标系在全局坐标中的坐标
@@ -157,6 +170,7 @@ Eigen::Vector3f ScanProcessor::matchData(const Eigen::Vector3f& beginEstimateWor
          mj=MAP_GYWY(map, pose.v[1]);
          if(!MAP_VALID(map, mi, mj)){
              ROS_ERROR("scan match origin pose not in scale");
+             flag= false;
              return beginEstimateWorld;
          }
          Eigen::Vector3f estimate(mi,mj,pose.v[2]);  //laser in map pose

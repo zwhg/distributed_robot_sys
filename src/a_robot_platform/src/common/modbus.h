@@ -26,14 +26,6 @@ typedef struct
     static const byte tail=TAIL;
 }ModbusMsg;
 
-typedef enum
-{
-     R_REGISTER =0x5f,
-     W_REGISTER =0xf5,
-     NULL1
-}FunctionCode;
-
-
 
 class Modbus
 {

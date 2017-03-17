@@ -835,7 +835,7 @@ void  MainWindow::getCarInfo(void)
 {
     zw::Paras m_para;
     int32_t dat[3];
-    zw::ParaGetSet  packInfo = {zw::R_REGISTER,3,zw::MSG_CONTROL+2,dat};
+    zw::ParaGetSet  packInfo = {zw::R_REGISTER,3,(zw::ParaAddress)(zw::MSG_CONTROL+2),dat};
     m_para.GetAddressValue(packInfo);
     zw::Float2Int32 ff;
     ff.i=dat[0];
@@ -905,4 +905,79 @@ void MainWindow::SavePoseFiile(void)
          }
          lastCarInfo = carInfo;
      }
+}
+
+void MainWindow::on_pBtn_start_navigation_clicked(bool checked)
+{
+    zw::Paras m_para;
+    int32_t dat[3];
+    zw::ParaGetSet  packInfo = {zw::W_REGISTER,3,(zw::ParaAddress)(zw::CONTROL+2),dat};
+    if(checked)
+    {
+        zw::Float2Int32 ff;
+        ff.f = ui->lbl_robot_epose_x->text().toFloat();
+        dat[0] = ff.i;
+
+        ff.f = ui->lbl_robot_epose_y->text().toFloat();
+        dat[1] = ff.i;
+
+        ff.f = ui->lbl_robot_epose_h->text().toFloat();
+        dat[2] = ff.i;
+        m_para.SetAddressValue(packInfo);
+        m_tcpSocketClient->SendMsg(packInfo);
+
+        packInfo={zw::R_REGISTER,1, zw::BTN_SWITCH,dat};
+        m_para.GetAddressValue(packInfo);
+        dat[0] |=KEY_START_NAV ;
+        ui->pBtn_start_navigation->setStyleSheet("background-color: rgb(0, 255, 0);");
+    }else{
+        packInfo={zw::R_REGISTER,1, zw::BTN_SWITCH,dat};
+        m_para.GetAddressValue(packInfo);
+        dat[0] &=(~KEY_START_NAV) ;
+
+        ui->pBtn_start_navigation->setStyleSheet("background-color: rgb(167, 167, 125)");
+    }
+    packInfo.fuc =zw::W_REGISTER;
+    m_para.SetAddressValue(packInfo);
+    m_tcpSocketClient->SendMsg(packInfo);
+}
+
+void MainWindow::on_pBtn_emergency_stop_clicked(bool checked)
+{
+    int32_t dat[1];
+    zw::ParaGetSet packInfo={zw::R_REGISTER,1, zw::BTN_SWITCH,dat};
+    zw::Paras m_para;
+    m_para.GetAddressValue(packInfo);
+
+    if(checked)
+    {
+        ui->pBtn_emergency_stop->setStyleSheet("background-color: rgb(0, 255, 0);");
+        dat[0] |= KEY_EME_STOP;
+    }else{
+        ui->pBtn_emergency_stop->setStyleSheet("background-color: rgb(167, 167, 125)");
+        dat[0] &= (~KEY_EME_STOP);
+    }
+
+    packInfo.fuc =zw::W_REGISTER;
+    m_para.SetAddressValue(packInfo);
+
+    m_tcpSocketClient->SendMsg(packInfo);
+
+    m_tcpSocketClient->SendMsg(packInfo);
+}
+
+void MainWindow::on_pBtn_PID_confirm_clicked()
+{
+    zw::Paras m_para;
+    int32_t dat[6];
+    zw::ParaGetSet  packInfo = {zw::W_REGISTER,6,(zw::ParaAddress)(zw::ADD_PID+6),dat};
+    dat[0] = ui->let_pose_pid_P->text().toInt();
+    dat[1] = ui->let_pose_pid_I->text().toInt();
+    dat[2] = ui->let_pose_pid_D->text().toInt();
+    dat[3] = ui->let_angle_pid_P->text().toInt();
+    dat[4] = ui->let_angle_pid_I->text().toInt();
+    dat[5] = ui->let_angle_pid_D->text().toInt();
+    m_para.SetAddressValue(packInfo);
+
+    m_tcpSocketClient->SendMsg(packInfo);
 }

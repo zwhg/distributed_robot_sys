@@ -58,7 +58,8 @@ private:
                            const DataContainer& dataPoints,
                            const map_grid_t* multMap,
                            Eigen::Matrix3f& covMatrix,
-                           int maxIterations);
+                           int maxIterations,
+                           bool & flag );
 
  bool estimateTransformationLogLh(Eigen::Vector3f& estimate,
                                   const DataContainer& dataPoints,

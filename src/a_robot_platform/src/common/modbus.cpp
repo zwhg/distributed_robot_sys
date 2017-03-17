@@ -98,7 +98,7 @@ bool Modbus::UnPackparas(const byte* inMsg, int32_t& startIndex,int32_t endIndex
             break;
         }
         case 1:{ //get function code ,and check the function code
-                Info.fuc = inMsg[startIndex++];
+                Info.fuc = (FunctionCode)inMsg[startIndex++];
                 if( (Info.fuc == R_REGISTER) ||(Info.fuc == W_REGISTER))
                     status=2;
                 else
@@ -145,7 +145,7 @@ bool Modbus::UnPackparas(const byte* inMsg, int32_t& startIndex,int32_t endIndex
         }
         case 5:{ //get address and data
             uint32_t I=startIndex+2;
-            Info.addr =  (int16_t) ((((uint16_t)inMsg[I+1]&0x00ff)<<8 )|
+            Info.addr =  (ParaAddress) ((((uint16_t)inMsg[I+1]&0x00ff)<<8 )|
                                       ((uint16_t)inMsg[I]&0x00ff));
              I +=2;
             if(Info.fuc ==R_REGISTER){

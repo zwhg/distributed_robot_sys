@@ -18,10 +18,10 @@
 #include "../../common/map_image.h"
 
 
-
 #define Myhigh 600
 #define Mywidth 600
 #define  MIDD 720
+
 namespace Ui {
 class MainWindow;
 }
@@ -68,6 +68,12 @@ private slots:
     void on_pBtn_save_pose_clicked(bool checked);
 
     void on_pBtn_clear_pose_clicked();
+
+    void on_pBtn_start_navigation_clicked(bool checked);
+
+    void on_pBtn_emergency_stop_clicked(bool checked);
+
+    void on_pBtn_PID_confirm_clicked();
 
 private :
     void ConnectStatus(void);

@@ -139,6 +139,11 @@ target_link_libraries(main_pathplan_server
 )
 
 
+add_executable(main_nav src/nav/main_nav.cpp)
+target_link_libraries(main_nav
+    ${catkin_LIBRARIES}
+)
+
 qt5_use_modules(main_uart_odom
   Core
   Network
