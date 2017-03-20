@@ -18,7 +18,7 @@ typedef enum
     MSG_CONTROL =0x0020, //show msg  v,w,x,y,theta   //float
     MSG_IMU = 0x0040,  //show msg  acc_x,y,z  gyr_x_y_z   //int16_t
     MSG_Ultrasonic = 0x0060,  //超声  int
-    BTN_SWITCH =0x0080,   //状态开关，键盘控制(bit 0),IMU 初始化(bit 1), 开始导航(bit 2), 急停(bit 3) ,
+    BTN_SWITCH =0x0080,   //状态开关，键盘控制(bit 0),IMU 初始化(bit 1), 开始导航(bit 2), 急停(bit 3) , newGoal (biy4)
     ADD_PID = 0x1000,   //pid 参数
     NULL2  =0x2000
 }ParaAddress;
@@ -46,7 +46,7 @@ typedef struct
 #define KEY_INIT_IMU    0x00000002
 #define KEY_START_NAV   0x00000004
 #define KEY_EME_STOP    0x00000008
-
+#define KEY_NEW_GOAL    0x00000010
 
 #define Gyro_Gr	  (2000.0/65536.0*3.1415926/180.0)//(0.0005326/2.0)
 #define Acc_Mss   ((4.0*9.81)/65536.0)

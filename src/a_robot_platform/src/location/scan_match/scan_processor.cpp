@@ -125,10 +125,10 @@ Eigen::Vector3f ScanProcessor::PoseUpdate(const sensor_msgs::LaserScanConstPtr& 
         if((pd >0.3)||(pa>0.5))
             ROS_INFO("scan match change too large!");
 
-        ROS_INFO("\na:[%6.3f %6.3f %6.3f]\n"
-                   "s:[%6.3f %6.3f %6.3f]",
-                   AmclPoseHintWorld[0],AmclPoseHintWorld[1],AmclPoseHintWorld[2],
-                   scanmatch[0],scanmatch[1],scanmatch[2]);
+//        ROS_INFO("\na:[%6.3f %6.3f %6.3f]\n"
+//                   "s:[%6.3f %6.3f %6.3f]",
+//                   AmclPoseHintWorld[0],AmclPoseHintWorld[1],AmclPoseHintWorld[2],
+//                   scanmatch[0],scanmatch[1],scanmatch[2]);
            finalPose = scanmatch ;
         //   return scanmatch;
     }
@@ -189,7 +189,7 @@ Eigen::Vector3f ScanProcessor::matchData(const Eigen::Vector3f& beginEstimateWor
                  break ;
              }
          }
-         ROS_INFO("Iteration =%d",i);
+       //  ROS_INFO("Iteration =%d",i);
 
         //normalize angle
          float angle = fmod(fmod(estimate[2], 2.0f*M_PI) + 2.0f*M_PI, 2.0f*M_PI);

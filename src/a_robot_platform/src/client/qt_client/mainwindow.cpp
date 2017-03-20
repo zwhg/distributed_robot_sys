@@ -929,17 +929,22 @@ void MainWindow::on_pBtn_start_navigation_clicked(bool checked)
         packInfo={zw::R_REGISTER,1, zw::BTN_SWITCH,dat};
         m_para.GetAddressValue(packInfo);
         dat[0] |=KEY_START_NAV ;
+        dat[0] |=KEY_NEW_GOAL ;
         ui->pBtn_start_navigation->setStyleSheet("background-color: rgb(0, 255, 0);");
+
     }else{
         packInfo={zw::R_REGISTER,1, zw::BTN_SWITCH,dat};
         m_para.GetAddressValue(packInfo);
         dat[0] &=(~KEY_START_NAV) ;
-
+        dat[0] &=(~KEY_NEW_GOAL) ;
         ui->pBtn_start_navigation->setStyleSheet("background-color: rgb(167, 167, 125)");
     }
     packInfo.fuc =zw::W_REGISTER;
     m_para.SetAddressValue(packInfo);
     m_tcpSocketClient->SendMsg(packInfo);
+
+    dat[0] &=(~KEY_NEW_GOAL) ;
+    m_para.SetAddressValue(packInfo);
 }
 
 void MainWindow::on_pBtn_emergency_stop_clicked(bool checked)

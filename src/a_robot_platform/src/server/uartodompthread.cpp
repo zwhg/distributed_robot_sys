@@ -7,10 +7,11 @@ namespace zw {
 
 
 
-NavPara UartOdomPthread::m_navPara={{0,0,0},{0,0,0},false,false};
-geometry_msgs::Twist UartOdomPthread::vel;
+static NavPara m_navPara={{0,0,0},{0,0,0},false,false};
+static bool getNewPose =false;
+static bool getGoal=false;
 
-void CalNavCmdVel(const NavPara *nav ,geometry_msgs::Twist& ctr);
+
 inline void limit(float& v ,float left,float right);
 
 
@@ -34,13 +35,31 @@ void *UartOdomPthread::DoPthread(void)
 {
   ros::NodeHandle n;
   ros::Subscriber key_sub =n.subscribe("cmd_vel",2,cmd_keyCallback);
-  ros::Subscriber pose_sub = n.subscribe<geometry_msgs::PoseStamped>("scan_p", 2,PoseReceived);
+  //ros::Subscriber pose_sub = n.subscribe<geometry_msgs::PoseStamped>("scan_p", 2,PoseReceived);
+
+  ros::Subscriber pose_sub = n.subscribe<geometry_msgs::PoseWithCovarianceStamped>("amcl_pose", 2,PoseReceived);
   ros::Publisher odom_pub = n.advertise<nav_msgs::Odometry>("odom", 100);
   ros::Publisher imu_pub =n.advertise<sensor_msgs::Imu>("imu",100);
   ros::Publisher vel_pub =n.advertise<geometry_msgs::Twist>("cmd_vel",2);
 
   ros::Time starts = ros::Time::now();
   ros::Time ends = ros::Time::now();
+
+
+  {
+  ros::NodeHandle nh("~");
+
+  if(!nh.getParam("maxForwardSpeed",maxForwardSpeed))
+      maxForwardSpeed =0.2;
+  if(!nh.getParam("maxBackSpeed",maxBackSpeed))
+      maxBackSpeed =-0.2;
+  if(!nh.getParam("maxOmega",maxOmega))
+      maxOmega =1.0;
+  if(!nh.getParam("maxDisErr",maxDisErr))
+      maxDisErr =0.05;
+  if(!nh.getParam("maxAngErr",maxAngErr))
+      maxAngErr =0.05;
+  }
 
   sensor_msgs::Imu  imu;
  {
@@ -155,8 +174,11 @@ void *UartOdomPthread::DoPthread(void)
         imu_pub.publish(imu);
     }
 
+    getNavcmd();
     if(m_navPara.startNav)
+    {
        vel_pub.publish(vel);
+    }
 
     starts = ends;
     loop_rate.sleep();
@@ -183,37 +205,53 @@ void UartOdomPthread::cmd_keyCallback(const geometry_msgs::Twist::ConstPtr & cmd
     }
 }
 
-void UartOdomPthread::PoseReceived(const geometry_msgs::PoseStampedConstPtr pose)
+void UartOdomPthread::PoseReceived(const geometry_msgs::PoseWithCovarianceStampedConstPtr pose)
 {
-  int32_t ctr_msg[3];
-  zw::ParaGetSet car_para={W_REGISTER,3,(ParaAddress)(MSG_CONTROL+2),ctr_msg};
-  zw::Float2Int32 mf;
-  m_navPara.current.x =mf.f =(float)pose->pose.position.x;
-  ctr_msg[0]=mf.i;
-  m_navPara.current.y =mf.f =(float)pose->pose.position.y;
-  ctr_msg[1]=mf.i;
-  m_navPara.current.h =mf.f =(float)(tf::getYaw(pose->pose.orientation));
-  ctr_msg[2]=mf.i;
-  zw::Paras m_para;
-  m_para.SetAddressValue(car_para);
+    int32_t ctr_msg[3];
+    zw::ParaGetSet car_para={W_REGISTER,3,(ParaAddress)(MSG_CONTROL+2),ctr_msg};
+    zw::Float2Int32 mf;
+    m_navPara.current.x =mf.f =(float)pose->pose.pose.position.x;
+    ctr_msg[0]=mf.i;
+    m_navPara.current.y =mf.f =(float)pose->pose.pose.position.y;
+    ctr_msg[1]=mf.i;
+    m_navPara.current.h =mf.f =(float)(tf::getYaw(pose->pose.pose.orientation));
+    ctr_msg[2]=mf.i;
+    zw::Paras m_para;
+    m_para.SetAddressValue(car_para);
+    getNewPose = true;
+}
 
-  car_para.fuc = R_REGISTER;
-  car_para.addr = (ParaAddress)(CONTROL+2);
-  m_para.GetAddressValue(car_para);
-  mf.i=ctr_msg[0];
-  m_navPara.desired.x =mf.f;
-  mf.i=ctr_msg[1];
-  m_navPara.desired.y =mf.f;
-  mf.i=ctr_msg[2];
-  m_navPara.desired.h =mf.f;
+void UartOdomPthread::getNavcmd(void)
+{
+    int32_t ctr_msg[3];
+    zw::ParaGetSet car_para={R_REGISTER,3,(ParaAddress)(CONTROL+2),ctr_msg};
+    zw::Float2Int32 mf;
+    zw::Paras m_para;
+    m_para.GetAddressValue(car_para);
+    mf.i=ctr_msg[0];
+    m_navPara.desired.x =mf.f;
+    mf.i=ctr_msg[1];
+    m_navPara.desired.y =mf.f;
+    mf.i=ctr_msg[2];
+    m_navPara.desired.h =mf.f;
 
-  car_para.len =1;
-  car_para.addr = BTN_SWITCH;
-  m_para.GetAddressValue(car_para);
-  m_navPara.startNav = (bool)(ctr_msg[0] & KEY_START_NAV);
-  m_navPara.emergeStop = (bool)(ctr_msg[0] & KEY_EME_STOP);
-  if(m_navPara.startNav)
-      CalNavCmdVel(&m_navPara,vel);
+    car_para.len =1;
+    car_para.addr = BTN_SWITCH;
+    m_para.GetAddressValue(car_para);
+    m_navPara.startNav = (bool)(ctr_msg[0] & KEY_START_NAV);
+    m_navPara.emergeStop = (bool)(ctr_msg[0] & KEY_EME_STOP);
+    m_navPara.newGoal = (bool)(ctr_msg[0] & KEY_NEW_GOAL);
+    if( m_navPara.emergeStop || (!m_navPara.startNav))
+        getGoal =false;
+    if(m_navPara.startNav && (m_navPara.newGoal|| getNewPose || (!getGoal) ))
+    {
+        CalNavCmdVel(&m_navPara,vel);
+
+        m_navPara.newGoal = false;
+        ctr_msg[0]  &=(~KEY_NEW_GOAL) ;
+        car_para.fuc = W_REGISTER;
+        m_para.SetAddressValue(car_para);
+    }
 }
 
 inline void limit(float& v ,float left,float right)
@@ -224,7 +262,7 @@ inline void limit(float& v ,float left,float right)
         v=left;
 }
 
-void CalNavCmdVel(const NavPara *nav ,geometry_msgs::Twist& ctr)
+void UartOdomPthread::CalNavCmdVel(const NavPara *nav ,geometry_msgs::Twist& ctr)
 {
     if(nav->emergeStop)
     {
@@ -233,11 +271,11 @@ void CalNavCmdVel(const NavPara *nav ,geometry_msgs::Twist& ctr)
         return ;
     }
 
-   int32_t pid[6];
+   int32_t pid[6]={0,0,0,0,0,0};
    zw::ParaGetSet para={R_REGISTER,6,(ParaAddress)(ADD_PID+6),pid};
    zw::Paras m_para;
    m_para.GetAddressValue(para);
-   ROS_INFO("%d,%d,%d,%d,%d,%d",pid[0],pid[1],pid[2],pid[3],pid[4],pid[5]);
+  // ROS_INFO("%d,%d,%d,%d,%d,%d",pid[0],pid[1],pid[2],pid[3],pid[4],pid[5]);
 
    float dpx,dpy,dph;
    dpx = nav->desired.x - nav->current.x;
@@ -257,16 +295,24 @@ void CalNavCmdVel(const NavPara *nav ,geometry_msgs::Twist& ctr)
    else if(dph<-M_PI)
        dph +=2*M_PI;
 
-   if(fabs(ds) < 0.05 && fabs(dph)<0.1)
+   if(dfh>M_PI/2)
+   {
+       dfh =dfh -M_PI;
+       ds = -ds ;
+   }else if (dfh<-M_PI/2){
+       dfh = dfh +M_PI;
+       ds= -ds;
+   }
+
+   if(fabs(ds) < maxDisErr && fabs(dph)< maxAngErr)
    {
        ctr.linear.x=0;
        ctr.angular.z=0;
-       ROS_INFO("dis_err=%6.3f ang_err=%6.3f",ds,dph);
+       getGoal = true ;
+       ROS_INFO("success :dis_err=%6.3f ang_err=%6.3f",ds,dph);
        return ;
    }
 
-   if(fabs(dfh)>M_PI/2)
-       ds = -ds ;
    static float lds=0;
    static float ids=0;
    ids +=ds;
@@ -275,7 +321,7 @@ void CalNavCmdVel(const NavPara *nav ,geometry_msgs::Twist& ctr)
    limit(ids,-2,2);
    limit(dds,-0.5,-0.5);
    float vx=(ds*pid[0]+ ids*pid[1]+ dds*pid[2])/100.0;
-   limit(vx,-0.2,0.2);
+   limit(vx,maxBackSpeed,maxForwardSpeed);
 
    static float ldfh=0;
    static float idfh=0;
@@ -285,7 +331,7 @@ void CalNavCmdVel(const NavPara *nav ,geometry_msgs::Twist& ctr)
    limit(idfh,-2,2);
    limit(ddfh,-1,1);
    float afz=(dfh*pid[3]+ idfh*pid[4]+ ddfh*pid[5])/100.0;
-   limit(afz,-1, 1);
+   limit(afz, -maxOmega, maxOmega);
 
    static float ldph=0;
    static float idph=0;
@@ -295,33 +341,57 @@ void CalNavCmdVel(const NavPara *nav ,geometry_msgs::Twist& ctr)
    limit(idph,-2,2);
    limit(ddph,-1,1);
    float apz=(dph*pid[3]+ idph*pid[4]+ ddph*pid[5])/100.0;
-   limit(apz,-1, 1);
+   limit(apz, -maxOmega, maxOmega);
 
    static float lvx=0,laz=0;
 
+   if(!nav->startNav)
+   {
+        lds=0;
+        ids=0;
+        ldfh=0;
+        idfh=0;
+        ldph=0;
+        idph=0;
+        lvx=0;
+        laz=0;
+   }
+
    float az=0;
-   if(fabs(ds)>0.05)
+   if(fabs(ds)>maxDisErr && fabs(dfh)>0.2)
    {
        idph=0;
        ldph=0;
+       ids=0;
+       lds=0;
        az = afz;
-   }else if(fabs(dph)>0.1){
+       if(fabs(vx-lvx)>0.05)
+           vx =lvx+(vx-lvx)*0.5;
+       else
+           vx=0;
+   }else if(fabs(ds)>maxDisErr &&fabs(dfh)<0.2){
+       idph=0;
+       ldph=0;
+       az = afz;
+   } else if(fabs(ds)<maxDisErr && fabs(dph)>maxAngErr){
        idfh=0;
        ldfh=0;
        ids=0;
        lds=0;
-       if(fabs(vx-lvx)>0.1)
+       if(fabs(vx-lvx)>0.05)
            vx =lvx+(vx-lvx)*0.5;
        else
            vx=0;
        az = apz;
    }else{
-       az = 0.8*afz +0.2*apz;
+       idph=0;
+       ldph=0;
+       az = afz;
    }
-   limit(vx,-0.2,0.2);
-   limit(az,-1,1);
+   limit(vx,maxBackSpeed,maxForwardSpeed);
+   limit(az,-maxOmega, maxOmega);
 
-   ROS_INFO("vx=%6.3f, az=%6.3f",vx,az);
+   ROS_INFO("\nerr=[%6.3f,%6.3f] ctr=[%6.3f,%6.3f]",ds,dph,vx,az);
 
    lvx =vx;
    laz =az;
@@ -329,9 +399,6 @@ void CalNavCmdVel(const NavPara *nav ,geometry_msgs::Twist& ctr)
    ctr.linear.x =vx;
    ctr.angular.z =az;
 }
-
-
-
 
 }
 

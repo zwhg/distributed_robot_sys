@@ -842,7 +842,7 @@ void AmclNode::laserReceived(const sensor_msgs::LaserScanConstPtr& laser_scan)
                 msample->weight = 1/mset->sample_count;
               }
           }
-          ROS_INFO("sample count= %d",mset->sample_count);
+    //      ROS_INFO("sample count= %d",mset->sample_count);
     }
       //amcl or scan match ?
      pf_vector_t  finalPose ;

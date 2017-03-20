@@ -16,6 +16,7 @@ struct NavPara
 {
     CarPose current;
     CarPose desired;
+    bool newGoal;
     bool startNav;
     bool emergeStop;
 };
