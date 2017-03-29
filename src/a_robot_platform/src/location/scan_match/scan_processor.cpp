@@ -6,7 +6,22 @@
 
 namespace zw{
 
+//be sure a,b <[-M_PI,M_PI]
+ static float  angle_diff(float a,float b)
+ {
+     assert(fabs(a)<=M_PI);
+     assert(fabs(b)<=M_PI);
 
+     float d1, d2;
+     d1 = a-b;
+     d2 = 2*M_PI - fabs(d1);
+     if(d1 > 0)
+       d2 *= -1.0;
+     if(fabs(d1) < fabs(d2))
+       return(d1);
+     else
+       return(d2);
+ }
 
 ScanProcessor::ScanProcessor()
 {
@@ -32,12 +47,13 @@ ScanProcessor::~ScanProcessor()
 }
 
 
-Eigen::Vector3f ScanProcessor::PoseUpdate(const sensor_msgs::LaserScanConstPtr& scan,
-                                          const map_t* map,
-                                          const Eigen::Vector3f& AmclPoseHintWorld)
+bool ScanProcessor::PoseUpdate(const sensor_msgs::LaserScanConstPtr& scan,
+                               const map_t* map,
+                               Eigen::Vector3f& finalPose)
 {
     LaserScanToDataContainer(scan,1/multMap[0].scale);
 
+    const Eigen::Vector3f AmclPoseHintWorld = finalPose;
     Eigen::Vector3f tmp(AmclPoseHintWorld);
 
     bool flag =true;
@@ -60,20 +76,13 @@ Eigen::Vector3f ScanProcessor::PoseUpdate(const sensor_msgs::LaserScanConstPtr& 
         }
     }
 
+    Eigen::Vector3f scanmatch=tmp;
+    bool sflag=true;
 
     float pd = sqrt((tmp[0] -AmclPoseHintWorld[0])*(tmp[0] -AmclPoseHintWorld[0])+
               (tmp[1] -AmclPoseHintWorld[1])*(tmp[1] -AmclPoseHintWorld[1]));
-    float pa = (tmp[2] - AmclPoseHintWorld[2]);
-
+    float pa = angle_diff(tmp[2] , AmclPoseHintWorld[2]);
     pa =fabs(pa);
-
-    if (pa > M_PI) {
-        pa -= M_PI ;
-    }
-
-    Eigen::Vector3f scanmatch=tmp;
-    Eigen::Vector3f finalPose;
-
 
     if( (pd < poseDiff) &&
         (pa < angleDiff) && false)
@@ -122,24 +131,32 @@ Eigen::Vector3f ScanProcessor::PoseUpdate(const sensor_msgs::LaserScanConstPtr& 
           finalPose = best;
       //  return best;
     }else{
-        if((pd >0.3)||(pa>0.5))
-            ROS_INFO("scan match change too large!");
+        ROS_INFO("\na:[%6.3f %6.3f %6.3f]\n"
+                   "s:[%6.3f %6.3f %6.3f]",
+                   AmclPoseHintWorld[0],AmclPoseHintWorld[1],AmclPoseHintWorld[2],
+                   scanmatch[0],scanmatch[1],scanmatch[2]);
 
-//        ROS_INFO("\na:[%6.3f %6.3f %6.3f]\n"
-//                   "s:[%6.3f %6.3f %6.3f]",
-//                   AmclPoseHintWorld[0],AmclPoseHintWorld[1],AmclPoseHintWorld[2],
-//                   scanmatch[0],scanmatch[1],scanmatch[2]);
-           finalPose = scanmatch ;
-        //   return scanmatch;
+        if((pd >0.1)||(pa>0.5))
+        {
+            ROS_INFO("scan match change too large!\npd=%f,pa=%f",pd,pa);
+            finalPose = AmclPoseHintWorld ;
+            sflag =false;
+        }else if(!flag){
+            finalPose = AmclPoseHintWorld ;
+            sflag =false;
+        }else{
+            finalPose = scanmatch ;
+        }
     }
 
     if(writePose)
     {
        static int i=0;
-       writePoseToTxt("../mpt.txt", AmclPoseHintWorld, scanmatch , i);
-     //  writePoseToTxt("../mpt.txt", AmclPoseHintWorld, finalPose, i);
+    //   writePoseToTxt("../mpt.txt", AmclPoseHintWorld, scanmatch , i);
+       writePoseToTxt("../mpt.txt", AmclPoseHintWorld, finalPose, i);
     }
-    return finalPose;
+
+    return sflag;
 }
 
 /*
@@ -182,9 +199,9 @@ Eigen::Vector3f ScanProcessor::matchData(const Eigen::Vector3f& beginEstimateWor
          {
              temp=estimate;
              estimateTransformationLogLh(estimate,dataPoints,map);
-             if((fabs(estimate[0]-temp[0])<0.25)&&
-                (fabs(estimate[1]-temp[1])<0.25)&&
-                (fabs(estimate[2]-temp[2])<0.02))
+             if((fabs(estimate[0]-temp[0])<0.2)&&
+                (fabs(estimate[1]-temp[1])<0.2)&&
+                (fabs(estimate[2]-temp[2])<0.01))
              {                
                  break ;
              }

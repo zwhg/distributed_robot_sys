@@ -56,8 +56,8 @@
         <param name="pose_diff" value="0.025"/>
         <param name="angle_diff" value="0.05"/>
         <param name="map_depth_num" value="2"/>
-        <param name="publish_scan" value="false"/>
-        <param name="write_pose" value="true"/>
+        <param name="publish_scan" value="true"/>
+        <param name="write_pose" value="false"/>
  　　　　　　　<param name="max_itera" value="6"/>
         <param name="add_close_loop" value="true"/>
  　　　　　　　<param name="use_amcl_pose" value="false"/>

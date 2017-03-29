@@ -42,9 +42,9 @@ public:
  ~ScanProcessor();
 
 
- Eigen::Vector3f PoseUpdate(const sensor_msgs::LaserScanConstPtr& scan,
+ bool PoseUpdate(const sensor_msgs::LaserScanConstPtr& scan,
                             const map_t* map,
-                            const Eigen::Vector3f& AmclPoseHintWorld);
+                            Eigen::Vector3f& scanPose);
  void SetLaserPose(const pf_vector_t& p);
 
  void GetMultiMap(const map_t* gridMap);
