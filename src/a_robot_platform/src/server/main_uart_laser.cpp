@@ -7,7 +7,7 @@
 #include "sensor_msgs/LaserScan.h"
 #include "uartlaser.h"
 #include "udpsocketserver.h"
-#include <QtNetwork/QUdpSocket>
+#include <QtNetwork>
 
 static int32_t startOrStop = 1;	// 1是start，0是stop
 static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
@@ -49,12 +49,13 @@ int main(int argc, char **argv)
 
   ros::Time starts = ros::Time::now();
   ros::Time ends = ros::Time::now();
+  pthread_create(&id,NULL,send_ultrasonic,(void*)msg);
 
   while(ros::ok())
   {
     ros::spinOnce();
    // zw::UdpSocketServer m_udpserver;
-    pthread_create(&id,NULL,send_ultrasonic,(void*)msg);
+
     pthread_mutex_lock(&mutex);
     if(isStarted && 0 == startOrStop)              // 当前正在扫描且要求停止
     {
@@ -83,13 +84,34 @@ int main(int argc, char **argv)
   ros::shutdown();
   m_lsRadar.StopScan();
   m_lsRadar.CloseSerial();
+  pthread_detach(id);
   return 0;
 }
 
 void *send_ultrasonic(void *arg)
 {
       qDebug()<<arg;
-      zw::UdpSocketServer m_udpserver;
+      while(1)
+      {
+       //  zw::UdpSocketServer m_udpserver;
+        ROS_INFO("this is laser constructor");
+        double laser_dis[PACKLEN];
+        zw:: Paras::get_distance(laser_dis);
+        QUdpSocket *Udp_Sender = new QUdpSocket();
+        QByteArray datagram;
+        zw::floatTobyte  FtB;
+        for(int i=0;i<720;i++)
+        {
+             FtB.ff =  laser_dis[i];
+             for(int j=0;j<4;j++)
+             {
+                 datagram.append(FtB.fb[j]);
+             }
+              Udp_Sender->writeDatagram(datagram.data(),datagram.size(),QHostAddress::Broadcast,45454);
+              datagram.clear();
+        }
+         sleep(1);
+      }
 }
 
 void publish_scan(ros::Publisher *pub, double *dist, int32_t count, ros::Time start, double scan_time)

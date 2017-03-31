@@ -118,7 +118,7 @@ void UartOdom::Analysis(uint8_t *arry, int nRet)
                 	qDebug()<<ff[0].f<<ff[1].f;
                 }
 #endif
-#if 1
+#if 0
                 if (packInfo.addr==MSG_CONTROL)
                 {
                 	zw::ParaGetSet pack ={zw::R_REGISTER,2,zw::CONTROL,dat};
