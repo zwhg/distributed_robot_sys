@@ -36,8 +36,6 @@ void *UartOdom::DoPthread(void)
     {
       Analysis(data_buf, nRet);
     }
-
-
 //    Paras m_para;
 //    int32_t dat[6]={i*10,-i*10,i*5,i+2,-i,i++};
 //    ParaGetSet packInfo={W_REGISTER,6, MSG_IMU,dat};
@@ -58,7 +56,7 @@ void UartOdom::Analysis(uint8_t *arry, int nRet)
 
     buf.append((char *)arry,nRet);
 
-    int32_t endIndex = buf.count();
+    int32_t endIndex = buf.comake[2]: *** [a_robot_platform/CMakeFiles/main_test_v.dir/src/server/main_test_vunt();
     if(endIndex >=FIXEDLENGTH){
         int32_t startIndex=0;
         ParaGetSet packInfo={0,0,0,nullptr};
@@ -99,8 +97,23 @@ void UartOdom::Analysis(uint8_t *arry, int nRet)
                 	zw::ParaGetSet pack ={zw::R_REGISTER,6,zw::MSG_IMU,dat};
                 	m_para.GetAddressValue(pack);
                 	qDebug()<<dat[0]<<dat[1]<<dat[2]<<dat[3]<<dat[4]<<dat[5];
-                }                
+                }  
+#endif
+#if 0              
                 if (packInfo.addr==CONTROL)
+                {
+                	zw::ParaGetSet pack ={zw::R_REGISTER,2,zw::CONTROL,dat};
+                	m_para.GetAddressValue(pack);
+                	zw::Float2Int32 ff[2];
+               	for(int i=0;i<2;i++)
+        		{
+        		  ff[i].i = dat[i];
+        		}
+                	qDebug()<<ff[0].f<<ff[1].f;
+                }
+#endif
+#if 1
+                if (packInfo.addr==MSG_CONTROL)
                 {
                 	zw::ParaGetSet pack ={zw::R_REGISTER,2,zw::CONTROL,dat};
                 	m_para.GetAddressValue(pack);

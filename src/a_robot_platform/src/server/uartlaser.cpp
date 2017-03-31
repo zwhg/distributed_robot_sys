@@ -13,7 +13,6 @@ UartLaser ::~UartLaser()
 {
   DeletList();
 }
-
 int32_t UartLaser ::StartScan(void)
 {
   static uint8_t scanflags = 0;
@@ -52,6 +51,7 @@ int32_t UartLaser ::GetScanData( double *ang, double *dis, int32_t len, double *
   {
     ang[i] = angle[i];
     dis[i] = distance[i];
+    qDebug()<<distance[i];
   }
     *spd  = speed;
     pthread_mutex_unlock(&tMutex);

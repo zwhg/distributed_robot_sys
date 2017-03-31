@@ -5,6 +5,7 @@
 namespace zw {
       UdpSocketServer::UdpSocketServer()
       {
+          qDebug()<<"this is laser constructor";
          double laser_dis[PACKLEN];
          Paras::get_distance(laser_dis);
          Udp_Sender = new QUdpSocket(this);
