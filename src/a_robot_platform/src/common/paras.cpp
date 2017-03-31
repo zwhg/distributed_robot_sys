@@ -48,12 +48,12 @@ static volatile zw::ElementTable dataTable[]=
     {ADD_PID+3,  	50},   //PID2   //转角PID	X100
     {ADD_PID+4,   	10},
     {ADD_PID+5,   	0},
-    {ADD_PID+6,   	0},    //PID3  //pose     X100
-    {ADD_PID+7,  	0},
+    {ADD_PID+6,   	20},    //PID3  //pose     X100
+    {ADD_PID+7,  	5},
     {ADD_PID+8,   	0},
-    {ADD_PID+9,   	0},    //PID4  //heading   X100
-    {ADD_PID+10,  	0},
-    {ADD_PID+11,   	0},
+    {ADD_PID+9,   	30},    //PID4  //heading   X100
+    {ADD_PID+10,  	5},
+    {ADD_PID+11,   	5},
 };
 
 

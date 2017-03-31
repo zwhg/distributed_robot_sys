@@ -50,6 +50,17 @@ MainWindow::MainWindow(QWidget *parent) :
     th_binarization=127;
     mapInfo={0,0,0,0,0,0,0};
     carInfo ={0,0,0,0,0};
+
+    zw::Paras m_para;
+    int32_t dat[6];
+    zw::ParaGetSet  packInfo = {zw::R_REGISTER,6,(zw::ParaAddress)(zw::ADD_PID+6),dat};
+    m_para.GetAddressValue(packInfo);
+    ui->let_pose_pid_P->setText(QString::number((uint)dat[0]));
+    ui->let_pose_pid_I->setText(QString::number((uint)dat[1]));
+    ui->let_pose_pid_D->setText(QString::number((uint)dat[2]));
+    ui->let_angle_pid_P->setText(QString::number((uint)dat[3]));
+    ui->let_angle_pid_I->setText(QString::number((uint)dat[4]));
+    ui->let_angle_pid_D->setText(QString::number((uint)dat[5]));
 }
 
 MainWindow::~MainWindow()
@@ -118,7 +129,7 @@ void MainWindow::cmdTimerUpdate(void)
     if(m_keyControl->keyControl){
         msgInfo={zw::W_REGISTER,2,zw::CONTROL,nullptr};
         m_tcpSocketClient->SendMsg(msgInfo);     
-    }   
+    }
 
     msgInfo={zw::R_REGISTER,5,zw::MSG_CONTROL,nullptr};
     m_tcpSocketClient->SendMsg(msgInfo);

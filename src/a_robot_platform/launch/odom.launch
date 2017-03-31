@@ -4,11 +4,13 @@
 <node name="odom" pkg="a_robot_platform" type="main_uart_odom" args= "/dev/ttyUSB0" output="screen"> 
 
 <!--nav para-->
-<param name="maxForwardSpeed" value="0.2"/>
-<param name="maxBackSpeed" value="-0.2"/>
+<param name="maxForwardSpeed" value="0.5"/>
+<param name="maxBackSpeed" value="-0.5"/>
 <param name="maxOmega" value="1.0"/>
-<param name="maxDisErr" value="0.015"/>
+<param name="maxDisErr" value="0.05"/>
 <param name="maxAngErr" value="0.05"/>
+<param name="maxUpAcc" value="1"/>
+<param name="maxBackAcc" value="-2"/>
 
 </node>
 

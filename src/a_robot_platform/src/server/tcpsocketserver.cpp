@@ -97,6 +97,13 @@ void TcpSocketServer::on_ReadyRead(void)
 
  void TcpSocketServer::cmdTimeOut()
  {
+     int32_t dat[2];
+     ParaGetSet pack={zw::R_REGISTER,1, BTN_SWITCH,dat};
+     Paras m_para;
+     m_para.GetAddressValue(pack);
+     if((dat[0]&KEY_VEL_CTR)!=KEY_VEL_CTR)
+         return ;
+
     bool flag =false ;
     pthread_mutex_lock(&g_tMutex );
     cmd_time_out ++ ;
@@ -108,11 +115,9 @@ void TcpSocketServer::on_ReadyRead(void)
     pthread_mutex_unlock(&g_tMutex);
 
     if(flag)
-    {
-        int32_t dat[2];
+    {       
         Float2Int32 f2is,f2io;
-        Paras m_para;
-        zw::ParaGetSet  pack = {zw::W_REGISTER,2,zw::CONTROL,dat};
+        pack = {zw::W_REGISTER,2,zw::CONTROL,dat};
         f2is.f=0;
         f2io.f=0;
         dat[0]=f2is.i;

@@ -31,6 +31,8 @@ private:
   float maxOmega;
   float maxDisErr;
   float maxAngErr;
+  float maxUpAcc;
+  float maxBackAcc;
 
 
 public:

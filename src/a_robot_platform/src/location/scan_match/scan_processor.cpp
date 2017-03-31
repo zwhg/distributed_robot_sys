@@ -131,10 +131,10 @@ bool ScanProcessor::PoseUpdate(const sensor_msgs::LaserScanConstPtr& scan,
           finalPose = best;
       //  return best;
     }else{
-        ROS_INFO("\na:[%6.3f %6.3f %6.3f]\n"
-                   "s:[%6.3f %6.3f %6.3f]",
-                   AmclPoseHintWorld[0],AmclPoseHintWorld[1],AmclPoseHintWorld[2],
-                   scanmatch[0],scanmatch[1],scanmatch[2]);
+//        ROS_INFO("\na:[%6.3f %6.3f %6.3f]\n"
+//                   "s:[%6.3f %6.3f %6.3f]",
+//                   AmclPoseHintWorld[0],AmclPoseHintWorld[1],AmclPoseHintWorld[2],
+//                   scanmatch[0],scanmatch[1],scanmatch[2]);
 
         if((pd >0.1)||(pa>0.5))
         {
