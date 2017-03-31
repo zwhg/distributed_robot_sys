@@ -234,7 +234,9 @@ void UartOdomPthread::cmd_keyCallback(const geometry_msgs::Twist::ConstPtr & cmd
         packInfo={W_REGISTER,2, CONTROL,dat};
         Paras m_para;
         m_para.SetAddressValue(packInfo);
+       // ROS_INFO("[%6.2f,%6.2f]",cmd->linear.x,cmd->angular.z);
     }
+  //  ROS_INFO("[%6.2f,%6.2f]",cmd->linear.x,cmd->angular.z);
 }
 
 void UartOdomPthread::PoseReceived(const geometry_msgs::PoseWithCovarianceStampedConstPtr pose)

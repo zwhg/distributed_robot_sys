@@ -21,7 +21,7 @@ int main(int argc, char **argv)
   if(argc==1)
     addrPort="/dev/ttyUSB0";
   else
-    addrPort =argv[1];
+  addrPort =argv[1];
 
   ret = m_uartOdom.OpenSerial(addrPort, B115200);
   //ret =m_uartOdom.SetNoDelay();

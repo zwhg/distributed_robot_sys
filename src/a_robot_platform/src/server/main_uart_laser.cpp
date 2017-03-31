@@ -11,9 +11,12 @@
 
 static int32_t startOrStop = 1;	// 1是start，0是stop
 static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
-
 static void publish_scan(ros::Publisher *pub, double *dist, int count, ros::Time start, double scan_time);
 static void startStopCB(const std_msgs::Int32::ConstPtr msg);
+
+pthread_t id;
+void *send_ultrasonic(void*);
+char msg[] = "UDP process is successful,here is main_uart_laser";
 
 int main(int argc, char **argv)
 {
@@ -50,18 +53,16 @@ int main(int argc, char **argv)
   while(ros::ok())
   {
     ros::spinOnce();
-
    // zw::UdpSocketServer m_udpserver;
-
+    pthread_create(&id,NULL,send_ultrasonic,(void*)msg);
     pthread_mutex_lock(&mutex);
-
     if(isStarted && 0 == startOrStop)              // 当前正在扫描且要求停止
     {
       ROS_INFO("stop");
       m_lsRadar.StopScan();
       isStarted = false;
     }
-    else if(!isStarted && 1 == startOrStop)	    // 当前未扫描且要求开始扫描
+    else if(!isStarted && 1 == startOrStop)	   // 当前未扫描且要求开始扫描
     {
       ROS_INFO("start");
       m_lsRadar.StartScan();
@@ -83,6 +84,12 @@ int main(int argc, char **argv)
   m_lsRadar.StopScan();
   m_lsRadar.CloseSerial();
   return 0;
+}
+
+void *send_ultrasonic(void *arg)
+{
+      qDebug()<<arg;
+      zw::UdpSocketServer m_udpserver;
 }
 
 void publish_scan(ros::Publisher *pub, double *dist, int32_t count, ros::Time start, double scan_time)

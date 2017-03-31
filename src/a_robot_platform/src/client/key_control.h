@@ -38,8 +38,6 @@ typedef struct
 class KeyControl :public QObject{
 
     Q_OBJECT
-
-
     private:   
         unsigned char keyFlag;
     public:

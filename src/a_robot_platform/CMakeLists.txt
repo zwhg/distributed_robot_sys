@@ -136,13 +136,22 @@ target_link_libraries(main_path_publish
 add_executable(main_pathplan_server src/server/main_pathplan_server.cpp)
 target_link_libraries(main_pathplan_server
     ${catkin_LIBRARIES}
-)
+    )
+
+add_executable(main_test_v  src/server/main_test_v.cpp)
+target_link_libraries(main_test_v
+    ${catkin_LIBRARIES}
+    )
+
+add_definitions(-std=gnu++11)
+
 
 
 add_executable(main_nav src/nav/main_nav.cpp)
 target_link_libraries(main_nav
     ${catkin_LIBRARIES}
 )
+
 
 qt5_use_modules(main_uart_odom
   Core
@@ -154,4 +163,7 @@ qt5_use_modules(main_uart_laser
   Network
 )
 
-
+qt5_use_modules(main_test_v
+  Core
+  Network
+)

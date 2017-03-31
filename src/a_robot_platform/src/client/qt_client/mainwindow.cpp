@@ -374,23 +374,7 @@ void MainWindow::ShowLaser()
         ShowPoint[i][1] = (tem_y*(Myhigh/2))/DIA;
 //qDebug()<<"(x,y):"<<"("<<ShowPoint[i][0]<<","<<ShowPoint[i][1]<<")";
     }
-//*******************draw the laser wave*********************//
-//    QVector<double>  x(TAG),y(TAG);
-//    for(int i=0;i<TAG;i++)
-//    {
-//        x[i] = i;
-//        y[i] = distance[100];
-//        ui->qCustomPlot->addGraph();
-//        ui->qCustomPlot->graph(0)->setPen(QPen(Qt::black));
-//        ui->qCustomPlot->graph(0)->setData(x,y);
-//        ui->qCustomPlot->xAxis->setLabel("时间");
-//        ui->qCustomPlot->yAxis->setLabel("距离(mm)");
-//        ui->qCustomPlot->xAxis->setRange(0,750);
-//        ui->qCustomPlot->yAxis->setRange(0,1500);
-//        if(i==TAG)
-//            i=0;
-//    }
-//********************draw the laser wave**********************//
+
     pixmap->fill(Qt::black);
     QPainter painter(pixmap);
     QColor qcolor(108,108,108);
