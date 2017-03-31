@@ -144,7 +144,7 @@ target_link_libraries(main_test_v
     )
 
 add_definitions(-std=gnu++11)
-)
+
 
 
 add_executable(main_nav src/nav/main_nav.cpp)
@@ -163,4 +163,7 @@ qt5_use_modules(main_uart_laser
   Network
 )
 
-
+qt5_use_modules(main_test_v
+  Core
+  Network
+)

@@ -1,6 +1,6 @@
 #include <ros/ros.h>
 #include "geometry_msgs/Twist.h"
-//#include "uartlaser.h"
+#include "uartlaser.h"
 geometry_msgs::Twist msg;
 void MoveMode(double linear_speed,double angular_speed)
 {
@@ -30,13 +30,13 @@ int main(int argc, char **argv)
 //      else
 //         MoveMode(0.0,0.0);
 /*****************************************************************/
-   if(distance[180]>=1000)
+/*   if(distance[180]>=1000)
 	MoveMode(0.3,0);
    else if(distance[180]>=500)
 	MoveMode(0.2,0);
    else if(distance[180]>=100)
         MoveMode(0.1,0);
-/*
+
        if(count<=1200)
           MoveMode(0.2,0); //直行
        else if(count<=1300)
@@ -48,9 +48,9 @@ int main(int argc, char **argv)
        else if(count<=8550)
           MoveMode(0.2,0.0);
        else
-          MoveMode(0.0,0.0);*/
+          MoveMode(0.0,0.0);
       vel_pub.publish(msg);
       loop_rate.sleep();
-      count++;
+      count++;*/
   }
 }

@@ -56,7 +56,7 @@ void UartOdom::Analysis(uint8_t *arry, int nRet)
 
     buf.append((char *)arry,nRet);
 
-    int32_t endIndex = buf.comake[2]: *** [a_robot_platform/CMakeFiles/main_test_v.dir/src/server/main_test_vunt();
+    int32_t endIndex = buf.count();
     if(endIndex >=FIXEDLENGTH){
         int32_t startIndex=0;
         ParaGetSet packInfo={NULL1,0,NULL2,nullptr};
