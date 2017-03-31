@@ -227,9 +227,16 @@ class AmclNode
     ros::Duration laser_check_interval_;
 
     ScanProcessor scan_processor;
+    Eigen::Vector3f scan_match_pose_;
+    bool add_close_loop;
+    bool use_amcl_pose;
 
     ros::Publisher pose_pub_amcl;
     ros::Publisher pose_pub_scan;
+
+    ros::Publisher test;
+
+
 };
 
 }

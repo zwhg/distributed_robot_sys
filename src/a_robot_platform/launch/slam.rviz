@@ -7,6 +7,7 @@ Panels:
         - /Global Options1
         - /Status1
         - /Path1
+        - /PointCloud1
       Splitter Ratio: 0.5
     Tree Height: 755
   - Class: rviz/Selection
@@ -186,6 +187,36 @@ Visualization Manager:
       Topic: /amcl_path
       Unreliable: false
       Value: true
+    - Alpha: 1
+      Autocompute Intensity Bounds: true
+      Autocompute Value Bounds:
+        Max Value: 10
+        Min Value: -10
+        Value: true
+      Axis: Z
+      Channel Name: intensity
+      Class: rviz/PointCloud
+      Color: 0; 85; 255
+      Color Transformer: FlatColor
+      Decay Time: 0
+      Enabled: true
+      Invert Rainbow: false
+      Max Color: 255; 255; 255
+      Max Intensity: 4096
+      Min Color: 0; 0; 0
+      Min Intensity: 0
+      Name: PointCloud
+      Position Transformer: XYZ
+      Queue Size: 10
+      Selectable: true
+      Size (Pixels): 3
+      Size (m): 0.05
+      Style: Flat Squares
+      Topic: /test
+      Unreliable: false
+      Use Fixed Frame: true
+      Use rainbow: true
+      Value: true
   Enabled: true
   Global Options:
     Background Color: 48; 48; 48
@@ -210,22 +241,22 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 9.00535
+      Distance: 16.6984
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.06
         Stereo Focal Distance: 1
         Swap Stereo Eyes: false
         Value: false
       Focal Point:
-        X: 1.04377
-        Y: 0.983999
-        Z: -5.89001
+        X: 1.94697
+        Y: -1.52848
+        Z: -2.21694
       Name: Current View
       Near Clip Distance: 0.01
-      Pitch: 1.5148
+      Pitch: 1.5698
       Target Frame: <Fixed Frame>
       Value: Orbit (rviz)
-      Yaw: 3.16868
+      Yaw: 3.14686
     Saved: ~
 Window Geometry:
   Displays:

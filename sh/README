@@ -99,7 +99,10 @@ bash sh/robot_config.sh
 bash sh/location.sh
 
 
-
+######定位过程:
+1.运行客户端
+2.远程 bash sh/server_location.sh
+3.设置参数 pid=[20 5 0][30 5 5]
 
 //
 AMCL部分代码说明：

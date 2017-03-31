@@ -375,7 +375,7 @@ void pf_kdtree_cluster(pf_kdtree_t *self)
       queue[queue_count++] = node;
 
       // TESTING; remove
-      assert(node == pf_kdtree_find_node(self, self->root, node->key));
+      assert(node == pf_kdtree_find_node(self, self->root, node->key));   // ??? why failed ???
     }
   }
 

@@ -16,14 +16,6 @@ TEMPLATE = app
 QMAKE_CXXFLAGS += -std=c++0x
 CONFIG += c++11
 
-INCLUDEPATH += /usr/local/include \
-                /usr/local/include/opencv \
-                /usr/local/include/opencv2
-
-LIBS += -L/usr/local/lib/ \
-        -lopencv_core \
-        -lopencv_highgui \
-        -lopencv_imgproc
 
 SOURCES += main.cpp\
         mainwindow.cpp \
@@ -33,7 +25,8 @@ SOURCES += main.cpp\
     ../../common/modbus.cpp \
     ../../common/map_image.cpp \
     ../udp_socket.cpp \
-    ../../server/tcpsocketserver.cpp
+    ../../server/tcpsocketserver.cpp \
+    ../../nav/nav.cpp
 
 
 HEADERS  += mainwindow.h \
@@ -47,7 +40,8 @@ HEADERS  += mainwindow.h \
     ../udp_socket.h \
     ../../server/uartlaser.h \
     ../../server/uartdriver.h \
-    ../../server/tcpsocketserver.h
+    ../../server/tcpsocketserver.h \
+    ../../nav/nav.h
 
 
 FORMS    += mainwindow.ui
@@ -55,7 +49,7 @@ FORMS    += mainwindow.ui
 
 INCLUDEPATH += /usr/local/include \
                /usr/local/include/opencv \
-               /usr/local/inlcude/opencv2
+               /usr/local/inlcude/opencv2 \
 
 LIBS += -L/usr/local/lib/ -lopencv_highgui -lopencv_core -lopencv_imgproc \
                           -lopencv_legacy -lopencv_features2d -lopencv_nonfree \

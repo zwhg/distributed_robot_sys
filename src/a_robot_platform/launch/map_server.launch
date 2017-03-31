@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <launch>
 
-<node name="map_server" pkg="a_robot_platform" type="main_map_server" args= "$(find a_robot_platform)/map/gtest2" output="screen">
+<node name="map_server" pkg="a_robot_platform" type="main_map_server" args= "$(find a_robot_platform)/map/gtest5" output="screen">
 </node>
 
 </launch>

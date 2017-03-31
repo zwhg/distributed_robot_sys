@@ -2,7 +2,7 @@
 #include <ros/ros.h>
 #include <sensor_msgs/PointCloud.h>
 #include  <tf/transform_broadcaster.h>
-
+#include <fcntl.h>
 
 void mapReceived(const nav_msgs::OccupancyGridConstPtr& grid);
 void scanReceived(const sensor_msgs::LaserScanConstPtr& scan);
@@ -23,7 +23,40 @@ int main(int argc, char **argv)
   // Set up ROS.
   ros::init(argc, argv, "main_initial_pose_test");
   ROS_INFO("package_name:a_robot_platform  node_name:main_initial_pose_test");
+#if 0
+  float a[3]={1.235,2.356,265.25};
 
+  static int i=0;
+  const char * filePath="../test.txt";
+  if(i==0)
+  {
+      if(access(filePath,F_OK)==0)
+      {
+          remove(filePath);
+          printf("delete ok !\n");
+      }
+  }
+  for(;i<100;i++)
+  {
+      std::string str=std::to_string(i)+" "+
+                      std::to_string((int)(a[0]*1000))+" "+
+                      std::to_string((int)(a[1]*1000))+" "+
+                      std::to_string((int)(a[2]*1000))+" "+
+                      std::to_string((int)(a[0]*1000))+" "+
+                      std::to_string((int)(a[1]*1000))+" "+
+                      std::to_string((int)(a[2]*1000))+"\n";
+      int len =str.length();
+      const char * buf = str.c_str();
+
+      int fd=open(filePath,O_CREAT|O_WRONLY|O_APPEND,S_IRWXU|S_IRWXG|S_IRWXO);
+      if(-1==fd)
+      {
+        printf("test.txt not exist !\n");
+      }
+      write(fd,buf,len);
+      close(fd);
+  }
+#endif
   ros::NodeHandle n;
   ros::NodeHandle nh("~");
   if(!nh.getParam("optimize1",m_mapProcess.optimize[0]))
@@ -44,7 +77,7 @@ int main(int argc, char **argv)
   ROS_INFO("optimize=[%6.2f %6.2f %6.2f]",m_mapProcess.optimize[0],
           m_mapProcess.optimize[1],m_mapProcess.optimize[2]);
 
-  ros::Subscriber map_sub = n.subscribe("map", 1, mapReceived);
+  ros::Subscriber map_sub = n.subscribe("bmap", 1, mapReceived);
   ros::Subscriber scan_sub =n.subscribe("scan",1, scanReceived);
 
   ros::Publisher filter_map_pub;

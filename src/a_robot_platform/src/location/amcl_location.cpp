@@ -22,7 +22,10 @@ AmclNode::AmclNode():
         laser_(NULL),
         private_nh_("~"),
         initial_pose_hyp_(NULL),
-        first_map_received_(false)
+        first_map_received_(false),
+        scan_processor(),
+        add_close_loop(true),
+        use_amcl_pose(false)
 {
     boost::recursive_mutex::scoped_lock l(configuration_mutex_);
     paraInit();
@@ -44,6 +47,8 @@ AmclNode::AmclNode():
                                                             odom_frame_id_, 100);
     laser_scan_filter_->registerCallback(boost::bind(&AmclNode::laserReceived,this, _1));
     initial_pose_sub_ = nh_.subscribe("initialpose", 2, &AmclNode::initialPoseReceived, this);
+
+    test =nh_.advertise<sensor_msgs::PointCloud>("test",1, true);
 
 
     pose_pub_amcl =nh_.advertise<geometry_msgs::PoseStamped>("amcl_p",2,true);
@@ -145,7 +150,7 @@ void AmclNode::paraInit()
     if(!private_nh_.getParam("odom_alpha5",alpha5_))
         alpha5_ =0.2;
 
-    //When true skips laser scans when a scan doesnt work for a
+    //When true skips laser scans when a scan doesn't work for a
     //majority of particles
     if(!private_nh_.getParam("do_beamskip",do_beamskip_))
         do_beamskip_ =false;
@@ -254,6 +259,31 @@ void AmclNode::paraInit()
            bag_scan_period=-1.0;
         bag_scan_period_.fromSec(bag_scan_period);
     }
+
+    if(!private_nh_.getParam("pose_diff",scan_processor.poseDiff))
+        scan_processor.poseDiff=0.01;
+
+    if(!private_nh_.getParam("angle_diff",scan_processor.angleDiff))
+        scan_processor.angleDiff=0.1;
+
+    if(!private_nh_.getParam("map_depth_num",scan_processor.numDepth))
+        scan_processor.numDepth=2;
+
+    if(!private_nh_.getParam("publish_scan",scan_processor.publishScan))
+        scan_processor.publishScan=false;
+
+    if(!private_nh_.getParam("write_pose",scan_processor.writePose))
+        scan_processor.writePose=false;
+
+    if(!private_nh_.getParam("max_itera",scan_processor.maxIterations))
+        scan_processor.maxIterations=6;
+
+    if(!private_nh_.getParam("add_close_loop",add_close_loop))
+        add_close_loop=true;
+
+    if(!private_nh_.getParam("use_amcl_pose",use_amcl_pose))
+        use_amcl_pose=false;
+
     updatePoseFromServer();
 }
 
@@ -325,6 +355,8 @@ void AmclNode::handleMapMessage(const nav_msgs::OccupancyGrid& msg)
     frame_to_laser_.clear();
 
     map_ = convertMap(msg);
+
+    scan_processor.GetMultiMap(map_);
 
 #if NEW_UNIFORM_SAMPLING
     // Index of free space
@@ -429,6 +461,7 @@ map_t* AmclNode::convertMap( const nav_msgs::OccupancyGrid& map_msg)
      map->cells[i].probability =((unsigned char)map_msg.data[i])/100.0;
   }
 
+#if 1
   char *m=new char[dat_size];
   zw:: map_process(m,map_msg);
 
@@ -441,11 +474,19 @@ map_t* AmclNode::convertMap( const nav_msgs::OccupancyGrid& map_msg)
     }else{
       map->cells[i].occ_state = 0;
     }
-
-//     ROS_INFO("%2d   %f", map->cells[i].occ_state, map->cells[i].probability);
   }
-
   delete m;
+#else
+  for(int i=0; i<dat_size;i++)
+  {
+      if(map_msg.data[i]>=(char)(kOccProbaility*kOccGrid))
+         map->cells[i].occ_state=1;
+      else if(map_msg.data[i] <=(char)(kFreeprobaility*kOccGrid))
+         map->cells[i].occ_state=-1;
+      else
+         map->cells[i].occ_state=0;
+  }
+#endif
 
   return map;
 }
@@ -731,6 +772,7 @@ void AmclNode::laserReceived(const sensor_msgs::LaserScanConstPtr& laser_scan)
     }
   }
 
+
   if(resampled || force_publication)
   {
     // Read out the current hypotheses
@@ -762,28 +804,11 @@ void AmclNode::laserReceived(const sensor_msgs::LaserScanConstPtr& laser_scan)
 
     if(max_weight > 0.0)
     {
-      Eigen::Vector3f scan_match_pose(hyps[max_weight_hyp].pf_pose_mean.v[0],
-                                      hyps[max_weight_hyp].pf_pose_mean.v[1],
-                                      hyps[max_weight_hyp].pf_pose_mean.v[2]);
+      scan_match_pose_[0]=hyps[max_weight_hyp].pf_pose_mean.v[0];
+      scan_match_pose_[1]=hyps[max_weight_hyp].pf_pose_mean.v[1];
+      scan_match_pose_[2]=hyps[max_weight_hyp].pf_pose_mean.v[2];
 
-      scan_processor.LaserScanToDataContainer(laser_scan,
-                                              scan_processor.dataContainer,
-                                              1/map_->scale);
-      scan_match_pose = scan_processor.PoseUpdate(scan_processor.dataContainer,
-                                                  map_,
-                                                  scan_match_pose);
-
-      pf_vector_t  finalPose = {scan_match_pose[0],scan_match_pose[1],scan_match_pose[2]};
-
-    //  pf_vector_t  finalPose = hyps[max_weight_hyp].pf_pose_mean;
-
-      ROS_INFO("amcl:[%6.3f %6.3f %6.3f]  scan:[%6.3f %6.3f %6.3f]",
-             hyps[max_weight_hyp].pf_pose_mean.v[0],
-             hyps[max_weight_hyp].pf_pose_mean.v[1],
-             hyps[max_weight_hyp].pf_pose_mean.v[2],
-             scan_match_pose[0],
-             scan_match_pose[1],
-             scan_match_pose[2]);
+      bool scan_flag =scan_processor.PoseUpdate(laser_scan, map_, scan_match_pose_);
 
       geometry_msgs::PoseStamped ptest;
       ptest.header.frame_id =global_frame_id_;
@@ -793,16 +818,42 @@ void AmclNode::laserReceived(const sensor_msgs::LaserScanConstPtr& laser_scan)
       tf::quaternionTFToMsg(tf::createQuaternionFromYaw(hyps[max_weight_hyp].pf_pose_mean.v[2]), ptest.pose.orientation);
       pose_pub_amcl.publish(ptest);
 
-      ptest.pose.position.x = scan_match_pose[0];
-      ptest.pose.position.y = scan_match_pose[1];
-      tf::quaternionTFToMsg(tf::createQuaternionFromYaw(scan_match_pose[2]),                    ptest.pose.orientation);
+      ptest.pose.position.x = scan_match_pose_[0];
+      ptest.pose.position.y = scan_match_pose_[1];
+      tf::quaternionTFToMsg(tf::createQuaternionFromYaw(scan_match_pose_[2]), ptest.pose.orientation);
       pose_pub_scan.publish(ptest);
 
+      if(scan_processor.publishScan)
+         test.publish(scan_processor.ptcloud);
 
+    if(add_close_loop && scan_flag)
+    {
+          pf_sample_set_t* mset = pf_->sets + pf_->current_set;
+          for(int i=0 ; (i<50) && (mset->sample_count < pf_->max_samples) ; i++)
+          {
+              pf_sample_t *msample = mset->samples + mset->sample_count++;
+              msample->pose ={scan_match_pose_[0],
+                              scan_match_pose_[1],
+                              scan_match_pose_[2]};
+
+              for (int i = 0; i < mset->sample_count; i++)
+              {
+                msample = mset->samples + i;
+                msample->weight = 1/mset->sample_count;
+              }
+          }
+    //      ROS_INFO("sample count= %d",mset->sample_count);
+    }
       //amcl or scan match ?
-      finalPose.v[0]= hyps[max_weight_hyp].pf_pose_mean.v[0];
-      finalPose.v[1]= hyps[max_weight_hyp].pf_pose_mean.v[1];
-      finalPose.v[2]= hyps[max_weight_hyp].pf_pose_mean.v[2];
+     pf_vector_t  finalPose ;
+    if(use_amcl_pose)
+    {
+        finalPose = {hyps[max_weight_hyp].pf_pose_mean.v[0],
+                     hyps[max_weight_hyp].pf_pose_mean.v[1],
+                     hyps[max_weight_hyp].pf_pose_mean.v[2]};
+    }else{
+        finalPose = {scan_match_pose_[0],scan_match_pose_[1],scan_match_pose_[2]};
+    }
 
 
       geometry_msgs::PoseWithCovarianceStamped p;
@@ -858,7 +909,7 @@ void AmclNode::laserReceived(const sensor_msgs::LaserScanConstPtr& laser_scan)
       latest_tf_ = tf::Transform(tf::Quaternion(odom_to_map.getRotation()),
                                  tf::Point(odom_to_map.getOrigin()));
       latest_tf_valid_ = true;
-      if(tf_broadcast_ == true)
+      if(tf_broadcast_)
       {
         // We want to send a transform that is good up until a
         // tolerance time so that odom can be used
@@ -872,8 +923,11 @@ void AmclNode::laserReceived(const sensor_msgs::LaserScanConstPtr& laser_scan)
       ROS_ERROR("No pose!");
     }
   }else if(latest_tf_valid_){
-    if (tf_broadcast_ == true)
+    if (tf_broadcast_)
     {
+
+    // scan_match_pose_ = scan_processor.PoseUpdate(laser_scan, scan_match_pose_);
+
       // Nothing changed, so we'll just republish the last transform, to keep everybody happy.
       ros::Time transform_expiration = (laser_scan->header.stamp +transform_tolerance_);
       tf::StampedTransform tmp_tf_stamped(latest_tf_.inverse(),transform_expiration,

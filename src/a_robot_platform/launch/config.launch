@@ -3,5 +3,4 @@
 <include file ="$(find a_robot_platform)/launch/odom.launch"/>
 <include file ="$(find a_robot_platform)/launch/laser.launch"/>
 <include file ="$(find a_robot_platform)/launch/urdf.launch"/>
-<include file ="$(find a_robot_platform)/launch/speed.launch"/>
 </launch>

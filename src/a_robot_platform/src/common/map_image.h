@@ -9,6 +9,30 @@
 
 namespace zw {
 
+constexpr int xyLength =20;
+constexpr int carLength1 = 15 ;
+
+
+struct MapInfo
+{
+    float resolution;
+    int w;
+    int h;
+    double word_x ;
+    double word_y ;
+    int map_x ;
+    int map_y ;
+};
+
+struct CarInfo
+{
+    float x;
+    float y;
+    float h;
+    int mx;
+    int my;  //right-up
+};
+
 class MapImage
 {
 public:

@@ -111,7 +111,7 @@ public:
 private:
      int GetFreeSpcaceIndices(const char *grid,int w,int h);
      void CalNeighbour(const char *grid,int w,int h,float resolution);
-     void calHeading(const sensor_msgs::LaserScanConstPtr& scan,int skip);
+     void calHeading(const sensor_msgs::LaserScanConstPtr& scan,int skip=1);
      void Optimiz(const sensor_msgs::LaserScanConstPtr& scan,int skip,int pcnt);
 public:
      MapProcess();

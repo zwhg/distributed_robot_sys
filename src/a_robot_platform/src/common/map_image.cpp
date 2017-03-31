@@ -27,28 +27,39 @@ void MapImage::GetQImage(const cv::Mat& image,QImage &img)
         //cvt Mat BGR 2 QImage RGB
         Mat rgb=image;
         cvtColor(image,rgb,CV_BGR2RGB);
-        img =QImage((const unsigned char*)(rgb.data),rgb.cols,rgb.rows,
+        img =QImage((const uchar*)(rgb.data),rgb.cols,rgb.rows,
                     rgb.cols*rgb.channels(),QImage::Format_RGB888);
+    }else if(image.channels()==1){
+        img=QImage(image.cols,image.rows,QImage::Format_Indexed8);
+        img.setColorCount(256);
+        for(int i=0;i<256;i++)
+            img.setColor(i,qRgb(i,i,i));
+
+        uchar *pSrc =image.data;
+        for(int row=0;row<image.rows;row++)
+        {
+            uchar* pDest =img.scanLine(row);
+            memcpy(pDest,pSrc,image.cols);
+            pSrc +=image.step;
+        }
+       img=img.convertToFormat(QImage::Format_RGB888);
     }else{
-        img =QImage((const unsigned char*)(image.data),image.cols,image.rows,
+        img =QImage((const uchar*)(image.data),image.cols,image.rows,
                     image.cols*image.channels(),QImage::Format_RGB888);
     }
 }
 
-void MapImage::GetBinaryImage(const cv::Mat& imgIn,double th,cv::Mat& imgOut, cv::Mat& sample_imgOut  )
+void MapImage::GetBinaryImage(const cv::Mat& imgIn,double th,cv::Mat& imgOut, cv::Mat& sample_imgOut)
 {
     Mat dst,edge,gray;
-    dst.create( imgIn.size(), imgIn.type() );
+    dst =imgIn.clone();
     // 将原图像转换为灰度图像
-    cvtColor( imgIn, gray, CV_BGR2GRAY );
-    // 先用使用 3x3内核来降噪
- //   blur( gray, edge, Size(3,3) );
-//    blur( edge, gray, Size(3,3) );
-//    blur( gray, edge, Size(3,3) );
+    cvtColor(dst, gray, CV_BGR2GRAY);
+
     threshold(gray, imgOut, th, 255, THRESH_BINARY);
     int structElement=1;
     Mat elemet =getStructuringElement(MORPH_RECT,Size(2*structElement+1,2*structElement+1),
-                                      Point(structElement,structElement));
+    Point(structElement,structElement));
 
    erode(imgOut,edge,elemet,Point(-1,-1),filter_cnt);
    dilate(edge,imgOut,elemet,Point(-1,-1),filter_cnt);

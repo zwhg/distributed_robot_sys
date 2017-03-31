@@ -94,7 +94,7 @@ namespace zw{
         int32_t endIndex = buf.count();
         if(endIndex >=FIXEDLENGTH){
             int32_t startIndex=0;
-            ParaGetSet  packInfo = {0,0,0,nullptr};
+            ParaGetSet  packInfo = {NULL1,0,NULL2,nullptr};
             Paras m_para;
 
             while(m_modbus.UnPackparas((const byte*)buf.data(),startIndex ,endIndex, packInfo))

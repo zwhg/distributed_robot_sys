@@ -59,7 +59,7 @@ void UartOdom::Analysis(uint8_t *arry, int nRet)
     int32_t endIndex = buf.comake[2]: *** [a_robot_platform/CMakeFiles/main_test_v.dir/src/server/main_test_vunt();
     if(endIndex >=FIXEDLENGTH){
         int32_t startIndex=0;
-        ParaGetSet packInfo={0,0,0,nullptr};
+        ParaGetSet packInfo={NULL1,0,NULL2,nullptr};
         Paras m_para;
 
         while(m_modbus.UnPackparas((const byte*)buf.data(),startIndex ,endIndex, packInfo))
@@ -101,14 +101,20 @@ void UartOdom::Analysis(uint8_t *arry, int nRet)
 #endif
 #if 0              
                 if (packInfo.addr==CONTROL)
+
+                }
+#endif
+#if 0
+                if (packInfo.addr==MSG_CONTROL)
+
                 {
                 	zw::ParaGetSet pack ={zw::R_REGISTER,2,zw::CONTROL,dat};
                 	m_para.GetAddressValue(pack);
                 	zw::Float2Int32 ff[2];
-               	for(int i=0;i<2;i++)
-        		{
-        		  ff[i].i = dat[i];
-        		}
+                    for(int i=0;i<2;i++)
+                    {
+                      ff[i].i = dat[i];
+                    }
                 	qDebug()<<ff[0].f<<ff[1].f;
                 }
 #endif
