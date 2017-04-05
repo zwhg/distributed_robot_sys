@@ -49,7 +49,7 @@ int main(int argc, char **argv)
 
   ros::Time starts = ros::Time::now();
   ros::Time ends = ros::Time::now();
-  pthread_create(&id,NULL,send_ultrasonic,(void*)msg);
+ // pthread_create(&id,NULL,send_ultrasonic,(void*)msg);
 
   while(ros::ok())
   {
@@ -90,7 +90,7 @@ int main(int argc, char **argv)
 
 void *send_ultrasonic(void *arg)
 {
-      qDebug()<<arg;
+    //  qDebug()<<arg;
       while(1)
       {
        //  zw::UdpSocketServer m_udpserver;

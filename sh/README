@@ -1,4 +1,124 @@
-a_robot_platform 功能说明
+/sh　　
+使用方式　bash sh/xx.sh
+amcl.sh-------------amcl官方源码 （分布式）
+google_make.sh　-----google slam的源码编译指令
+google_mapping.sh---google slam算法的启动脚本（分布式）
+google_mapsave.sh---google slam地图保存接口　
+location.sh---------改进amcl算法启动脚本（分布式）
+location_rviz.sh----定位rviz启动脚本
+mapping_rviz.sh-----建图rviz启动脚本
+pose_test.sh--------初始位姿测试算法启动脚本
+pose_test_rviz.sh---初始位姿测试rviz启动脚本
+robot_config.sh-----机器人配置脚本
+robot_location.sh---改进amcl算法启动脚本
+
+/src/a_robot_platform/launch
+config.launch-------机器人配置节点： odom, laser, urdf
+laser.launch--------激光节点，发布激光消息，串口默认参数/dev/ttyUSB1
+odom.launch---------里程计节，发布里程计、IMU消息;接收控制指令，以及控制消息，串口默认参数/dev/ttyUSB0
+urdf.launch---------机器人模型节点，发布link关系
+
+location.launch-----定位配置节点：地图预处理节点，改进amcl定位节点
+map_server.launch---地图预处理节点，读取地图文件，并将其发布到ros
+pose_test.launch----初始位姿测试节点：地图预处理节点，初始位姿测试
+server_location.sh--定位节点：config, location
+
+orange_car.urdf-----机器人urdf模型文件
+
+location.rviz-------定位rviz配置文件
+slam.rviz-----------slam rviz配置文件
+test.rviz-----------初始位姿测试rviz配置文件
+
+
+
+#######分布式构图过程:
+1、运行client
+运行qt客户端（qt_client）
+roscore
+到distributed_root_sys目录下运行
+bash sh/mapping_rviz.sh
+bash sh/google_mapping.sh
+
+2、运行server
+ssh 192.168.1.100 -l hustac
+到distributed_root_sys目录下运行
+bash sh/robot_config.sh
+
+3、连接client->server
+遥控机器人人运动
+保存地图图片
+source googleMapping/install_isolated/setup.bash
+rosservice call /finish_trajectory "stem: 'gtest'"
+或 
+bash sh/google_mapsave.sh "gtest"
+保存位置 .ros/
+
+
+######分布式定位过程:
+1、运行客户端（qt_client）
+roscore 
+到distributed_root_sys目录下运行
+bash sh/location.rviz
+
+2、运行server
+ssh 192.168.1.100 -l hustac
+到distributed_root_sys目录下运行
+bash sh/robot_config.sh
+bash sh/location.sh
+
+
+######本体定位过程:
+1、运行客户端（qt_client）
+
+2、运行server
+roscore 
+到distributed_root_sys目录下运行
+bash sh/server_location.sh
+
+
+
+######上位机（客户端）操作说明:（注意，上位机无机器人初始位姿改写部分，故进行定位测试时，需将机器人放在地图原点附近）
+１、设置
+Network 模块：
+--网络连接部分，修改ip与port（输入完成后需回车确认），单击disconnected连接按钮，连接成功按钮为绿色，否则为红色。
+IMU 模块
+--IMU数据显示部分，reInit为机器人单片机复位按钮，初次连接时最好复位单片机。
+control 模块
+--机器人运动控制部分（键盘控制），stoped为机器人运动控制按钮，使用键盘控制，则需单击该按钮，单击后，按钮为绿色，w(前进)、s(后退)、a(左转)、d(右转)；z(最大速度加0.1m/s)、x(最大速度减0.1m/s)、c(最大角速度加0.5rad/s)、ｖ（最大角速度减0.5rad/s）。max为当前设定的最大速度的绝对值大小，expect 为键盘控制期望速度大小（有平滑处理），retrun为机器人返回实际速度大小。
+pose 模块
+--机器人实时位姿显示模块
+２、地图
+--打开子图按钮，选择子地图；
+--打开地图按钮，选择全局地图；
+--二值化按钮，启动地图二值化功能；
+--滤波次数按钮，腐蚀与膨胀次数；
+--将采样次数，全局地图将采样次数；
+--二值化阈值拖动条，改变二值化阈值；
+
+保存姿态到文件模块
+--保存，保存本次机器人运动轨迹数据到../pose.txt文件
+--清空，清空机器人运动轨迹数据
+
+地图信息模块
+--全局地图大小与分辨率信息显示
+
+实时位姿
+--机器人实时位姿，保留到小数点后3位
+
+目标位姿
+--机器人导航的目标位姿（简单的点到点导航，无路径规划）
+--开始导航，确定本次导航的目标位姿，并开始导航
+--紧急停止，紧急停止机器人
+（导航完成后，重新导航，需双击开始导航）
+
+位置PID与航向PID
+--导航运动控制pid参数修改窗口。
+
+
+
+
+
+######a_robot_platform 部分源文件说明
 src/中包含客户端和服务器
 
 包a_robot_platform含以下几个节点:
@@ -59,50 +179,8 @@ src/client 中qt_client为qt上位机程序。可用qt(community)版本直接打
 2.键盘控制指令下发，wasd，zxcv
 
 
-#######构图过程:
-
-1、运行client
-运行qt客户端
-roscore
-cd distributed_root_sys
-bash sh/mapping_rviz.sh
-bash sh/google_mapping.sh
-
-2、运行server
-sudo ssh pentium
-cd distributed_root_sys
-bash sh/robot_config.sh
-
-3、连接client->server
-遥控机器人人运动
-保存地图图片
-source googleMapping/install_isolated/setup.bash
-rosservice call /finish_trajectory "stem: 'gtest'"
-或 bash sh/google_mapsave.sh "gtest"
-保存位置 .ros/
 
 
-
-
-######定位过程:
-
-1、运行客户端
-ssh 192168.1.100
-roscore 
-cd ~/distributed_root_sys
-bash sh/location.rviz
-
-2、运行server
-sudo ssh pentium
-cd ~/distributed_root_sys
-bash sh/robot_config.sh
-bash sh/location.sh
-
-
-######定位过程:
-1.运行客户端
-2.远程 bash sh/server_location.sh
-3.设置参数 pid=[20 5 0][30 5 5]
 
 //
 AMCL部分代码说明：

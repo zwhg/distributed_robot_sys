@@ -315,26 +315,7 @@ void UartOdomPthread::CalNavCmdVel(const NavPara *nav ,geometry_msgs::Twist& ctr
    ds = sqrt(dpx*dpx +dpy*dpy);
    dph = angle_diff(nav->desired.h , nav->current.h);
 
- //  dfh = atan2(dpy,dpx) - nav->current.h;
    dfh = angle_diff(atan2(dpy,dpx), nav->current.h);
-
-//   if(fabs(dfh)>M_PI/2)
-//   {
-//       if(dpy<0)
-//       {
-//          if(dfh>M_PI/2)
-//             dfh = dfh-M_PI;
-//          else
-//             dfh = dfh+M_PI;
-//       }else{
-//           if(dfh>M_PI/2)
-//              dfh = dfh-M_PI;
-//           else
-//              dfh = dfh+M_PI;
-//       }
-//       ds =-ds;
-//   }
-
 
    if(fabs(dfh)>M_PI/2)
    {
