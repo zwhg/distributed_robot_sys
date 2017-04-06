@@ -441,7 +441,7 @@
            <string notr="true">rgb:(255, 0, 0);</string>
           </property>
           <property name="text">
-           <string>0.00</string>
+           <string>0.000</string>
           </property>
           <property name="alignment">
            <set>Qt::AlignCenter</set>
@@ -461,7 +461,7 @@
            <string notr="true">rgb:(255, 0, 0);</string>
           </property>
           <property name="text">
-           <string>0.00</string>
+           <string>0.000</string>
           </property>
           <property name="alignment">
            <set>Qt::AlignCenter</set>
@@ -481,7 +481,7 @@
            <string notr="true">rgb:(255, 0, 0);</string>
           </property>
           <property name="text">
-           <string>0.00</string>
+           <string>0.000</string>
           </property>
           <property name="alignment">
            <set>Qt::AlignCenter</set>
@@ -526,7 +526,7 @@
            <string notr="true">rgb:(255, 0, 0);</string>
           </property>
           <property name="text">
-           <string>0.00</string>
+           <string>0.000</string>
           </property>
           <property name="alignment">
            <set>Qt::AlignCenter</set>
@@ -553,7 +553,7 @@
            <string notr="true">rgb:(255, 0, 0);</string>
           </property>
           <property name="text">
-           <string>0.00</string>
+           <string>0.000</string>
           </property>
           <property name="alignment">
            <set>Qt::AlignCenter</set>
@@ -579,7 +579,7 @@
            <string notr="true">rgb:(255, 85, 0)</string>
           </property>
           <property name="text">
-           <string>0.00</string>
+           <string>0.000</string>
           </property>
           <property name="alignment">
            <set>Qt::AlignCenter</set>
@@ -1487,7 +1487,7 @@
      <x>0</x>
      <y>0</y>
      <width>1069</width>
-     <height>25</height>
+     <height>27</height>
     </rect>
    </property>
   </widget>

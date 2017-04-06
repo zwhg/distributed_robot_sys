@@ -58,7 +58,7 @@ bash sh/google_mapsave.sh "gtest"
 1、运行客户端（qt_client）
 roscore 
 到distributed_root_sys目录下运行
-bash sh/location.rviz
+bash sh/location_rviz.sh
 
 2、运行server
 ssh 192.168.1.100 -l hustac

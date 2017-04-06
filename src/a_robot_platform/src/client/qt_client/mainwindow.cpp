@@ -163,11 +163,11 @@ void MainWindow::MsgControlRefresh(void)
     ff.i=dat[1];
     ui->lbl_ome_ret->setText(QString::number(ff.f,'f',2));
     ff.i=dat[2];
-    ui->lbl_pose_x->setText(QString::number(ff.f,'f',2));
+    ui->lbl_pose_x->setText(QString::number(ff.f,'f',3));
     ff.i=dat[3];
-    ui->lbl_pose_y->setText(QString::number(ff.f,'f',2));
+    ui->lbl_pose_y->setText(QString::number(ff.f,'f',3));
     ff.i=dat[4];
-    ui->lbl_pose_h->setText(QString::number(ff.f,'f',2));
+    ui->lbl_pose_h->setText(QString::number(ff.f,'f',3));
 }
 
 void MainWindow::MsgImuRefresh(void)

@@ -135,13 +135,11 @@ bool ScanProcessor::PoseUpdate(const sensor_msgs::LaserScanConstPtr& scan,
 //                   "s:[%6.3f %6.3f %6.3f]",
 //                   AmclPoseHintWorld[0],AmclPoseHintWorld[1],AmclPoseHintWorld[2],
 //                   scanmatch[0],scanmatch[1],scanmatch[2]);
-
-        if((pd >0.1)||(pa>0.5))
-        {
+        if(!flag){
+                   finalPose = AmclPoseHintWorld ;
+                   sflag =false;
+        }else if((pd >0.1)||(pa>0.5)){
             ROS_INFO("scan match change too large!\npd=%f,pa=%f",pd,pa);
-            finalPose = AmclPoseHintWorld ;
-            sflag =false;
-        }else if(!flag){
             finalPose = AmclPoseHintWorld ;
             sflag =false;
         }else{
@@ -540,13 +538,13 @@ float ScanProcessor::getPoseSetGrade(const DataContainer& dataPoints,
         if(MAP_VALID(map, mi, mj))
         {
             index = MAP_INDEX(map, mi, mj);
-            if(map->cells[index].occ_dist==0)
-                p +=2;
-            else if(map->cells[index].occ_dist==1)
-                p++ ;
-
-        //    else if(map->cells[index].occ_state == -1)
+//            if(map->cells[index].occ_dist==0)
+//                p +=2;
+//            else if(map->cells[index].occ_dist==1)
+//                p++ ;
+//            else if(map->cells[index].occ_state == -1)
                 //grade --;
+            p+=map->cells[index].probability;
         }
 #else
         if(!MAP_VALID(map, mi, mj))
