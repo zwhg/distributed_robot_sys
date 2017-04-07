@@ -326,10 +326,16 @@ int32_t UartLaser ::LsParameter(uint8_t *data, double *angle, double *dist, int3
 void *UartLaser ::DoPthread(void)
 {
   uint8_t buf[READMAX];
+  static int cnt=0;
   while(createPthread)
   {
+    cnt ++ ;
     bzero(buf,READMAX);
-    int32_t nRet = read(fd, buf, READMAX);
+    if(cnt==33){
+        std::cout<<"laser ok\n";
+        cnt=0;
+    }
+    int32_t nRet = read(fd, buf, READMAX);  
     if( nRet >0 )
     {
       Analysis(buf, nRet);

@@ -51,6 +51,7 @@ int main(int argc, char **argv)
   ros::Time ends = ros::Time::now();
  // pthread_create(&id,NULL,send_ultrasonic,(void*)msg);
 
+  ros::Rate loop_rate(50);
   while(ros::ok())
   {
     ros::spinOnce();
@@ -78,6 +79,7 @@ int main(int argc, char **argv)
     ends = ros::Time::now();
     float scan_duration = (ends - starts).toSec() * 1e-3;
     publish_scan(&scan_pub, distance, ret, starts, scan_duration);
+    loop_rate.sleep();
     starts = ends;
   }
 

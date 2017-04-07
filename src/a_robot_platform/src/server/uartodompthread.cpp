@@ -11,7 +11,7 @@ static NavPara m_navPara={{0,0,0},{0,0,0},false,false};
 static bool getNewPose =false;
 static bool getGoal=false;
 static int timeout =0;
-static bool timeoutflag=false;
+static bool timeoutflag=true;
 
 inline static float normalize(float z)
 {
@@ -348,7 +348,7 @@ void UartOdomPthread::CalNavCmdVel(const NavPara *nav ,geometry_msgs::Twist& ctr
    float dds=ds-lds;
 
    timeout ++;
-   if((lvx*1000)!=0)
+   if((((int)(lvx*1000)!=0)||(int)(laz*1000) !=0))
    {
        if((timeout>=20) || timeoutflag)
        {
@@ -356,13 +356,13 @@ void UartOdomPthread::CalNavCmdVel(const NavPara *nav ,geometry_msgs::Twist& ctr
            timeout =0;
            ctr.linear.x=0;
            ctr.angular.z=0;
-           ROS_ERROR("pose timeout lvx=%f",lvx);
+           if(pricnt%(2*PCT)==1)
+                 ROS_ERROR("pose timeout lvx=%f",lvx);
            return ;
        }
    }
    if(!timeoutflag){
        timeout =0;
-       timeoutflag=false;
    }
 
    ids +=ds;
