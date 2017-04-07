@@ -54,6 +54,9 @@ static volatile zw::ElementTable dataTable[]=
     {ADD_PID+9,   	30},    //PID4  //heading   X100
     {ADD_PID+10,  	5},
     {ADD_PID+11,   	5},
+
+    {ADD_ERR,    50},     //pose err   X1000
+    {ADD_ERR+1,  50},     //heading err  X1000
 };
 
 

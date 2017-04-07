@@ -20,6 +20,7 @@ typedef enum
     MSG_Ultrasonic = 0x0060,  //超声  int
     BTN_SWITCH =0x0080,   //状态开关，键盘控制(bit 0),IMU 初始化(bit 1), 开始导航(bit 2), 急停(bit 3) , newGoal (biy4)
     ADD_PID = 0x1000,   //pid 参数
+    ADD_ERR = 0x1200,   //err
     NULL2  =0x2000
 }ParaAddress;
 

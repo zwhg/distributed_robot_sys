@@ -10,7 +10,8 @@ namespace zw {
 static NavPara m_navPara={{0,0,0},{0,0,0},false,false};
 static bool getNewPose =false;
 static bool getGoal=false;
-
+static int timeout =0;
+static bool timeoutflag=false;
 
 inline static float normalize(float z)
 {
@@ -253,14 +254,24 @@ void UartOdomPthread::PoseReceived(const geometry_msgs::PoseWithCovarianceStampe
     zw::Paras m_para;
     m_para.SetAddressValue(car_para);
     getNewPose = true;
+
+    timeout =0;
+    timeoutflag=false;
 }
 
 void UartOdomPthread::getNavcmd(void)
 {
     int32_t ctr_msg[3];
-    zw::ParaGetSet car_para={R_REGISTER,3,(ParaAddress)(CONTROL+2),ctr_msg};
+    zw::ParaGetSet car_para;
     zw::Float2Int32 mf;
     zw::Paras m_para;
+
+    car_para={R_REGISTER,2,ADD_ERR,ctr_msg};
+    m_para.GetAddressValue(car_para);
+    maxDisErr =ctr_msg[0]/1000.0;
+    maxAngErr =ctr_msg[1]/1000.0;
+
+    car_para={R_REGISTER,3,(ParaAddress)(CONTROL+2),ctr_msg};
     m_para.GetAddressValue(car_para);
     mf.i=ctr_msg[0];
     m_navPara.desired.x =mf.f;
@@ -313,8 +324,8 @@ void UartOdomPthread::CalNavCmdVel(const NavPara *nav ,geometry_msgs::Twist& ctr
    dpx = nav->desired.x - nav->current.x;
    dpy = nav->desired.y - nav->current.y;
    ds = sqrt(dpx*dpx +dpy*dpy);
-   dph = angle_diff(nav->desired.h , nav->current.h);
 
+   dph = angle_diff(nav->desired.h , nav->current.h);
    dfh = angle_diff(atan2(dpy,dpx), nav->current.h);
 
    if(fabs(dfh)>M_PI/2)
@@ -332,48 +343,59 @@ void UartOdomPthread::CalNavCmdVel(const NavPara *nav ,geometry_msgs::Twist& ctr
    const uint8_t PCT=5;
    pricnt ++;
 
-   static float lds=0;
-   static float ids=0;
-   ids +=ds;
+   static float lds=0 ,ids=0;
+   static float lvx=0,laz=0;
    float dds=ds-lds;
+
+   timeout ++;
+   if((lvx*1000)!=0)
+   {
+       if((timeout>=20) || timeoutflag)
+       {
+           timeoutflag= true;
+           timeout =0;
+           ctr.linear.x=0;
+           ctr.angular.z=0;
+           ROS_ERROR("pose timeout lvx=%f",lvx);
+           return ;
+       }
+   }
+   if(!timeoutflag){
+       timeout =0;
+       timeoutflag=false;
+   }
+
+   ids +=ds;
    lds=ds;
    limit(ids,-2,2);
    limit(dds,-0.5,0.5);
    float vx=(ds*pid[0]+ ids*pid[1]+ dds*pid[2])/100.0;
    limit(vx,maxBackSpeed,maxForwardSpeed);
 
-   static float ldfh=0;
-   static float idfh=0;
-   idfh +=dfh;
+   static float ldfh=0 ,idfh=0;
    float ddfh =dfh-ldfh;
+   idfh +=dfh;
    ldfh=dfh;
    limit(idfh,-2,2);
    limit(ddfh,-1,1);
    float afz=(dfh*pid[3]+ idfh*pid[4]+ ddfh*pid[5])/100.0;
    limit(afz, -maxOmega, maxOmega);
 
-   static float ldph=0;
-   static float idph=0;
-   idph +=dph;
+   static float ldph=0,idph=0;
    float ddph =dph-ldph;
+   idph +=dph;
    ldph=dph;
    limit(idph,-2,2);
    limit(ddph,-1,1);
    float apz=(dph*pid[3]+ idph*pid[4]+ ddph*pid[5])/100.0;
    limit(apz, -maxOmega, maxOmega);
 
-   static float lvx=0,laz=0;
-
    if(!nav->startNav)
    {
-        lds=0;
-        ids=0;
-        ldfh=0;
-        idfh=0;
-        ldph=0;
-        idph=0;
-        lvx=0;
-        laz=0;
+        lds=ids=0;
+        ldfh=idfh=0;
+        ldph=idph=0;
+        lvx=laz=0;
    }
 
    float az=0;
@@ -383,34 +405,31 @@ void UartOdomPthread::CalNavCmdVel(const NavPara *nav ,geometry_msgs::Twist& ctr
        ctr.linear.x=0;
        ctr.angular.z=0;
        getGoal = true ;
-       lvx =vx;
-       laz =az;
-       if(pricnt%PCT==1)
-            ROS_INFO("success :dis_err=%6.3f ang_err=%6.3f",ds,dph);
+       lds=ids=0;
+       ldfh=idfh=0;
+       ldph=idph=0;
+       lvx=laz=0;
+       if(pricnt%(2*PCT)==1)
+            ROS_INFO("Reached !\n"
+                     "dis_err=%6.3f/%6.3f ang_err=%6.3f/%6.3f",ds,maxDisErr,dph,maxAngErr);
        return ;
    } else if(fabs(ds)>maxDisErr && fabs(dfh)>0.2){
-       idph=0;
-       ldph=0;
-       ids=0;
-       lds=0;
+       idph=ldph=0;
+       ids=lds=0;
        vx =0;
        az = afz;      
    } else if(fabs(ds)>maxDisErr && fabs(dfh)<0.2){
-       idph=0;
-       ldph=0;
+       idph=ldph=0;
        az = afz;
    } else if(fabs(ds)<maxDisErr && fabs(dph)>maxAngErr){
-       idfh=0;
-       ldfh=0;
-       ids=0;
-       lds=0;
+       idfh=ldfh=0;
+       ids=lds=0;
        az = apz;
    }else{
 //       idph=0;
 //       ldph=0;
 //       az = afz;
-       vx= 0;
-       az= 0;
+       vx=az= 0;
        if(pricnt%PCT==1)
           ROS_INFO("\ncan't reach err=[%6.3f,%6.3f,%6.3f]",ds,dfh,dph);
    }

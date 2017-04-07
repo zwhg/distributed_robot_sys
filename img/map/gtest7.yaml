@@ -1,0 +1,6 @@
+image: gtest7.pgm
+resolution: 0.025
+origin: [-10.21405386924744, -8.081217670440674, 0]
+occupied_thresh: 0.51
+free_thresh: 0.49
+negate: 0

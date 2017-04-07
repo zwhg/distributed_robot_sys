@@ -59,13 +59,6 @@ void TcpSocketServer::on_ReadyRead(void)
                 delete packInfo.data;
             }else if(packInfo.fuc == W_REGISTER){
                 m_para.SetAddressValue(packInfo);
-
-                if(packInfo.addr==CONTROL)
-                {
-                    pthread_mutex_lock(&g_tMutex );
-                    cmd_time_out =0;
-                    pthread_mutex_unlock(&g_tMutex );
-                }
 #if 0
                 int32_t dat[2];
                 zw::ParaGetSet  pack = {zw::R_REGISTER,2,zw::CONTROL,dat};
@@ -86,6 +79,12 @@ void TcpSocketServer::on_ReadyRead(void)
                    delete packInfo.data;
                    packInfo.data=nullptr;
                 }
+            }
+
+            {
+                pthread_mutex_lock(&g_tMutex );
+                cmd_time_out =0;
+                pthread_mutex_unlock(&g_tMutex );
             }
         }
         if(startIndex!=0){
@@ -123,8 +122,8 @@ void TcpSocketServer::on_ReadyRead(void)
         dat[0]=f2is.i;
         dat[1]=f2io.i;
         m_para.SetAddressValue(pack);
+        qDebug()<<"tcp time out!";
     }
-
  }
 
 }

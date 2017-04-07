@@ -62,6 +62,13 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->let_angle_pid_I->setText(QString::number((uint)dat[4]));
     ui->let_angle_pid_D->setText(QString::number((uint)dat[5]));
 
+    packInfo.len =2;
+    packInfo.addr =zw::ADD_ERR;
+    m_para.GetAddressValue(packInfo);
+    ui->lbl_robot_epose_err_x->setText(QString::number(dat[0]/1000.0,'f',3));
+    ui->lbl_robot_epose_err_y->setText(QString::number(dat[0]/1000.0,'f',3));
+    ui->lbl_robot_epose_err_h->setText(QString::number(dat[1]/1000.0,'f',3));
+
 }
 
 MainWindow::~MainWindow()
@@ -980,5 +987,17 @@ void MainWindow::on_pBtn_PID_confirm_clicked()
     dat[5] = ui->let_angle_pid_D->text().toInt();
     m_para.SetAddressValue(packInfo);
 
+    m_tcpSocketClient->SendMsg(packInfo);
+}
+
+void MainWindow::on_pBtn_nav_err_conf_clicked()
+{
+    int dat[2];
+    dat[0]=(int)(ui->lbl_robot_epose_err_x->text().toFloat()*1000);
+   // dat[0]=(int)(ui->lbl_robot_epose_err_y->text().toFloat()*1000);
+    dat[1]=(int)(ui->lbl_robot_epose_err_h->text().toFloat()*1000);
+    zw::Paras m_para;
+    zw::ParaGetSet  packInfo = {zw::W_REGISTER,2,zw::ADD_ERR,dat};
+    m_para.SetAddressValue(packInfo);
     m_tcpSocketClient->SendMsg(packInfo);
 }

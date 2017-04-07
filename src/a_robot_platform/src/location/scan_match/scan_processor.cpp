@@ -71,7 +71,6 @@ bool ScanProcessor::PoseUpdate(const sensor_msgs::LaserScanConstPtr& scan,
         if(!flag)
         {
             tmp = AmclPoseHintWorld;
-            ROS_INFO("scan match failed!");
             break;
         }
     }
@@ -131,25 +130,41 @@ bool ScanProcessor::PoseUpdate(const sensor_msgs::LaserScanConstPtr& scan,
           finalPose = best;
       //  return best;
     }else{
-//        ROS_INFO("\na:[%6.3f %6.3f %6.3f]\n"
-//                   "s:[%6.3f %6.3f %6.3f]",
-//                   AmclPoseHintWorld[0],AmclPoseHintWorld[1],AmclPoseHintWorld[2],
-//                   scanmatch[0],scanmatch[1],scanmatch[2]);
+        ROS_INFO("\na:[%6.3f %6.3f %6.3f]\n"
+                   "s:[%6.3f %6.3f %6.3f]",
+                   AmclPoseHintWorld[0],AmclPoseHintWorld[1],AmclPoseHintWorld[2],
+                   scanmatch[0],scanmatch[1],scanmatch[2]);
+
         poseSet_t tset[2]={{ AmclPoseHintWorld,0},{scanmatch,0}};
 
         tset[0].grade =  getPoseSetGrade(dataContainer,map, tset[0],1);
         tset[1].grade =  getPoseSetGrade(dataContainer,map, tset[1],1);
 
         if(!flag){
-                   finalPose = AmclPoseHintWorld ;
-                   sflag =false;
-        }else if((pd >0.2)||(pa>0.5)||(tset[0].grade>tset[1].grade)){
-            ROS_INFO("\nscan match change too large!\npd=%f,pa=%f",pd,pa);
-            ROS_INFO("\nagrade=%f,sgrade=%f",tset[0].grade,tset[1].grade);
-            finalPose = AmclPoseHintWorld ;
-            sflag =false;
+                  finalPose = AmclPoseHintWorld ;
+                  sflag =false;
+                  ROS_INFO("scan match failed!\nuse amcl");
+        }else if(tset[0].grade>tset[1].grade){
+                  finalPose = AmclPoseHintWorld ;
+                  sflag =false;
+                  ROS_INFO("\nag=%f,sg=%f\nuse amcl",tset[0].grade,tset[1].grade);
+        }else if((pd >0.2)||(pa>0.5)){
+            if((tset[1].grade>0.7) && (tset[0].grade<tset[1].grade))
+            {
+                finalPose = scanmatch ;
+                sflag =true;
+                ROS_INFO("\nscan match change too large!\n"
+                         "ag=%f,sg=%f\nuse scan",tset[0].grade,tset[1].grade);
+            }else{
+                finalPose = AmclPoseHintWorld ;
+                sflag =false;
+                ROS_INFO("\nscan match change too large!\n"
+                         "ag=%f,sg=%f\nuse amcl",tset[0].grade,tset[1].grade);
+            }
         }else{
             finalPose = scanmatch ;
+            sflag =true;
+            ROS_INFO("\nag=%f,sg=%f\nuse scan",tset[0].grade,tset[1].grade);
         }
     }
 
@@ -308,7 +323,7 @@ void ScanProcessor::getCompleteHessianDerivs(const Eigen::Vector3f& pose,
           geometry_msgs:: Point32 p;
           p.x= MAP_WXGX(gridMap, endPoint[0]);
           p.y= MAP_WYGY(gridMap, endPoint[1]);
-          p.z= 1.0;
+          p.z= 0;
           ptcloud.points.push_back(p);
        }
 

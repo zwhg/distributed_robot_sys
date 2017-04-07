@@ -5,6 +5,7 @@ Panels:
     Property Tree Widget:
       Expanded:
         - /Global Options1
+        - /Map1
         - /PointCloud1
       Splitter Ratio: 0.5
     Tree Height: 755
@@ -88,6 +89,21 @@ Visualization Manager:
         Expand Link Details: false
         Expand Tree: false
         Link Tree Style: Links in Alphabetic Order
+        base_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        imu_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        laser_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
       Name: RobotModel
       Robot Description: robot_description
       TF Prefix: ""
@@ -115,7 +131,7 @@ Visualization Manager:
       Draw Behind: false
       Enabled: true
       Name: Map
-      Topic: /bmap
+      Topic: /map
       Unreliable: false
       Value: true
     - Arrow Length: 0.3
@@ -209,7 +225,7 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 12.5556
+      Distance: 14.0623
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.06
         Stereo Focal Distance: 1
@@ -242,5 +258,5 @@ Window Geometry:
   Views:
     collapsed: true
   Width: 1855
-  X: 1985
+  X: 65
   Y: 24

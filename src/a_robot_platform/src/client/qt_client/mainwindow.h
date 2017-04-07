@@ -75,6 +75,8 @@ private slots:
 
     void on_pBtn_PID_confirm_clicked();
 
+    void on_pBtn_nav_err_conf_clicked();
+
 private :
     void ConnectStatus(void);
     void KeyControlMsgRefresh(const zw::KeyControlMsg & kMsg);

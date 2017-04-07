@@ -36,7 +36,7 @@
      </rect>
     </property>
     <property name="currentIndex">
-     <number>0</number>
+     <number>1</number>
     </property>
     <widget class="QWidget" name="tab_1">
      <attribute name="title">
@@ -1087,48 +1087,107 @@
        <item>
         <layout class="QVBoxLayout" name="verticalLayout_13">
          <item>
-          <widget class="QLabel" name="label_4">
-           <property name="text">
-            <string>目标位姿</string>
-           </property>
-           <property name="alignment">
-            <set>Qt::AlignCenter</set>
-           </property>
-          </widget>
-         </item>
-         <item>
           <layout class="QHBoxLayout" name="horizontalLayout_12">
            <item>
-            <layout class="QVBoxLayout" name="verticalLayout_9">
+            <layout class="QVBoxLayout" name="verticalLayout_9"/>
+           </item>
+           <item>
+            <layout class="QVBoxLayout" name="verticalLayout_16">
              <item>
-              <widget class="QLineEdit" name="lbl_robot_epose_x">
-               <property name="text">
-                <string>0.000</string>
-               </property>
-               <property name="alignment">
-                <set>Qt::AlignCenter</set>
-               </property>
-              </widget>
+              <layout class="QHBoxLayout" name="horizontalLayout_24">
+               <item>
+                <widget class="QLabel" name="label_4">
+                 <property name="text">
+                  <string>目标位姿</string>
+                 </property>
+                 <property name="alignment">
+                  <set>Qt::AlignCenter</set>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QLabel" name="label_11">
+                 <property name="text">
+                  <string>设定误差</string>
+                 </property>
+                 <property name="alignment">
+                  <set>Qt::AlignCenter</set>
+                 </property>
+                </widget>
+               </item>
+              </layout>
              </item>
              <item>
-              <widget class="QLineEdit" name="lbl_robot_epose_y">
-               <property name="text">
-                <string>0.000</string>
-               </property>
-               <property name="alignment">
-                <set>Qt::AlignCenter</set>
-               </property>
-              </widget>
+              <layout class="QHBoxLayout" name="horizontalLayout_21">
+               <item>
+                <widget class="QLineEdit" name="lbl_robot_epose_x">
+                 <property name="text">
+                  <string>0.000</string>
+                 </property>
+                 <property name="alignment">
+                  <set>Qt::AlignCenter</set>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QLineEdit" name="lbl_robot_epose_err_x">
+                 <property name="text">
+                  <string>0.000</string>
+                 </property>
+                 <property name="alignment">
+                  <set>Qt::AlignCenter</set>
+                 </property>
+                </widget>
+               </item>
+              </layout>
              </item>
              <item>
-              <widget class="QLineEdit" name="lbl_robot_epose_h">
-               <property name="text">
-                <string>0.000</string>
-               </property>
-               <property name="alignment">
-                <set>Qt::AlignCenter</set>
-               </property>
-              </widget>
+              <layout class="QHBoxLayout" name="horizontalLayout_22">
+               <item>
+                <widget class="QLineEdit" name="lbl_robot_epose_y">
+                 <property name="text">
+                  <string>0.000</string>
+                 </property>
+                 <property name="alignment">
+                  <set>Qt::AlignCenter</set>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QLineEdit" name="lbl_robot_epose_err_y">
+                 <property name="text">
+                  <string>0.000</string>
+                 </property>
+                 <property name="alignment">
+                  <set>Qt::AlignCenter</set>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </item>
+             <item>
+              <layout class="QHBoxLayout" name="horizontalLayout_23">
+               <item>
+                <widget class="QLineEdit" name="lbl_robot_epose_h">
+                 <property name="text">
+                  <string>0.000</string>
+                 </property>
+                 <property name="alignment">
+                  <set>Qt::AlignCenter</set>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QLineEdit" name="lbl_robot_epose_err_h">
+                 <property name="text">
+                  <string>0.000</string>
+                 </property>
+                 <property name="alignment">
+                  <set>Qt::AlignCenter</set>
+                 </property>
+                </widget>
+               </item>
+              </layout>
              </item>
             </layout>
            </item>
@@ -1160,6 +1219,19 @@
                </property>
               </widget>
              </item>
+             <item>
+              <widget class="QPushButton" name="pBtn_nav_err_conf">
+               <property name="text">
+                <string>误差确认</string>
+               </property>
+               <property name="checkable">
+                <bool>true</bool>
+               </property>
+               <property name="checked">
+                <bool>false</bool>
+               </property>
+              </widget>
+             </item>
             </layout>
            </item>
           </layout>
@@ -1174,6 +1246,14 @@
      <zorder>layoutWidget7</zorder>
      <zorder>layoutWidget8</zorder>
      <zorder>lbl_map</zorder>
+     <zorder>lbl_robot_epose_err_x</zorder>
+     <zorder>lbl_robot_epose_err_y</zorder>
+     <zorder>lbl_robot_epose_err_h</zorder>
+     <zorder>lbl_robot_epose_x</zorder>
+     <zorder>lbl_robot_epose_y</zorder>
+     <zorder>lbl_robot_epose_h</zorder>
+     <zorder>label_11</zorder>
+     <zorder>label_4</zorder>
     </widget>
     <widget class="QWidget" name="tab_3">
      <attribute name="title">
@@ -1487,7 +1567,7 @@
      <x>0</x>
      <y>0</y>
      <width>1069</width>
-     <height>27</height>
+     <height>25</height>
     </rect>
    </property>
   </widget>
