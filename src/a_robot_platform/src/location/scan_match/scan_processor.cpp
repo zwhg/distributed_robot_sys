@@ -135,11 +135,17 @@ bool ScanProcessor::PoseUpdate(const sensor_msgs::LaserScanConstPtr& scan,
 //                   "s:[%6.3f %6.3f %6.3f]",
 //                   AmclPoseHintWorld[0],AmclPoseHintWorld[1],AmclPoseHintWorld[2],
 //                   scanmatch[0],scanmatch[1],scanmatch[2]);
+        poseSet_t tset[2]={{ AmclPoseHintWorld,0},{scanmatch,0}};
+
+        tset[0].grade =  getPoseSetGrade(dataContainer,map, tset[0],1);
+        tset[1].grade =  getPoseSetGrade(dataContainer,map, tset[1],1);
+
         if(!flag){
                    finalPose = AmclPoseHintWorld ;
                    sflag =false;
-        }else if((pd >0.1)||(pa>0.5)){
-            ROS_INFO("scan match change too large!\npd=%f,pa=%f",pd,pa);
+        }else if((pd >0.2)||(pa>0.5)||(tset[0].grade>tset[1].grade)){
+            ROS_INFO("\nscan match change too large!\npd=%f,pa=%f",pd,pa);
+            ROS_INFO("\nagrade=%f,sgrade=%f",tset[0].grade,tset[1].grade);
             finalPose = AmclPoseHintWorld ;
             sflag =false;
         }else{
@@ -302,7 +308,7 @@ void ScanProcessor::getCompleteHessianDerivs(const Eigen::Vector3f& pose,
           geometry_msgs:: Point32 p;
           p.x= MAP_WXGX(gridMap, endPoint[0]);
           p.y= MAP_WYGY(gridMap, endPoint[1]);
-          p.z= 0;
+          p.z= 1.0;
           ptcloud.points.push_back(p);
        }
 
@@ -525,6 +531,7 @@ float ScanProcessor::getPoseSetGrade(const DataContainer& dataPoints,
     Eigen::Affine2f transform(getTransformForState(lpw));  //laser pose in world transform
 
     double z=0,p=0,pz=0 ;
+    int vcnt=0;
 
     for (int i = 0; i < size; i+=skip)
     {
@@ -534,7 +541,7 @@ float ScanProcessor::getPoseSetGrade(const DataContainer& dataPoints,
 
         mi=MAP_GXWX(map, endPoint[0]);
         mj=MAP_GYWY(map, endPoint[1]);
-#if 0
+#if 1
         if(MAP_VALID(map, mi, mj))
         {
             index = MAP_INDEX(map, mi, mj);
@@ -545,6 +552,7 @@ float ScanProcessor::getPoseSetGrade(const DataContainer& dataPoints,
 //            else if(map->cells[index].occ_state == -1)
                 //grade --;
             p+=map->cells[index].probability;
+            vcnt ++;
         }
 #else
         if(!MAP_VALID(map, mi, mj))
@@ -559,7 +567,10 @@ float ScanProcessor::getPoseSetGrade(const DataContainer& dataPoints,
         p +=pz*pz*pz;
 #endif
     }
-    return p;
+    if(vcnt==0)
+        return 0;
+    else
+        return (p/vcnt);
 }
 
  Eigen::Vector3f ScanProcessor::getBestSet(void)

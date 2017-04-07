@@ -61,6 +61,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->let_angle_pid_P->setText(QString::number((uint)dat[3]));
     ui->let_angle_pid_I->setText(QString::number((uint)dat[4]));
     ui->let_angle_pid_D->setText(QString::number((uint)dat[5]));
+
 }
 
 MainWindow::~MainWindow()
