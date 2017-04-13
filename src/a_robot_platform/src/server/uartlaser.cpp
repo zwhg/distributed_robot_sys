@@ -326,7 +326,7 @@ int32_t UartLaser ::LsParameter(uint8_t *data, double *angle, double *dist, int3
 void *UartLaser ::DoPthread(void)
 {
   uint8_t buf[READMAX];
-  static int cnt=0;
+  static int8_t cnt=0;
   while(createPthread)
   {
     cnt ++ ;

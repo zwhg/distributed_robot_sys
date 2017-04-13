@@ -218,14 +218,15 @@ Eigen::Vector3f ScanProcessor::matchData(const Eigen::Vector3f& beginEstimateWor
          {
              temp=estimate;
              estimateTransformationLogLh(estimate,dataPoints,map);
-             if((fabs(estimate[0]-temp[0])<0.2)&&
-                (fabs(estimate[1]-temp[1])<0.2)&&
+             if((fabs(estimate[0]-temp[0])<0.05)&&
+                (fabs(estimate[1]-temp[1])<0.05)&&
                 (fabs(estimate[2]-temp[2])<0.01))
-             {                
+             {
+                 std::cout<<"Iterations="<< i<<"\n";
                  break ;
              }
          }
-       //  ROS_INFO("Iteration =%d",i);
+        // ROS_INFO("Iteration =%d",i);
 
         //normalize angle
          float angle = fmod(fmod(estimate[2], 2.0f*M_PI) + 2.0f*M_PI, 2.0f*M_PI);

@@ -11,6 +11,7 @@ pose_test.sh--------初始位姿测试算法启动脚本
 pose_test_rviz.sh---初始位姿测试rviz启动脚本
 robot_config.sh-----机器人配置脚本
 robot_location.sh---改进amcl算法启动脚本
+ip.sh---------------分布式运行，roscore所在节点，ip地址
 
 /src/a_robot_platform/launch
 config.launch-------机器人配置节点： odom, laser, urdf
@@ -59,12 +60,13 @@ bash sh/google_mapsave.sh "gtest"
 roscore 
 到distributed_root_sys目录下运行
 bash sh/location_rviz.sh
+bash sh/location.sh， 也可在server中运行
 
 2、运行server
 ssh 192.168.1.100 -l hustac
 到distributed_root_sys目录下运行
 bash sh/robot_config.sh
-bash sh/location.sh
+
 
 
 ######本体定位过程:
