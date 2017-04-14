@@ -143,8 +143,6 @@ target_link_libraries(main_test_v
     ${catkin_LIBRARIES}
     )
 
-add_definitions(-std=gnu++11)
-
 
 
 add_executable(main_nav src/nav/main_nav.cpp)

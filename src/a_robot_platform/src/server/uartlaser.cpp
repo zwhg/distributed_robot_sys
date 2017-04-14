@@ -22,15 +22,25 @@ int32_t UartLaser ::StartScan(void)
   int32_t wRet=-1;
   if(pcurr ==NULL)
   {
-    ROS_FATAL("[%s - %d] Initial list failed ! \n", __FILE__, __LINE__);
+    std::cout<<"[%s - %d] Initial list failed ! \n"<< __FILE__<<__LINE__;
     return wRet;
   }
+  std::cout<<"scanflags="<<scanflags+1<<std::endl;
+
   if (scanflags == 0)
   {
     wRet = write(fd, startCmd, 7);          //发送开始扫描指令
+    usleep(3000);
+    wRet = write(fd, startCmd, 7);          //发送开始扫描指令
+    std::cout<<"wRet="<<wRet<<std::endl;
   }
+
   usleep(3000);
   wRet = write(fd, dataScanCmd, 7);		//持续请求扫描数据
+  usleep(3000);
+  wRet = write(fd, dataScanCmd, 7);		//持续请求扫描数据
+  std::cout<<"wRet="<<wRet<<std::endl;
+
   createPthread = 1;
   if (scanflags == 0)
   {
@@ -62,10 +72,11 @@ int32_t UartLaser ::GetScanData( double *ang, double *dis, int32_t len, double *
 
 int32_t UartLaser ::StopScan(void)
 {
-  int32_t ret;
-  uint8_t buf[7] = {0xa5, 0x21, 0xe1, 0xaa, 0xbb, 0xcc, 0xdd};  //停止扫描命令
-  ret = write(fd, buf, 7);
-
+  int32_t ret=0;
+ // uint8_t buf[7] = {0xa5, 0x21, 0xe1, 0xaa, 0xbb, 0xcc, 0xdd};  //停止扫描命令
+ // ret = write(fd, buf, 7);
+ // usleep(3000);
+ // ret = write(fd, buf, 7);
   return  ret;
 }
 

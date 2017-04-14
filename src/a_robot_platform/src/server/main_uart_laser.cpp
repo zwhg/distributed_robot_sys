@@ -83,10 +83,10 @@ int main(int argc, char **argv)
     starts = ends;
   }
 
-  ros::shutdown();
   m_lsRadar.StopScan();
   m_lsRadar.CloseSerial();
-  pthread_detach(id);
+  ros::shutdown();
+  //pthread_detach(id);
   return 0;
 }
 

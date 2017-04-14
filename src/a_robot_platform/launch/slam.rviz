@@ -6,8 +6,8 @@ Panels:
       Expanded:
         - /Global Options1
         - /Status1
+        - /LaserScan1
         - /Path1
-        - /PointCloud1
       Splitter Ratio: 0.5
     Tree Height: 755
   - Class: rviz/Selection
@@ -89,7 +89,7 @@ Visualization Manager:
       Topic: /map
       Unreliable: false
       Value: true
-    - Alpha: 1
+    - Alpha: 0.5
       Autocompute Intensity Bounds: true
       Autocompute Value Bounds:
         Max Value: 10
@@ -111,8 +111,8 @@ Visualization Manager:
       Position Transformer: XYZ
       Queue Size: 10
       Selectable: true
-      Size (Pixels): 3
-      Size (m): 0.01
+      Size (Pixels): 5
+      Size (m): 0.025
       Style: Points
       Topic: /scan
       Unreliable: false
@@ -241,22 +241,22 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 16.6984
+      Distance: 9.45857
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.06
         Stereo Focal Distance: 1
         Swap Stereo Eyes: false
         Value: false
       Focal Point:
-        X: 1.94697
-        Y: -1.52848
-        Z: -2.21694
+        X: 2.553
+        Y: 0.530608
+        Z: -2.20773
       Name: Current View
       Near Clip Distance: 0.01
       Pitch: 1.5698
       Target Frame: <Fixed Frame>
       Value: Orbit (rviz)
-      Yaw: 3.14686
+      Yaw: 3.13186
     Saved: ~
 Window Geometry:
   Displays:
