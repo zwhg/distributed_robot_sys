@@ -16,7 +16,7 @@
 #include <QTableWidget>
 #include <QProgressBar>
 #include "../../common/map_image.h"
-
+#include "../../nav/nav.h"
 
 #define Myhigh 600
 #define Mywidth 600
@@ -49,7 +49,8 @@ private slots:
     void on_lEdit_port_returnPressed();
     void xTimerUpdate();
     void cmdTimerUpdate();
-
+    void naviTimerupdate();
+    
   //  void on_tableView_activated(const QModelIndex &index);
 
     void on_pBtn_open_map_clicked();
@@ -77,6 +78,22 @@ private slots:
 
     void on_pBtn_nav_err_conf_clicked();
 
+    void on_pBtn_open_inspection_file_clicked();
+
+    void on_pBtn_add_vertex_clicked();
+
+    void on_pBtn_save_inspection_file_clicked();
+
+    void on_pBtn_delete_vertex_clicked();
+
+    void on_pBtn_add_edge_clicked();
+
+    void on_pBtn_delete_edge_clicked();
+
+    void on_pBtn_g_navi_clicked();
+    
+   
+
 private :
     void ConnectStatus(void);
     void KeyControlMsgRefresh(const zw::KeyControlMsg & kMsg);
@@ -98,6 +115,10 @@ private:
     zw::KeyControl *m_keyControl;
     zw::TcpSocket *m_tcpSocketClient;
     zw::UdpSocket *m_udpSocketClient;
+    zw::nav navi;
+    std::vector<int> nav_path;
+    bool plot_g_navi;
+    QTimer *nav_timer;
 
     zw::MapInfo mapInfo;
     zw::CarInfo carInfo;
@@ -108,7 +129,6 @@ private:
 
     bool save_pose_file;
     bool clear_pose_file;
-
 };
 
 #endif // MAINWINDOW_H

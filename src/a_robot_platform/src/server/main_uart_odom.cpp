@@ -34,6 +34,7 @@ int main(int argc, char **argv)
   zw::UartOdomPthread m_OdomPthread;
   a.exec();
   m_uartOdom.CloseSerial();
+
   ros::shutdown();
   return 0;
 }

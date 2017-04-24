@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1069</width>
-    <height>926</height>
+    <width>1264</width>
+    <height>721</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -30,8 +30,8 @@
     <property name="geometry">
      <rect>
       <x>0</x>
-      <y>0</y>
-      <width>2014</width>
+      <y>-10</y>
+      <width>1261</width>
       <height>931</height>
      </rect>
     </property>
@@ -691,7 +691,7 @@
      <widget class="QLabel" name="lbl_map">
       <property name="geometry">
        <rect>
-        <x>500</x>
+        <x>580</x>
         <y>20</y>
         <width>521</width>
         <height>581</height>
@@ -857,9 +857,9 @@
       <property name="geometry">
        <rect>
         <x>260</x>
-        <y>20</y>
+        <y>450</y>
         <width>191</width>
-        <height>121</height>
+        <height>114</height>
        </rect>
       </property>
       <layout class="QVBoxLayout" name="verticalLayout_7">
@@ -905,8 +905,8 @@
       <property name="geometry">
        <rect>
         <x>10</x>
-        <y>600</y>
-        <width>233</width>
+        <y>370</y>
+        <width>191</width>
         <height>197</height>
        </rect>
       </property>
@@ -1029,10 +1029,10 @@
      <widget class="QWidget" name="layoutWidget8">
       <property name="geometry">
        <rect>
-        <x>10</x>
-        <y>370</y>
-        <width>231</width>
-        <height>217</height>
+        <x>260</x>
+        <y>20</y>
+        <width>271</width>
+        <height>225</height>
        </rect>
       </property>
       <layout class="QVBoxLayout" name="verticalLayout_10">
@@ -1240,20 +1240,167 @@
        </item>
       </layout>
      </widget>
+     <widget class="QWidget" name="">
+      <property name="geometry">
+       <rect>
+        <x>260</x>
+        <y>270</y>
+        <width>271</width>
+        <height>161</height>
+       </rect>
+      </property>
+      <layout class="QVBoxLayout" name="verticalLayout_19">
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_25">
+         <item>
+          <layout class="QVBoxLayout" name="verticalLayout_17">
+           <item>
+            <layout class="QHBoxLayout" name="horizontalLayout_27">
+             <item>
+              <widget class="QPushButton" name="pBtn_open_inspection_file">
+               <property name="text">
+                <string>打开</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="pBtn_save_inspection_file">
+               <property name="text">
+                <string>保存</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+           <item>
+            <layout class="QHBoxLayout" name="horizontalLayout_28">
+             <item>
+              <widget class="QLineEdit" name="let_delete_vertex_index">
+               <property name="text">
+                <string>0</string>
+               </property>
+               <property name="alignment">
+                <set>Qt::AlignCenter</set>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="pBtn_add_vertex">
+               <property name="text">
+                <string>添加顶点</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="pBtn_delete_vertex">
+               <property name="text">
+                <string>删除顶点</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+          </layout>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_29">
+         <item>
+          <widget class="QLineEdit" name="let_vertex_start_index">
+           <property name="text">
+            <string>0</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignCenter</set>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLineEdit" name="let_vertex_end_index">
+           <property name="text">
+            <string>0</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignCenter</set>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="pBtn_add_edge">
+           <property name="text">
+            <string>添加边</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="pBtn_delete_edge">
+           <property name="text">
+            <string>删除边</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="pBtn_g_navi">
+           <property name="text">
+            <string>导航</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_26">
+         <item>
+          <widget class="QLabel" name="lbl_vertex_number">
+           <property name="text">
+            <string>顶点：00</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignCenter</set>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLabel" name="lbl_edge_number">
+           <property name="text">
+            <string>边：00</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignCenter</set>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+      </layout>
+     </widget>
      <zorder>layoutWidget4</zorder>
      <zorder>layoutWidget5</zorder>
      <zorder>layoutWidget6</zorder>
      <zorder>layoutWidget7</zorder>
      <zorder>layoutWidget8</zorder>
      <zorder>lbl_map</zorder>
-     <zorder>lbl_robot_epose_err_x</zorder>
-     <zorder>lbl_robot_epose_err_y</zorder>
-     <zorder>lbl_robot_epose_err_h</zorder>
-     <zorder>lbl_robot_epose_x</zorder>
-     <zorder>lbl_robot_epose_y</zorder>
-     <zorder>lbl_robot_epose_h</zorder>
-     <zorder>label_11</zorder>
-     <zorder>label_4</zorder>
+     <zorder>pBtn_open_inspection_file</zorder>
+     <zorder>pBtn_add_vertex</zorder>
+     <zorder>pBtn_delete_vertex</zorder>
+     <zorder>let_delete_vertex_index</zorder>
+     <zorder>pBtn_add_edge</zorder>
+     <zorder>pBtn_delete_edge</zorder>
+     <zorder>let_vertex_start_index</zorder>
+     <zorder>let_vertex_end_index</zorder>
+     <zorder>lbl_vertex_number</zorder>
+     <zorder>lbl_edge_number</zorder>
+     <zorder>pBtn_save_inspection_file</zorder>
+     <zorder>pBtn_open_inspection_file</zorder>
+     <zorder>let_delete_vertex_index</zorder>
+     <zorder>pBtn_add_vertex</zorder>
+     <zorder>pBtn_delete_vertex</zorder>
+     <zorder>let_vertex_start_index</zorder>
+     <zorder>let_vertex_end_index</zorder>
+     <zorder>pBtn_add_edge</zorder>
+     <zorder>pBtn_delete_edge</zorder>
+     <zorder>pBtn_g_navi</zorder>
     </widget>
     <widget class="QWidget" name="tab_3">
      <attribute name="title">
@@ -1566,8 +1713,8 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1069</width>
-     <height>25</height>
+     <width>1264</width>
+     <height>27</height>
     </rect>
    </property>
   </widget>
