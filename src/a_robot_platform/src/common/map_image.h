@@ -11,6 +11,10 @@ namespace zw {
 
 constexpr int xyLength =20;
 constexpr int carLength1 = 15 ;
+constexpr int vertex_radius =10 ;
+constexpr int vertex_text_offset =5;
+
+
 
 
 struct MapInfo

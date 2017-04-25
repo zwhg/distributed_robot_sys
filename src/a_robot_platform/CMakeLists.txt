@@ -68,6 +68,7 @@ add_executable(main_uart_odom src/server/main_uart_odom.cpp
  src/server/uartodom.cpp
  src/server/uartodompthread.cpp
  src/server/udpsocketserver.cpp
+ src/nav/nav.cpp
  src/server/moc_udpsocketserver.cpp
 )
 target_link_libraries(main_uart_odom

@@ -11,6 +11,9 @@
 #include <QTextStream>
 #include <QFile>
 #include <QtNetwork>
+#include <QRegExp>
+#include <QStringList>
+#include <iostream>
 
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
@@ -21,6 +24,8 @@
 #include "../udp_socket.h"
 
 
+QString ins_path ="/home/zw/ins.txt";
+QString ins_Head ="inspection";
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -44,9 +49,15 @@ MainWindow::MainWindow(QWidget *parent) :
     cmd_timer->start(40);
     QObject::connect(cmd_timer,SIGNAL(timeout()),this,SLOT(cmdTimerUpdate()));
 
+    nav_timer=new QTimer();
+    nav_timer->start(50);
+    nav_timer->stop();
+    QObject::connect(nav_timer,SIGNAL(timeout()),this,SLOT(naviTimerupdate()));
+
     img_binarization=false;
     save_pose_file =false;
     clear_pose_file =false;
+    plot_g_navi =false;
     th_binarization=127;
     mapInfo={0,0,0,0,0,0,0};
     carInfo ={0,0,0,0,0};
@@ -93,7 +104,7 @@ void MainWindow::xTimerUpdate(void)
         break;
     case 1:
         PoseRefresh();
-        if(img_binarization)
+        if(img_binarization | navi.g.changed |plot_g_navi)
            redrawMap();
         break;
     case 2:
@@ -776,11 +787,59 @@ void MainWindow::redrawMap(void)
         polygon <<QPoint(x1,y1)<<QPoint(x2,y2)<<QPoint(x3,y3);
         painter.drawPolygon(polygon,Qt::WindingFill);
 
+        {
+            pen.setColor(Qt::GlobalColor::darkGreen);
+            painter.setPen(pen);
+            for(int i=0;i<navi.g.vertexNum;i++)
+            {
+                QPoint c(floor(abs((navi.g.vertex[i].x -mapInfo.word_x)/mapInfo.resolution)+0.5),
+                         mapInfo.h-floor(abs((navi.g.vertex[i].y-mapInfo.word_y)/mapInfo.resolution)+0.5));
+                painter.drawEllipse(c,zw::vertex_radius,zw::vertex_radius);
+                c.setX(c.rx()-zw::vertex_text_offset);
+                c.setY(c.ry()+zw::vertex_text_offset);
+                painter.drawText(c,QString::number(i));
+            }
+            QVector<qreal> dashes;
+            qreal space=3;
+            dashes <<5<<space<<5<<space;
+            pen.setDashPattern(dashes);
+            pen.setWidth(2);
+            pen.setColor(Qt::GlobalColor::magenta);
+            painter.setPen(pen);
+            for(int i=0;i<navi.g.edgeNum;i++)
+            {
+                zw::CarPose vp =navi.g.vertex[navi.g.se[i].start];
+                QPoint s (floor(abs((vp.x -mapInfo.word_x)/mapInfo.resolution)+0.5),
+                              mapInfo.h-floor(abs((vp.y-mapInfo.word_y)/mapInfo.resolution)+0.5));
+                vp =navi.g.vertex[navi.g.se[i].end];
+                QPoint e (floor(abs((vp.x -mapInfo.word_x)/mapInfo.resolution)+0.5),
+                          mapInfo.h-floor(abs((vp.y-mapInfo.word_y)/mapInfo.resolution)+0.5));
+                painter.drawLine(s, e);
+            }
+        }
+
+        {
+            pen.setStyle(Qt::SolidLine);
+            pen.setColor(Qt::GlobalColor::green);
+            painter.setPen(pen);
+            for( unsigned int i=1;i< nav_path.size();i++)
+            {
+                zw::CarPose vp= navi.g.vertex[nav_path[i-1]];
+                QPoint s (floor(abs((vp.x -mapInfo.word_x)/mapInfo.resolution)+0.5),
+                              mapInfo.h-floor(abs((vp.y-mapInfo.word_y)/mapInfo.resolution)+0.5));
+                vp =navi.g.vertex[nav_path[i]];
+                QPoint e (floor(abs((vp.x -mapInfo.word_x)/mapInfo.resolution)+0.5),
+                          mapInfo.h-floor(abs((vp.y-mapInfo.word_y)/mapInfo.resolution)+0.5));
+                painter.drawLine(s, e);
+            }
+
+        }
+
         painter.end();
 
         ui->lbl_map->setPixmap(QPixmap::fromImage(img));
         ui->lbl_map->resize(img.width(),img.height());
-        ui->lbl_map->setScaledContents(true);
+        ui->lbl_map->setScaledContents(true);     
     }
 }
 
@@ -834,7 +893,7 @@ void MainWindow::PoseRefresh(void)
     ui->lbl_robot_pose_h->setText(QString::number(carInfo.h,'f',3));
 }
 
-void  MainWindow::getCarInfo(void)
+void MainWindow::getCarInfo(void)
 {
     zw::Paras m_para;
     int32_t dat[3];
@@ -926,6 +985,7 @@ void MainWindow::on_pBtn_start_navigation_clicked(bool checked)
 
         ff.f = ui->lbl_robot_epose_h->text().toFloat();
         dat[2] = ff.i;
+
         m_para.SetAddressValue(packInfo);
         m_tcpSocketClient->SendMsg(packInfo);
 
@@ -1000,4 +1060,245 @@ void MainWindow::on_pBtn_nav_err_conf_clicked()
     zw::ParaGetSet  packInfo = {zw::W_REGISTER,2,zw::ADD_ERR,dat};
     m_para.SetAddressValue(packInfo);
     m_tcpSocketClient->SendMsg(packInfo);
+}
+
+void MainWindow::on_pBtn_open_inspection_file_clicked()
+{
+    // QString filePath = QFileDialog::getOpenFileName(this,tr("Open inspection"),".",tr("txt Files(*.txt)"));
+    QString filePath=ins_path;
+    QFile f(filePath);
+    if(f.exists())
+    {
+         if(!f.open(QIODevice::ReadOnly |QIODevice::Text))
+         {
+             qDebug()<<"Open inspection file failed";
+             return  ;
+         }
+         QTextStream in(&f);
+
+         QString line=in.readLine() ;
+         if(ins_Head != line)
+         {
+             qDebug()<<"Error inspection file";
+             f.close();
+             return;
+         }
+         QStringList list;
+         line =in.readLine();
+         list=line.split(QRegExp("\t"));
+
+         navi.g.vertex.clear();
+         navi.g.se.clear();
+
+         navi.g.vertexNum = list.at(0).toInt();
+         navi.g.edgeNum =list.at(1).toInt();
+       //  navi.g.vertex.resize(navi.g.vertexNum);
+       //  navi.g.se.resize(navi.g.edgeNum);
+
+         line =in.readLine();
+         for(int i=0;i<navi.g.vertexNum && (!line.isNull());i++)
+         {
+             list =line.split(QRegExp("\t"));
+             zw::CarPose p;
+             p.x = list.at(1).toInt()/1000.0;
+             p.y = list.at(2).toInt()/1000.0;
+             p.h = list.at(3).toInt()/1000.0;
+            // navi.g.vertex[i]=(p);
+             navi.g.vertex.push_back(p);
+             line = in.readLine();
+         }
+         for(int i=0;i<navi.g.edgeNum && (!line.isNull());i++)
+         {
+             list =line.split(QRegExp("\t"));
+             zw::Edge se;
+             se.start =list.at(0).toInt();
+             se.end =list.at(1).toInt();
+           //  navi.g.se[i]=se;
+             navi.g.se.push_back(se);
+
+             line = in.readLine();
+         }
+         ui->lbl_vertex_number->setText("顶点:"+QString::number(navi.g.vertexNum));
+         ui->lbl_edge_number->setText("边:"+QString::number(navi.g.edgeNum));
+         navi.g.changed = true ;
+
+         f.close();
+    }
+}
+
+void MainWindow::on_pBtn_save_inspection_file_clicked()
+{
+    QString filePath=ins_path;
+    QFile f(filePath);
+    if(f.exists())
+        f.remove();
+    if(f.open(QIODevice::WriteOnly |QIODevice::Append |QIODevice::Text))
+    {
+          QTextStream txtOutput(&f);
+          txtOutput<<ins_Head<<endl
+                   <<navi.g.vertexNum<<"\t"<<navi.g.edgeNum<<endl;
+          for(int i=0;i<navi.g.vertexNum;i++)
+          {
+              txtOutput<<i<<"\t"<<(int)(navi.g.vertex[i].x*1000)
+                          <<"\t"<<(int)(navi.g.vertex[i].y*1000)
+                          <<"\t"<<(int)(navi.g.vertex[i].h*1000)<<endl;
+          }
+          for(int i=0;i<navi.g.edgeNum;i++)
+          {
+              txtOutput<<navi.g.se[i].start<<"\t"<<navi.g.se[i].end<<endl;
+          }
+          f.close();
+    }else{
+         qDebug()<<"save inspection file failed";
+    }
+}
+
+void MainWindow::on_pBtn_add_vertex_clicked()
+{
+    getCarInfo();
+    zw::CarPose p{carInfo.x,carInfo.y,carInfo.h};
+    navi.add_vertex(p);
+    ui->lbl_vertex_number->setText("顶点:"+QString::number(navi.g.vertexNum));
+}
+
+void MainWindow::on_pBtn_delete_vertex_clicked()
+{
+    int index=ui->let_delete_vertex_index->text().toInt();
+    navi.delete_vertex(index);
+    ui->lbl_vertex_number->setText("顶点:"+QString::number(navi.g.vertexNum));
+    ui->lbl_edge_number->setText("边:"+QString::number(navi.g.edgeNum));
+}
+
+void MainWindow::on_pBtn_add_edge_clicked()
+{
+    int start = ui->let_vertex_start_index->text().toInt();
+    int end = ui->let_vertex_end_index->text().toInt();
+    navi.add_edge(start, end);
+    ui->lbl_edge_number->setText("边:"+QString::number(navi.g.edgeNum));
+}
+
+void MainWindow::on_pBtn_delete_edge_clicked()
+{
+    int start = ui->let_vertex_start_index->text().toInt();
+    int end = ui->let_vertex_end_index->text().toInt();
+    navi.delete_edge(start, end);
+    ui->lbl_edge_number->setText("边:"+QString::number(navi.g.edgeNum));
+}
+
+void MainWindow::on_pBtn_g_navi_clicked()
+{
+        int start = ui->let_vertex_start_index->text().toInt();
+        int end = ui->let_vertex_end_index->text().toInt();
+        std::vector<int> rpath ,path;
+        nav_path.clear();
+        if(navi.dijkstra(start, end, rpath))
+        {
+            for(int i=end;rpath[i]>=0;i=rpath[i])  //反向打印路径
+                path.push_back(i);
+            path.push_back(start);
+
+            nav_path.resize(path.size());
+            int i,j=0;
+            for(i=path.size()-1;i>=0;i--)
+            {
+                nav_path[j++]=path[i];
+            }
+            qDebug()<<nav_path;         
+            nav_timer->start();
+
+        }else{
+            qDebug()<<"can not reach !";
+        }
+        plot_g_navi = true;
+}
+
+void MainWindow::naviTimerupdate(void)
+{
+    zw::Paras m_para;
+    int32_t dat[3];
+    zw::ParaGetSet  packInfo = {zw::W_REGISTER,3,(zw::ParaAddress)(zw::CONTROL+2),dat};
+    getCarInfo();
+    zw::CarPose start={carInfo.x,carInfo.y,carInfo.h};
+    zw::CarPose end;
+    float errd ,errh;
+    static unsigned int k=0;
+    static unsigned int cmdCnt=0;
+    bool res=true;
+    end = navi.g.vertex[nav_path[k]];
+    errd = sqrt((start.x-end.x)*(start.x-end.x) + (start.y-end.y)*(start.y-end.y));
+    errh = fabs(zw::angle_diff(end.h,start.h));
+
+    zw::Float2Int32 ff;
+    ff.f = end.x;
+    dat[0] = ff.i;
+    ff.f = end.y;
+    dat[1] = ff.i;
+    ff.f = end.h;
+    dat[2] = ff.i;
+
+    if(navi.firstIn)
+    {
+       if(errd<0.1){
+          cmdCnt =1;
+          navi.firstIn =false;
+       }else if(cmdCnt == 0){
+           m_para.SetAddressValue(packInfo);
+           res=m_tcpSocketClient->SendMsg(packInfo);
+           qDebug()<< "Send "<<nav_path[k]<<";"<<"goal "<<end.x<<end.y<<end.h;
+
+           cmdCnt =1;
+
+           packInfo={zw::R_REGISTER,1, zw::BTN_SWITCH,dat};
+           m_para.GetAddressValue(packInfo);
+           dat[0] |=KEY_START_NAV ;
+           dat[0] |=KEY_NEW_GOAL ;
+           packInfo.fuc =zw::W_REGISTER;
+           m_para.SetAddressValue(packInfo);
+           res=m_tcpSocketClient->SendMsg(packInfo);
+           dat[0] &=(~KEY_START_NAV) ;
+           dat[0] &=(~KEY_NEW_GOAL) ;
+           m_para.SetAddressValue(packInfo);
+       }
+    }else{
+        if(cmdCnt==nav_path.size())
+        {
+            if(errd<=0.05 && errh<=0.05){
+                nav_timer->stop();
+                navi.firstIn =true;
+                k=0;
+                cmdCnt =0;
+                qDebug()<<"Reach Goal !";
+            }
+        }else{
+            if((errd<0.1) && (cmdCnt == k+1))
+            {
+                k++;
+            }else if(cmdCnt == k){
+                m_para.SetAddressValue(packInfo);
+                res=m_tcpSocketClient->SendMsg(packInfo);
+                qDebug()<< "Send "<<nav_path[k]<<";"<<"goal "<<end.x<<end.y<<end.h;
+                cmdCnt ++;
+
+                packInfo={zw::R_REGISTER,1, zw::BTN_SWITCH,dat};
+                m_para.GetAddressValue(packInfo);
+                dat[0] |=KEY_START_NAV ;
+                dat[0] |=KEY_NEW_GOAL ;
+                packInfo.fuc =zw::W_REGISTER;
+                m_para.SetAddressValue(packInfo);
+                res=m_tcpSocketClient->SendMsg(packInfo);
+                dat[0] &=(~KEY_START_NAV) ;
+                dat[0] &=(~KEY_NEW_GOAL) ;
+                m_para.SetAddressValue(packInfo);
+            }
+        }
+    }
+
+    if(!res)
+    {
+        nav_timer->stop();
+        navi.firstIn =true;
+        k=0;
+        cmdCnt =0;
+        qDebug()<<"Can not send msg!";
+    }
 }
