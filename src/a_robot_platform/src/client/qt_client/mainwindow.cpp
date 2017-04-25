@@ -24,7 +24,7 @@
 #include "../udp_socket.h"
 
 
-QString ins_path ="/home/zw/ins.txt";
+QString ins_path ="../ins.txt";
 QString ins_Head ="inspection";
 
 MainWindow::MainWindow(QWidget *parent) :
@@ -147,7 +147,7 @@ void MainWindow::cmdTimerUpdate(void)
 
     if(m_keyControl->keyControl){
         msgInfo={zw::W_REGISTER,2,zw::CONTROL,nullptr};
-        m_tcpSocketClient->SendMsg(msgInfo);     
+        m_tcpSocketClient->SendMsg(msgInfo);
     }
 
     msgInfo={zw::R_REGISTER,5,zw::MSG_CONTROL,nullptr};
@@ -839,7 +839,7 @@ void MainWindow::redrawMap(void)
 
         ui->lbl_map->setPixmap(QPixmap::fromImage(img));
         ui->lbl_map->resize(img.width(),img.height());
-        ui->lbl_map->setScaledContents(true);     
+        ui->lbl_map->setScaledContents(true);
     }
 }
 
@@ -1053,9 +1053,10 @@ void MainWindow::on_pBtn_PID_confirm_clicked()
 void MainWindow::on_pBtn_nav_err_conf_clicked()
 {
     int dat[2];
-    dat[0]=(int)(ui->lbl_robot_epose_err_x->text().toFloat()*1000);
-   // dat[0]=(int)(ui->lbl_robot_epose_err_y->text().toFloat()*1000);
-    dat[1]=(int)(ui->lbl_robot_epose_err_h->text().toFloat()*1000);
+    navi.EndNodeDisErr =ui->lbl_robot_epose_err_x->text().toFloat();
+    navi.EndNodeAngErr =ui->lbl_robot_epose_err_h->text().toFloat();
+    dat[0]=(int)( navi.EndNodeDisErr*1000);
+    dat[1]=(int)( navi.EndNodeAngErr*1000);
     zw::Paras m_para;
     zw::ParaGetSet  packInfo = {zw::W_REGISTER,2,zw::ADD_ERR,dat};
     m_para.SetAddressValue(packInfo);
@@ -1064,8 +1065,9 @@ void MainWindow::on_pBtn_nav_err_conf_clicked()
 
 void MainWindow::on_pBtn_open_inspection_file_clicked()
 {
-    // QString filePath = QFileDialog::getOpenFileName(this,tr("Open inspection"),".",tr("txt Files(*.txt)"));
-    QString filePath=ins_path;
+    QString filePath = QFileDialog::getOpenFileName(this,tr("Open inspection"),".",tr("txt Files(*.txt)"));
+ //   QString filePath=ins_path;
+    ins_path = filePath;
     QFile f(filePath);
     if(f.exists())
     {
@@ -1123,6 +1125,8 @@ void MainWindow::on_pBtn_open_inspection_file_clicked()
          navi.g.changed = true ;
 
          f.close();
+    }else{
+         qDebug()<<"inspection file  do not exist!";
     }
 }
 
@@ -1203,7 +1207,7 @@ void MainWindow::on_pBtn_g_navi_clicked()
             {
                 nav_path[j++]=path[i];
             }
-            qDebug()<<nav_path;         
+            qDebug()<<nav_path;
             nav_timer->start();
 
         }else{
@@ -1238,7 +1242,7 @@ void MainWindow::naviTimerupdate(void)
 
     if(navi.firstIn)
     {
-       if(errd<0.1){
+       if(errd<zw::PassNodeErr){
           cmdCnt =1;
           navi.firstIn =false;
        }else if(cmdCnt == 0){
@@ -1262,7 +1266,7 @@ void MainWindow::naviTimerupdate(void)
     }else{
         if(cmdCnt==nav_path.size())
         {
-            if(errd<=0.05 && errh<=0.05){
+            if((errd<= navi.EndNodeDisErr) && (errh<= navi.EndNodeAngErr)){
                 nav_timer->stop();
                 navi.firstIn =true;
                 k=0;
@@ -1270,7 +1274,7 @@ void MainWindow::naviTimerupdate(void)
                 qDebug()<<"Reach Goal !";
             }
         }else{
-            if((errd<0.1) && (cmdCnt == k+1))
+            if((errd<zw::PassNodeErr) && (cmdCnt == k+1))
             {
                 k++;
             }else if(cmdCnt == k){

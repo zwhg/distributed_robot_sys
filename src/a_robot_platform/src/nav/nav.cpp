@@ -28,6 +28,8 @@ nav::nav()
 {
  g.vertexNum=0;
  g.edgeNum=0;
+ EndNodeDisErr=0.05;
+ EndNodeAngErr=0.05;
  g.changed = false;
  firstIn=true;
 }

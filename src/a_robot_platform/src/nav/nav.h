@@ -8,6 +8,8 @@ namespace zw
 
 
 constexpr int INF=1000000;
+constexpr float PassNodeErr=0.1;
+
 
 float angle_diff(float a, float b);
 
@@ -51,6 +53,8 @@ class nav
 public:
     Graph g;
     bool firstIn;
+    float EndNodeDisErr;
+    float EndNodeAngErr;
 public:
     nav();
     ~nav();
