@@ -318,7 +318,7 @@ void UartOdomPthread::CalNavCmdVel(const NavPara *nav ,geometry_msgs::Twist& ctr
      ds =-ds;
    }
 
-   assert (dfh<M_PI && dfh>-M_PI);
+   assert (dfh<=M_PI && dfh>=-M_PI);
 
    static  uint8_t pricnt =0 ;
    const uint8_t PCT=5;

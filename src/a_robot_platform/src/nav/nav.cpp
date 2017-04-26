@@ -32,6 +32,8 @@ nav::nav()
  EndNodeAngErr=0.05;
  g.changed = false;
  firstIn=true;
+ k=0;
+ cmdCnt=0;
 }
 
 nav::~nav()

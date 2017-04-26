@@ -3,12 +3,13 @@
 
 #include <vector>
 
+
 namespace zw
 {
 
 
 constexpr int INF=1000000;
-constexpr float PassNodeErr=0.1;
+constexpr float PassNodeErr=0.15;
 
 
 float angle_diff(float a, float b);
@@ -55,6 +56,9 @@ public:
     bool firstIn;
     float EndNodeDisErr;
     float EndNodeAngErr;
+    unsigned int k;
+    unsigned int cmdCnt;
+
 public:
     nav();
     ~nav();

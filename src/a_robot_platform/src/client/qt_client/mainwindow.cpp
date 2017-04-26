@@ -80,6 +80,8 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->lbl_robot_epose_err_y->setText(QString::number(dat[0]/1000.0,'f',3));
     ui->lbl_robot_epose_err_h->setText(QString::number(dat[1]/1000.0,'f',3));
 
+    navi.EndNodeDisErr =ui->lbl_robot_epose_err_x->text().toFloat();
+    navi.EndNodeAngErr =ui->lbl_robot_epose_err_h->text().toFloat();
 }
 
 MainWindow::~MainWindow()
@@ -1189,6 +1191,8 @@ void MainWindow::on_pBtn_delete_edge_clicked()
     ui->lbl_edge_number->setText("边:"+QString::number(navi.g.edgeNum));
 }
 
+static pthread_mutex_t g_tNaviMutex  = PTHREAD_MUTEX_INITIALIZER;
+
 void MainWindow::on_pBtn_g_navi_clicked()
 {
         int start = ui->let_vertex_start_index->text().toInt();
@@ -1207,7 +1211,14 @@ void MainWindow::on_pBtn_g_navi_clicked()
             {
                 nav_path[j++]=path[i];
             }
-            qDebug()<<nav_path;
+            qDebug()<<nav_path<<nav_path.size();
+            nav_timer->stop();
+
+            pthread_mutex_lock(&g_tNaviMutex );
+            navi.firstIn = true;
+            navi.k =0;
+            navi.cmdCnt=0;
+            pthread_mutex_unlock(&g_tNaviMutex );
             nav_timer->start();
 
         }else{
@@ -1225,10 +1236,9 @@ void MainWindow::naviTimerupdate(void)
     zw::CarPose start={carInfo.x,carInfo.y,carInfo.h};
     zw::CarPose end;
     float errd ,errh;
-    static unsigned int k=0;
-    static unsigned int cmdCnt=0;
+
     bool res=true;
-    end = navi.g.vertex[nav_path[k]];
+    end = navi.g.vertex[nav_path[navi.k]];
     errd = sqrt((start.x-end.x)*(start.x-end.x) + (start.y-end.y)*(start.y-end.y));
     errh = fabs(zw::angle_diff(end.h,start.h));
 
@@ -1240,17 +1250,18 @@ void MainWindow::naviTimerupdate(void)
     ff.f = end.h;
     dat[2] = ff.i;
 
+    pthread_mutex_lock(&g_tNaviMutex );
     if(navi.firstIn)
     {
        if(errd<zw::PassNodeErr){
-          cmdCnt =1;
+          navi.cmdCnt =1;
           navi.firstIn =false;
-       }else if(cmdCnt == 0){
+       }else if(navi.cmdCnt == 0){
            m_para.SetAddressValue(packInfo);
            res=m_tcpSocketClient->SendMsg(packInfo);
-           qDebug()<< "Send "<<nav_path[k]<<";"<<"goal "<<end.x<<end.y<<end.h;
+           qDebug()<< "Send "<<nav_path[navi.k]<<";"<<"goal "<<end.x<<end.y<<end.h;
 
-           cmdCnt =1;
+           navi.cmdCnt =1;
 
            packInfo={zw::R_REGISTER,1, zw::BTN_SWITCH,dat};
            m_para.GetAddressValue(packInfo);
@@ -1264,24 +1275,24 @@ void MainWindow::naviTimerupdate(void)
            m_para.SetAddressValue(packInfo);
        }
     }else{
-        if(cmdCnt==nav_path.size())
+        if(navi.cmdCnt==nav_path.size())
         {
             if((errd<= navi.EndNodeDisErr) && (errh<= navi.EndNodeAngErr)){
                 nav_timer->stop();
                 navi.firstIn =true;
-                k=0;
-                cmdCnt =0;
+                navi.k=0;
+                navi.cmdCnt =0;
                 qDebug()<<"Reach Goal !";
             }
         }else{
-            if((errd<zw::PassNodeErr) && (cmdCnt == k+1))
+            if((errd<zw::PassNodeErr) && (navi.cmdCnt == navi.k+1))
             {
-                k++;
-            }else if(cmdCnt == k){
+                navi.k++;
+            }else if(navi.cmdCnt == navi.k){
                 m_para.SetAddressValue(packInfo);
                 res=m_tcpSocketClient->SendMsg(packInfo);
-                qDebug()<< "Send "<<nav_path[k]<<";"<<"goal "<<end.x<<end.y<<end.h;
-                cmdCnt ++;
+                qDebug()<< "Send "<<nav_path[navi.k]<<";"<<"goal "<<end.x<<end.y<<end.h;
+                navi.cmdCnt ++;
 
                 packInfo={zw::R_REGISTER,1, zw::BTN_SWITCH,dat};
                 m_para.GetAddressValue(packInfo);
@@ -1301,8 +1312,9 @@ void MainWindow::naviTimerupdate(void)
     {
         nav_timer->stop();
         navi.firstIn =true;
-        k=0;
-        cmdCnt =0;
+        navi.k=0;
+        navi.cmdCnt =0;
         qDebug()<<"Can not send msg!";
     }
+    pthread_mutex_unlock(&g_tNaviMutex );
 }
