@@ -277,16 +277,26 @@ void AmclNode::paraInit()
     if(!private_nh_.getParam("write_pose",scan_processor.writePose))
         scan_processor.writePose=false;
 
-    if(!private_nh_.getParam("max_itera",scan_processor.maxIterations))
-        scan_processor.maxIterations=6;
-
     if(!private_nh_.getParam("add_close_loop",add_close_loop))
         add_close_loop=true;
 
     if(!private_nh_.getParam("use_amcl_pose",use_amcl_pose))
         use_amcl_pose=false;
 
-    updatePoseFromServer();
+    float submap_res;;
+    int submap_width,submap_height;;
+    if(!private_nh_.getParam("subMap_resolution",submap_res))
+        submap_res=0.1;
+    if(!private_nh_.getParam("subMap_width",submap_width))
+        submap_width=60;
+    if(!private_nh_.getParam("subMap_height",submap_height))
+        submap_height=60;
+
+   scan_processor.subMap.info.resolution =submap_res;
+   scan_processor.subMap.info.width =submap_width;
+   scan_processor.subMap.info.height =submap_height;
+
+   updatePoseFromServer();
 }
 
 void AmclNode::updatePoseFromServer()
@@ -1119,7 +1129,5 @@ void AmclNode::runFromBag(const std::string &in_bag_fn)
 
   ros::shutdown();
 }
-
-
 
 }

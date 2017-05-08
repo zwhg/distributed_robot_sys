@@ -3,6 +3,7 @@
 #include <tf/tf.h>
 #include "../../map/mapreadandwrite.h"
 #include <fcntl.h>
+#include <tf/transform_broadcaster.h>
 
 
 namespace zw{
@@ -37,10 +38,10 @@ ScanProcessor::ScanProcessor()
     subMap.header.frame_id="subMap";
   //  subMap.header.stamp=ros::Time::now();
     subMap.info.resolution=0.1;
-    subMap.info.width = 61;
-    subMap.info.height= 61;
- //   subMap.info.origin.position.x=40;
- //   subMap.info.origin.position.y=40;
+    subMap.info.width = 60;
+    subMap.info.height= 60;
+    subMap.info.origin.position.x=0;
+    subMap.info.origin.position.y=0;
     subMap.info.origin.position.z=0;
   //  subMap.data.resize(subMap.info.origin.position.x *subMap.info.origin.position.y,0);
 //    tf::Quaternion q;
@@ -71,21 +72,19 @@ void ScanProcessor::GetSubMap(float factor ,const Eigen::Vector3f& finalPose)
    d.setFrom(dataContainer,factor);
 
 
-   Eigen::Vector3f lpw(finalPose[0]+laser_pose.v[0],      //laser pose in world
-                       finalPose[1]+laser_pose.v[1],
+   Eigen::Vector3f lpw(laser_pose.v[0],      //laser pose in world
+                       laser_pose.v[1],
                        finalPose[2]);
 
    Eigen::Affine2f transform(getTransformForState(lpw));  //laser pose in world transform
 
    int dsize =d.getSize();
-   int msize = subMap.info.origin.position.x *subMap.info.origin.position.y;
+   int msize = subMap.info.width *subMap.info.height;
    int mi,mj,index;
 
    subMap.header.stamp=ros::Time::now();
+   subMap.data.clear();
    subMap.data.resize(msize,-1);
-   subMap.info.origin.position.x=finalPose[0] - subMap.info.width*subMap.info.resolution/2;
-   subMap.info.origin.position.y=finalPose[1] - subMap.info.height*subMap.info.resolution/2;
-
 
    for (int i = 0; i < dsize; i++)
    {
@@ -107,7 +106,22 @@ void ScanProcessor::GetSubMap(float factor ,const Eigen::Vector3f& finalPose)
    {
        if(subMap.data[i]>0)
            subMap.data[i]=kOccGrid;
+       else
+           subMap.data[i]=kUnknownGrid;
    }
+    geometry_msgs :: TransformStamped subMap_trans;
+    tf:: TransformBroadcaster subMap_broadcaster;
+    geometry_msgs :: Quaternion submap_quat =tf::createQuaternionMsgFromYaw(0);
+
+    subMap_trans.header.stamp = ros::Time::now();
+    subMap_trans.header.frame_id = "map";
+    subMap_trans.child_frame_id ="subMap";
+
+    subMap_trans.transform.translation.x =finalPose[0] - subMap.info.width*subMap.info.resolution/2.0;
+    subMap_trans.transform.translation.y =finalPose[1] - subMap.info.height*subMap.info.resolution/2.0;
+    subMap_trans.transform.translation.z =0.0;
+    subMap_trans.transform.rotation =submap_quat;
+    subMap_broadcaster.sendTransform(subMap_trans);
 }
 
 bool ScanProcessor::PoseUpdate(const sensor_msgs::LaserScanConstPtr& scan,
@@ -238,7 +252,7 @@ bool ScanProcessor::PoseUpdate(const sensor_msgs::LaserScanConstPtr& scan,
        writePoseToTxt("../mpt.txt", AmclPoseHintWorld, finalPose, i);
     }
 
-   // GetSubMap(multMap[0].scale/subMap.info.resolution, finalPose);
+    GetSubMap(multMap[0].scale/subMap.info.resolution, finalPose);
 
     return sflag;
 }

@@ -105,8 +105,8 @@ public:
  pf_vector_t laser_pose;
 
  sensor_msgs::PointCloud ptcloud;
-
  nav_msgs::OccupancyGrid subMap;
+
 
 
 public:

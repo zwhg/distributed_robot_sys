@@ -62,5 +62,9 @@
         <param name="add_close_loop" value="true"/>
  　　　　　　　<param name="use_amcl_pose" value="false"/>
 
+	<param name="subMap_resolution" value="0.15"/>
+        <param name="subMap_width" value="40"/>
+ 　　　　　　　<param name="subMap_height" value="40"/>
+
 </node>
 </launch>
