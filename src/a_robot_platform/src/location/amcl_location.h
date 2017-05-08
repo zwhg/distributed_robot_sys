@@ -233,6 +233,7 @@ class AmclNode
 
     ros::Publisher pose_pub_amcl;
     ros::Publisher pose_pub_scan;
+    ros::Publisher subMap_pub;
 
     ros::Publisher test;
 

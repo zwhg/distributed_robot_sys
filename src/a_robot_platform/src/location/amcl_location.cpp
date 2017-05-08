@@ -54,6 +54,8 @@ AmclNode::AmclNode():
     pose_pub_amcl =nh_.advertise<geometry_msgs::PoseStamped>("amcl_p",2,true);
     pose_pub_scan =nh_.advertise<geometry_msgs::PoseStamped>("scan_p",2,true);
 
+    subMap_pub =nh_.advertise<nav_msgs::OccupancyGrid>("subMap", 1, true);
+
     if(use_map_topic_) {
       map_sub_ = nh_.subscribe("map", 1, &AmclNode::mapReceived, this);
       ROS_INFO("Subscribed to map topic.");
@@ -854,6 +856,8 @@ void AmclNode::laserReceived(const sensor_msgs::LaserScanConstPtr& laser_scan)
     }else{
         finalPose = {scan_match_pose_[0],scan_match_pose_[1],scan_match_pose_[2]};
     }
+
+    subMap_pub.publish(scan_processor.subMap);
 
 
       geometry_msgs::PoseWithCovarianceStamped p;

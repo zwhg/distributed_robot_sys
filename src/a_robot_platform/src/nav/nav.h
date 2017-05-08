@@ -47,8 +47,6 @@ struct Graph
 };
 
 
-
-
 class nav
 {
 public:

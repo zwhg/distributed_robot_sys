@@ -33,6 +33,9 @@ typedef struct
 }poseSet_t;
 
 
+
+
+
 bool cmp_grade(const poseSet_t& s1,const poseSet_t& s2);
 
 class ScanProcessor{
@@ -95,12 +98,15 @@ private:
 
  Eigen::Vector3f getBestSet(void);
 
+ void GetSubMap(float factor,const Eigen::Vector3f& finalPose);
+
 
 public:
  pf_vector_t laser_pose;
 
  sensor_msgs::PointCloud ptcloud;
 
+ nav_msgs::OccupancyGrid subMap;
 
 
 public:
@@ -110,8 +116,6 @@ public:
  bool publishScan;
  bool writePose;
  int maxIterations;
-
-
 
 
 

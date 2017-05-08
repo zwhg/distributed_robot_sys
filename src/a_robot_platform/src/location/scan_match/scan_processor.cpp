@@ -1,5 +1,6 @@
 #include "scan_processor.h"
 #include <ros/ros.h>
+#include <tf/tf.h>
 #include "../../map/mapreadandwrite.h"
 #include <fcntl.h>
 
@@ -33,6 +34,23 @@ ScanProcessor::ScanProcessor()
     maxIterations =6;
     multMap =new map_grid_t[numDepth];
 
+    subMap.header.frame_id="subMap";
+  //  subMap.header.stamp=ros::Time::now();
+    subMap.info.resolution=0.1;
+    subMap.info.width = 61;
+    subMap.info.height= 61;
+ //   subMap.info.origin.position.x=40;
+ //   subMap.info.origin.position.y=40;
+    subMap.info.origin.position.z=0;
+  //  subMap.data.resize(subMap.info.origin.position.x *subMap.info.origin.position.y,0);
+//    tf::Quaternion q;
+//    q.setRPY(0,0,subMap.info.origin.position.z);
+//    subMap.info.origin.orientation.x=q.x();
+//    subMap.info.origin.orientation.y=q.y();
+//    subMap.info.origin.orientation.z=q.z();
+//    subMap.info.origin.orientation.w=q.w();
+//    subMap.info.origin.orientation(q);
+
     for(int i=0; i<numDepth;i++)
         multMap[i].cell_pbb = nullptr;
 }
@@ -46,6 +64,51 @@ ScanProcessor::~ScanProcessor()
     delete multMap;
 }
 
+
+void ScanProcessor::GetSubMap(float factor ,const Eigen::Vector3f& finalPose)
+{
+   DataContainer d(dataContainer.getSize());
+   d.setFrom(dataContainer,factor);
+
+
+   Eigen::Vector3f lpw(finalPose[0]+laser_pose.v[0],      //laser pose in world
+                       finalPose[1]+laser_pose.v[1],
+                       finalPose[2]);
+
+   Eigen::Affine2f transform(getTransformForState(lpw));  //laser pose in world transform
+
+   int dsize =d.getSize();
+   int msize = subMap.info.origin.position.x *subMap.info.origin.position.y;
+   int mi,mj,index;
+
+   subMap.header.stamp=ros::Time::now();
+   subMap.data.resize(msize,-1);
+   subMap.info.origin.position.x=finalPose[0] - subMap.info.width*subMap.info.resolution/2;
+   subMap.info.origin.position.y=finalPose[1] - subMap.info.height*subMap.info.resolution/2;
+
+
+   for (int i = 0; i < dsize; i++)
+   {
+       const Eigen::Vector2f& currPoint(d.getVecEntry(i)*subMap.info.resolution);  //end point in laser pose
+       // end point in map pose
+       const Eigen::Vector2f endPoint =transform * currPoint;  //end point in world
+
+       mi=floor((endPoint[0] - subMap.info.origin.position.x) / subMap.info.resolution + 0.5) + subMap.info.width / 2;
+       mj=floor((endPoint[1] - subMap.info.origin.position.y) / subMap.info.resolution + 0.5) + subMap.info.height / 2;
+
+       if(mi>=0 && mi<subMap.info.width && mj>=0 && mj<subMap.info.height)
+       {
+           index = mi + mj*subMap.info.width;
+           subMap.data[index] ++;
+       }
+   }
+
+   for(int i=0; i<msize ;i++)
+   {
+       if(subMap.data[i]>0)
+           subMap.data[i]=kOccGrid;
+   }
+}
 
 bool ScanProcessor::PoseUpdate(const sensor_msgs::LaserScanConstPtr& scan,
                                const map_t* map,
@@ -174,6 +237,8 @@ bool ScanProcessor::PoseUpdate(const sensor_msgs::LaserScanConstPtr& scan,
     //   writePoseToTxt("../mpt.txt", AmclPoseHintWorld, scanmatch , i);
        writePoseToTxt("../mpt.txt", AmclPoseHintWorld, finalPose, i);
     }
+
+   // GetSubMap(multMap[0].scale/subMap.info.resolution, finalPose);
 
     return sflag;
 }
@@ -599,7 +664,7 @@ float ScanProcessor::getPoseSetGrade(const DataContainer& dataPoints,
                                      const Eigen::Vector3f& p1,
                                      const Eigen::Vector3f& p2,
                                      int& i)
- {
+   {
      if(i==0)
      {
          if(access(filePath,F_OK)==0)
