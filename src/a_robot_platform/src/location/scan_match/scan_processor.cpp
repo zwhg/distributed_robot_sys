@@ -253,7 +253,7 @@ bool ScanProcessor::PoseUpdate(const sensor_msgs::LaserScanConstPtr& scan,
        writePoseToTxt("../mpt.txt", AmclPoseHintWorld, finalPose, i);
     }
 
- //   GetSubMap(multMap[0].scale/subMap.info.resolution, finalPose);
+    GetSubMap(multMap[0].scale/subMap.info.resolution, finalPose);
 
     return sflag;
 }

@@ -51,7 +51,7 @@ void *UartOdomPthread::DoPthread(void)
 
   ros::Subscriber pose_sub = n.subscribe<geometry_msgs::PoseWithCovarianceStamped>("amcl_pose", 2,PoseReceived);
 
-  // ros::Subscriber submap_sub = n.subscribe("subMap", 2,  SubMapReceived);
+  ros::Subscriber submap_sub = n.subscribe("subMap", 2,  SubMapReceived);
   ros::Publisher odom_pub = n.advertise<nav_msgs::Odometry>("odom", 100);
   ros::Publisher imu_pub =n.advertise<sensor_msgs::Imu>("imu",100);
   ros::Publisher vel_pub =n.advertise<geometry_msgs::Twist>("cmd_vel",2);
@@ -459,6 +459,8 @@ void UartOdomPthread::SubMapReceived(const nav_msgs::OccupancyGridConstPtr& msg)
     float boundx = (msg->info.width-2)*msg->info.resolution*0.5 ;
     float boundy = (msg->info.height-2)*msg->info.resolution*0.5;
     float fk = (boundy/boundx) ;
+
+    ROS_INFO("submap %f %f", submap_fx , submap_fy);
 
     CarPose tempGoal{submap_fx, submap_fy, m_navPara.desired.h};
 
