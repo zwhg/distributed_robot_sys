@@ -1,7 +1,7 @@
 #include "uartodompthread.h"
 #include "uartodom.h"
-
-
+#include "../common/map_process.h"
+#include <sensor_msgs/PointCloud.h>
 
 namespace zw {
 
@@ -12,7 +12,9 @@ static bool getNewPose =false;
 static bool getGoal=false;
 static int timeout =0;
 static bool timeoutflag=true;
-
+static Astart astar;
+static sensor_msgs::PointCloud aStartPath;
+static bool getPath =false;
 
 inline void limit(float& v ,float left,float right)
 {
@@ -48,9 +50,13 @@ void *UartOdomPthread::DoPthread(void)
   //ros::Subscriber pose_sub = n.subscribe<geometry_msgs::PoseStamped>("scan_p", 2,PoseReceived);
 
   ros::Subscriber pose_sub = n.subscribe<geometry_msgs::PoseWithCovarianceStamped>("amcl_pose", 2,PoseReceived);
+
+  // ros::Subscriber submap_sub = n.subscribe("subMap", 2,  SubMapReceived);
   ros::Publisher odom_pub = n.advertise<nav_msgs::Odometry>("odom", 100);
   ros::Publisher imu_pub =n.advertise<sensor_msgs::Imu>("imu",100);
   ros::Publisher vel_pub =n.advertise<geometry_msgs::Twist>("cmd_vel",2);
+
+  ros::Publisher submap_path =n.advertise<sensor_msgs::PointCloud>("submap_path",1, true);
 
   ros::Time starts = ros::Time::now();
   ros::Time ends = ros::Time::now();
@@ -192,6 +198,12 @@ void *UartOdomPthread::DoPthread(void)
  //   if(m_navPara.startNav)
     {
        vel_pub.publish(vel);
+    }
+
+    if(getPath)
+    {
+        getPath=false;
+        submap_path.publish(aStartPath);
     }
 
     starts = ends;
@@ -437,6 +449,77 @@ void UartOdomPthread::CalNavCmdVel(const NavPara *nav ,geometry_msgs::Twist& ctr
 
    ctr.linear.x =vx;
    ctr.angular.z =az;
+}
+
+void UartOdomPthread::SubMapReceived(const nav_msgs::OccupancyGridConstPtr& msg)
+{
+    float submap_fx = m_navPara.desired.x - m_navPara.current.x;
+    float submap_fy = m_navPara.desired.y - m_navPara.current.y;
+
+    float boundx = (msg->info.width-2)*msg->info.resolution*0.5 ;
+    float boundy = (msg->info.height-2)*msg->info.resolution*0.5;
+    float fk = (boundy/boundx) ;
+
+    CarPose tempGoal{submap_fx, submap_fy, m_navPara.desired.h};
+
+    if( (fabs(submap_fx)>boundx) || (fabs(submap_fy)>boundy) )
+    {
+        if(submap_fx ==0)
+        {
+             tempGoal.x =0 ;
+             tempGoal.y =((submap_fy>=0) ? boundy : -boundy);
+        }else if(submap_fy ==0){
+             tempGoal.x =((submap_fx>=0) ? boundx : -boundx);
+             tempGoal.y =0;
+        }else{
+             float k = submap_fy /submap_fx ;
+             if(fabs(k) <= fk)
+             {
+                 tempGoal.x = ((submap_fx >=0) ? boundx : -boundx);
+                 tempGoal.y = k* tempGoal.x ;
+             }else{
+                 tempGoal.y = ((submap_fy >=0) ? boundy : -boundy);
+                 tempGoal.x = tempGoal.y / k ;
+             }
+        }
+    }
+    int mi=floor((tempGoal.x -msg->info.origin.position.x) / msg->info.resolution + 0.5) + msg->info.width / 2;
+    int mj=floor((tempGoal.y -msg->info.origin.position.y) / msg->info.resolution + 0.5) + msg->info.height /2;
+    if(mi>=0 && mi<msg->info.width && mj>=0 && mj<msg->info.height)
+    {
+        std::vector<std::vector<char>> maze;
+        maze.resize(msg->info.height ,std::vector<char>(msg->info.width,0));
+
+        for(int i=0;i<msg->info.height;i++)
+            for(int j=0; j<msg->info.width;j++)
+            {
+              maze[i][j] =  msg->data[j+i*msg->info.width];
+            }
+
+        astar.InitAstart(maze);
+        int ox =msg->info.width/2 ;
+        int oy =msg->info.height/2 ;
+
+        Point start(ox , oy);
+        Point end(mi,mj);
+        std::list<Point *> path =astar.GetPath(start, end, false);
+
+        aStartPath.header.frame_id="map";
+        aStartPath.header.stamp=ros::Time::now();
+        aStartPath.points.clear();
+      //  aStartPath.points.resize(path.size());
+        for(auto &p:path)
+        {
+            geometry_msgs:: Point32 pa;
+            pa.x = (p->x -ox +0.5)*msg->info.resolution + m_navPara.current.x;
+            pa.y = (p->y -oy +0.5)*msg->info.resolution + m_navPara.current.y;
+            pa.z = 0;
+            aStartPath.points.push_back(pa);
+        }
+        getPath =true;
+    }else{
+        ROS_ERROR("tempGoal out of bound");
+    }
 }
 
 }

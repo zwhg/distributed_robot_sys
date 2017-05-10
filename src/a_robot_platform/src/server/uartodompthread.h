@@ -14,6 +14,8 @@
 #include <math.h>
 #include <termios.h>
 #include "../nav/nav.h"
+#include <nav_msgs/OccupancyGrid.h>
+
 
 namespace zw {
 
@@ -23,6 +25,8 @@ class UartOdomPthread
 private:
   pthread_t id;
   geometry_msgs::Twist vel;
+
+
 
 
 private:
@@ -43,6 +47,7 @@ private:
   static void cmd_keyCallback(const geometry_msgs::Twist::ConstPtr & cmd);
 //  static void PoseReceived(const geometry_msgs::PoseStampedConstPtr pose);
   static void PoseReceived(const geometry_msgs::PoseWithCovarianceStampedConstPtr pose);
+  static void SubMapReceived(const nav_msgs::OccupancyGridConstPtr& msg);
   static void *MyPthread(void *temp);
   virtual void *DoPthread(void);
   void getNavcmd(void);

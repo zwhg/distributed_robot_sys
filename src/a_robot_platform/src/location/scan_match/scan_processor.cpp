@@ -109,6 +109,7 @@ void ScanProcessor::GetSubMap(float factor ,const Eigen::Vector3f& finalPose)
        else
            subMap.data[i]=kUnknownGrid;
    }
+
     geometry_msgs :: TransformStamped subMap_trans;
     tf:: TransformBroadcaster subMap_broadcaster;
     geometry_msgs :: Quaternion submap_quat =tf::createQuaternionMsgFromYaw(0);
@@ -252,7 +253,7 @@ bool ScanProcessor::PoseUpdate(const sensor_msgs::LaserScanConstPtr& scan,
        writePoseToTxt("../mpt.txt", AmclPoseHintWorld, finalPose, i);
     }
 
-    GetSubMap(multMap[0].scale/subMap.info.resolution, finalPose);
+ //   GetSubMap(multMap[0].scale/subMap.info.resolution, finalPose);
 
     return sflag;
 }

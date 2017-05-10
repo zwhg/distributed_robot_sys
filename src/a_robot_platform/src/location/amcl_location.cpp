@@ -867,7 +867,7 @@ void AmclNode::laserReceived(const sensor_msgs::LaserScanConstPtr& laser_scan)
         finalPose = {scan_match_pose_[0],scan_match_pose_[1],scan_match_pose_[2]};
     }
 
-    subMap_pub.publish(scan_processor.subMap);
+  //  subMap_pub.publish(scan_processor.subMap);
 
 
       geometry_msgs::PoseWithCovarianceStamped p;
