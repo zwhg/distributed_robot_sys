@@ -8,9 +8,6 @@ namespace zw
 
 static NavPara m_navPara = {{0, 0, 0}, {0, 0, 0}, false, false};
 static bool hasNewPose = false;
-static int timeout = 0;
-static bool isNoDataTimeout = true;
-static Astart astar;
 static sensor_msgs::PointCloud aStartPath;
 static bool getPath = false;
 static int reachFinalCount = 0;
@@ -326,6 +323,8 @@ void UartOdomPthread::getNavcmd(void)
 
     if (m_navPara.startNav)
     {
+        static int timeout = 0;
+
         if (m_navPara.newGoal || hasNewPose)
         {
             if (m_navPara.newGoal)
@@ -347,25 +346,28 @@ void UartOdomPthread::getNavcmd(void)
             timeout++;
             if (timeout >= 20)
             {
-                // 20次循环都没有新数据则超时
-                isNoDataTimeout = true;
-                ROS_ERROR("Position not updated, timeout!");
+                // 20次循环都没有新数据则超时,且速度不为零(速度为零说明已到达目标点)
+                timeout =0;
+                if(vel.linear.x !=0 && vel.angular.z !=0)
+                {
+                    vel.linear.x = 0;
+                    vel.angular.z = 0;
+                    ROS_ERROR("Position not updated, timeout!");
+                }
             }
         }
-
-        if (isNoDataTimeout || m_navPara.emergeStop)
-        {
-            // 超时或者受到急停指令, 则停车
-            isNoDataTimeout = false;
-            vel.linear.x = 0;
-            vel.angular.z = 0;
-        }
-    }
-    else
-    {
+    }else{
         // 停止导航时, 停车
         vel.linear.x = 0;
         vel.angular.z = 0;
+    }
+
+    if (m_navPara.emergeStop)
+    {
+        // 受到急停指令, 则停车
+        vel.linear.x = 0;
+        vel.angular.z = 0;
+        ROS_INFO("Emerge Stop");
     }
 
     //  ROS_INFO("%d    %d",m_navPara.startNav ,m_navPara.emergeStop );
@@ -400,6 +402,8 @@ void UartOdomPthread::CalNavCmdVel(const NavPara *nav, geometry_msgs::Twist &ctr
             ROS_INFO("nextDest=[%6.3f,%6.3f]", nextDest.x, nextDest.y);
     }else{
         // 否则, 直接将最终目标作为期望位姿
+
+        // 此处需要加防碰撞处理，即A*算法没有求出路径
 
         nextDest = nav->desired;
         isFinalDest = true;
@@ -581,6 +585,8 @@ void UartOdomPthread::SubMapReceived(const nav_msgs::OccupancyGridConstPtr &msg)
     int mi = floor(tempGoal.x / msg->info.resolution + 0.5) + msg->info.width / 2;
     int mj = floor(tempGoal.y / msg->info.resolution + 0.5) + msg->info.height / 2;
 
+    aStartPath.points.clear();
+
     if (mi >= 0 && mi < msg->info.width && mj >= 0 && mj < msg->info.height)
     {
         std::vector<std::vector<char>> maze;
@@ -599,11 +605,6 @@ void UartOdomPthread::SubMapReceived(const nav_msgs::OccupancyGridConstPtr &msg)
 
         zw::Point start(ox, oy);
         zw::Point end(mi, mj);
-
-        //        ROS_INFO("start %d %d", start.x , start.y);
-        //        ROS_INFO("end %d %d", end.x , end.y);
-
-        aStartPath.points.clear();
 
         //    int maxBoundx = floor(boundx / msg->info.resolution + 0.5) + msg->info.width / 2;
         //    int minBoundx = floor(-boundx / msg->info.resolution + 0.5) + msg->info.width / 2;
