@@ -129,7 +129,8 @@ void nav::calAdjMap()
 bool nav::dijkstra(const int& start, const int& end, std::vector<int> & path)
 {
     calAdjMap();
-    if(start == end || start<0 ||end<0 || start>=g.edgeNum || end>=g.edgeNum)
+//    if(start == end || start<0 ||end<0 || start>=g.edgeNum || end>=g.edgeNum)
+    if(start == end || start<0 ||end<0)
         return false;
 
     const int &NODE= g.vertexNum;
@@ -171,6 +172,8 @@ bool nav::dijkstra(const int& start, const int& end, std::vector<int> & path)
 void Astart::InitAstart(std::vector<std::vector<char>> &_maze)
 {
    maze = _maze ;
+   openList.clear();
+   closeList.clear();
 }
 
 int Astart::calcG(Point *temp_start,Point *point)
@@ -272,11 +275,11 @@ Point *Astart::isInList(const std::list<Point *> &list,const Point *point) const
 
 bool Astart::isCanreach(const Point *point,const Point *target,bool isIgnoreCorner) const
 {
-    if(target->x<0||target->x>maze.size()-1
-        ||target->y<0&&target->y>maze[0].size()-1
-        ||maze[target->x][target->y]==kOccGrid
-        ||target->x==point->x&&target->y==point->y
-        ||isInList(closeList,target)) //如果点与当前节点重合、超出地图、是障碍物、或者在关闭列表中，返回false
+    if( target->x<0 || target->x>maze.size()-1 ||
+        target->y<0 && target->y>maze[0].size()-1 ||
+        maze[target->x][target->y]==kOccGrid ||
+        target->x==point->x && target->y==point->y ||
+        isInList(closeList,target)) //如果点与当前节点重合、超出地图、是障碍物、或者在关闭列表中，返回false
         return false;
     else
     {
@@ -285,7 +288,7 @@ bool Astart::isCanreach(const Point *point,const Point *target,bool isIgnoreCorn
         else
         {
             //斜对角要判断是否绊住
-            if(maze[point->x][target->y]==kFreeGrid&&maze[target->x][point->y]==kFreeGrid)
+            if(maze[point->x][target->y]==kUnknownGrid&&maze[target->x][point->y]==kUnknownGrid)
                 return true;
             else
                 return isIgnoreCorner;

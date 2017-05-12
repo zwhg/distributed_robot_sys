@@ -37,6 +37,7 @@ private:
   float maxAngErr;
   float maxUpAcc;
   float maxBackAcc;
+  float fabsdfh;
 
 
 public:

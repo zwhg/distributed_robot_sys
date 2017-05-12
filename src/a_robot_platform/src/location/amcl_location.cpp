@@ -284,17 +284,24 @@ void AmclNode::paraInit()
         use_amcl_pose=false;
 
     float submap_res;;
-    int submap_width,submap_height;;
+    int submap_width,submap_height;
+    int submap_filter_cnt , submap_expand_cnt;
     if(!private_nh_.getParam("subMap_resolution",submap_res))
         submap_res=0.1;
     if(!private_nh_.getParam("subMap_width",submap_width))
         submap_width=60;
     if(!private_nh_.getParam("subMap_height",submap_height))
         submap_height=60;
+    if(!private_nh_.getParam("submapFilter",submap_filter_cnt))
+        submap_filter_cnt=1;
+    if(!private_nh_.getParam("submapExpandCnt",submap_expand_cnt))
+        submap_expand_cnt=1;
 
    scan_processor.subMap.info.resolution =submap_res;
-   scan_processor.subMap.info.width =submap_width;
-   scan_processor.subMap.info.height =submap_height;
+   scan_processor.subMap.info.width =submap_width+1;
+   scan_processor.subMap.info.height =submap_height+1;
+   scan_processor.submapFilter=submap_filter_cnt;
+   scan_processor.submapExpandCnt=submap_expand_cnt;
 
    updatePoseFromServer();
 }
@@ -867,7 +874,10 @@ void AmclNode::laserReceived(const sensor_msgs::LaserScanConstPtr& laser_scan)
         finalPose = {scan_match_pose_[0],scan_match_pose_[1],scan_match_pose_[2]};
     }
 
-    subMap_pub.publish(scan_processor.subMap);
+    if(scan_processor.getSubmap){
+        scan_processor.getSubmap =false ;
+        subMap_pub.publish(scan_processor.subMap);
+    }
 
 
       geometry_msgs::PoseWithCovarianceStamped p;

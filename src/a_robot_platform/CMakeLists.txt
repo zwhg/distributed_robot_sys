@@ -146,7 +146,8 @@ target_link_libraries(main_test_v
 
 
 
-add_executable(main_nav src/nav/main_nav.cpp)
+add_executable(main_nav src/nav/main_nav.cpp
+  src/nav/nav.cpp)
 target_link_libraries(main_nav
     ${catkin_LIBRARIES}
 )

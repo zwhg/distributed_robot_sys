@@ -1,0 +1,6 @@
+image: gtest10.pgm
+resolution: 0.025
+origin: [-2.819620800018312, -2.63143653869629, 0]
+occupied_thresh: 0.51
+free_thresh: 0.49
+negate: 0

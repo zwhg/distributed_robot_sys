@@ -92,7 +92,7 @@ public:
     std::list<Point *> GetPath(Point &startPoint,Point &endPoint,bool isIgnoreCorner);
 
 private:
-    Point *findPath(Point &startPoint,Point &endPoint,bool isIgnoreCorner);
+   Point *findPath(Point &startPoint,Point &endPoint,bool isIgnoreCorner);
    std::vector<Point *> getSurroundPoints(const Point *point,bool isIgnoreCorner) const;
    bool isCanreach(const Point *point,const Point *target,bool isIgnoreCorner) const; //判断某点是否可以用于下一步判断
    Point *isInList(const std::list<Point *> &list,const Point *point) const; //判断开启/关闭列表中是否包含某点

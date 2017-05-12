@@ -106,6 +106,7 @@ public:
 
  sensor_msgs::PointCloud ptcloud;
  nav_msgs::OccupancyGrid subMap;
+ bool getSubmap;
 
 
 
@@ -117,6 +118,8 @@ public:
  bool writePose;
  int maxIterations;
 
+ int submapFilter;
+ int submapExpandCnt;
 
 
 private:

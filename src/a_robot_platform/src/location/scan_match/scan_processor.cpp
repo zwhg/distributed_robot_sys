@@ -35,11 +35,12 @@ ScanProcessor::ScanProcessor()
     maxIterations =6;
     multMap =new map_grid_t[numDepth];
 
+    getSubmap =false;
     subMap.header.frame_id="subMap";
   //  subMap.header.stamp=ros::Time::now();
     subMap.info.resolution=0.1;
-    subMap.info.width = 60;
-    subMap.info.height= 60;
+    subMap.info.width = 61;
+    subMap.info.height= 61;
     subMap.info.origin.position.x=0;
     subMap.info.origin.position.y=0;
     subMap.info.origin.position.z=0;
@@ -78,13 +79,22 @@ void ScanProcessor::GetSubMap(float factor ,const Eigen::Vector3f& finalPose)
 
    Eigen::Affine2f transform(getTransformForState(lpw));  //laser pose in world transform
 
-   int dsize =d.getSize();
-   int msize = subMap.info.width *subMap.info.height;
+   const int dsize =d.getSize();
+   const int w=subMap.info.width;
+   const int h=subMap.info.height;
+   int msize = w*h;
+
    int mi,mj,index;
 
    subMap.header.stamp=ros::Time::now();
    subMap.data.clear();
    subMap.data.resize(msize,-1);
+
+   std::vector<char> tmp1 ,tmp2;
+   tmp1.clear();
+   tmp2.clear();
+   tmp1.resize(msize,-1);
+   tmp2.resize(msize,-1);
 
    for (int i = 0; i < dsize; i++)
    {
@@ -92,22 +102,92 @@ void ScanProcessor::GetSubMap(float factor ,const Eigen::Vector3f& finalPose)
        // end point in map pose
        const Eigen::Vector2f endPoint =transform * currPoint;  //end point in world
 
-       mi=floor((endPoint[0] - subMap.info.origin.position.x) / subMap.info.resolution + 0.5) + subMap.info.width / 2;
-       mj=floor((endPoint[1] - subMap.info.origin.position.y) / subMap.info.resolution + 0.5) + subMap.info.height / 2;
+       mi=floor(endPoint[0] / subMap.info.resolution + 0.5) + w/2 ;
+       mj=floor(endPoint[1] / subMap.info.resolution + 0.5) + h/2 ;
 
-       if(mi>=0 && mi<subMap.info.width && mj>=0 && mj<subMap.info.height)
+       if(mi>=0 && mi<w && mj>=0 && mj<h)
        {
-           index = mi + mj*subMap.info.width;
-           subMap.data[index] ++;
+           index = mi + mj*w;
+           tmp1[index] ++;
        }
    }
 
    for(int i=0; i<msize ;i++)
    {
-       if(subMap.data[i]>0)
-           subMap.data[i]=kOccGrid;
+       if(tmp1[i]>0)
+           tmp1[i]=kOccGrid;
        else
-           subMap.data[i]=kUnknownGrid;
+           tmp1[i]=kUnknownGrid;
+   }
+
+   for(int k=0;k<submapExpandCnt;k++)
+   {
+       for(int i=0; i<msize ;i++)
+       {
+
+           if(tmp1[i]==kOccGrid)
+           {
+               tmp2[i]=kOccGrid;
+#if 0   //8
+               index =i-1;
+               if(index >=0)
+                   tmp2[index]=kOccGrid;
+
+               index -=w;
+               if(index >=0)
+                   tmp2[index]=kOccGrid;
+
+               index +=1;
+               if(index >=0)
+                   tmp2[index]=kOccGrid;
+
+               index +=1;
+               if(index >=0)
+                   tmp2[index]=kOccGrid;
+
+               index =i+1;
+               if(index < msize)
+                   tmp2[index]=kOccGrid;
+
+               index +=w;
+               if(index < msize)
+                   tmp2[index]=kOccGrid;
+
+               index -=1;
+               if(index < msize)
+                   tmp2[index]=kOccGrid;
+               index -=1;
+               if(index <msize)
+                   tmp2[index]=kOccGrid;
+#else    //4
+               index =i-1;
+               if(index >=0)
+                   tmp2[index]=kOccGrid;
+
+               index =i-w ;
+               if(index >=0)
+                   tmp2[index]=kOccGrid;
+
+               index =i+1;
+               if(index <msize)
+                   tmp2[index]=kOccGrid;
+
+               index =i+w ;
+               if(index <msize)
+                   tmp2[index]=kOccGrid;
+#endif
+           }
+       }
+       if(submapExpandCnt==k+1)
+           break ;
+       for(int i=0; i<msize ;i++)
+           tmp1[i] =tmp2[i];
+   }
+
+
+   for(int i=0; i<msize ;i++)
+   {
+      subMap.data[i]=tmp2[i];
    }
 
     geometry_msgs :: TransformStamped subMap_trans;
@@ -118,8 +198,8 @@ void ScanProcessor::GetSubMap(float factor ,const Eigen::Vector3f& finalPose)
     subMap_trans.header.frame_id = "map";
     subMap_trans.child_frame_id ="subMap";
 
-    subMap_trans.transform.translation.x =finalPose[0] - subMap.info.width*subMap.info.resolution/2.0;
-    subMap_trans.transform.translation.y =finalPose[1] - subMap.info.height*subMap.info.resolution/2.0;
+    subMap_trans.transform.translation.x =finalPose[0] - (w+0.5)*subMap.info.resolution/2.0;
+    subMap_trans.transform.translation.y =finalPose[1] - (h+0.5)*subMap.info.resolution/2.0;
     subMap_trans.transform.translation.z =0.0;
     subMap_trans.transform.rotation =submap_quat;
     subMap_broadcaster.sendTransform(subMap_trans);
@@ -252,8 +332,13 @@ bool ScanProcessor::PoseUpdate(const sensor_msgs::LaserScanConstPtr& scan,
     //   writePoseToTxt("../mpt.txt", AmclPoseHintWorld, scanmatch , i);
        writePoseToTxt("../mpt.txt", AmclPoseHintWorld, finalPose, i);
     }
-
-    GetSubMap(multMap[0].scale/subMap.info.resolution, finalPose);
+    static int fcnt=submapFilter-1;
+    fcnt++;
+    if(fcnt % submapFilter ==0){
+       fcnt=0;
+       GetSubMap(multMap[0].scale/subMap.info.resolution, finalPose);
+       getSubmap = true ;
+    }
 
     return sflag;
 }
