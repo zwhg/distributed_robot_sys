@@ -342,9 +342,7 @@ void UartOdomPthread::getNavcmd(void)
             car_para.fuc = W_REGISTER;
             m_para.SetAddressValue(car_para);
             timeout = 0;
-        }
-        else
-        {
+        }else{
             // 判定超时
             timeout++;
             if (timeout >= 20)
@@ -354,6 +352,7 @@ void UartOdomPthread::getNavcmd(void)
                 ROS_ERROR("Position not updated, timeout!");
             }
         }
+
         if (isNoDataTimeout || m_navPara.emergeStop)
         {
             // 超时或者受到急停指令, 则停车
@@ -399,9 +398,7 @@ void UartOdomPthread::CalNavCmdVel(const NavPara *nav, geometry_msgs::Twist &ctr
 
         if (pricnt % (3 * PCT) == 1)
             ROS_INFO("nextDest=[%6.3f,%6.3f]", nextDest.x, nextDest.y);
-    }
-    else
-    {
+    }else{
         // 否则, 直接将最终目标作为期望位姿
 
         nextDest = nav->desired;
@@ -473,9 +470,7 @@ void UartOdomPthread::CalNavCmdVel(const NavPara *nav, geometry_msgs::Twist &ctr
                 ids = last_ds = 0;
                 vx = 0;
                 az = afz;
-            }
-            else
-            {
+            }else{
                 // 航向正确, 则行进
                 idph = ldph = 0;
                 az = afz;
@@ -506,9 +501,7 @@ void UartOdomPthread::CalNavCmdVel(const NavPara *nav, geometry_msgs::Twist &ctr
             ids = last_ds = 0;
             vx = 0;
             az = apz;
-        }
-        else
-        {
+        }else{
             // 到达期望角度
             vx = az = 0;
             ctr.linear.x = 0;
