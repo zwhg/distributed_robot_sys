@@ -275,10 +275,10 @@ Point *Astart::isInList(const std::list<Point *> &list,const Point *point) const
 
 bool Astart::isCanreach(const Point *point,const Point *target,bool isIgnoreCorner) const
 {
-    if( target->x<0 || target->x>maze.size()-1 ||
-        target->y<0 && target->y>maze[0].size()-1 ||
-        maze[target->x][target->y]==kOccGrid ||
-        target->x==point->x && target->y==point->y ||
+    if( (target->x<0) || (target->x > (int)maze.size()-1) ||
+        (target->y<0) || (target->y > (int)maze[0].size()-1) ||
+        (maze[target->x][target->y]==kOccGrid) ||
+        (target->x==point->x && target->y==point->y) ||
         isInList(closeList,target)) //如果点与当前节点重合、超出地图、是障碍物、或者在关闭列表中，返回false
         return false;
     else
