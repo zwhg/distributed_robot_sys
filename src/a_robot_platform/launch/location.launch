@@ -66,7 +66,7 @@
         <param name="subMap_width" value="40"/>
  　　　　　　　<param name="subMap_height" value="40"/>
 	<param name="submapFilter" value="3"/>
-　　　　　　　　<param name ="submapExpandCnt" value="2"/>
+　　　　　　　　<param name ="submapExpandCnt" value="3"/>
 
 </node>
 </launch>

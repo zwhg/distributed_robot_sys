@@ -145,7 +145,6 @@ void *UartOdomPthread::DoPthread(void)
     double x = 0.0;
     double y = 0.0;
     double th = 0.0;
-    double lth = 0.0;
 
     double vx;
     double vy;
@@ -240,6 +239,8 @@ void *UartOdomPthread::DoPthread(void)
         if (getPath)
         {
             getPath = false;
+            aStartPath.header.frame_id = "map";
+            aStartPath.header.stamp = ros::Time::now();
             submap_path.publish(aStartPath);
         }
 
@@ -348,7 +349,7 @@ void UartOdomPthread::getNavcmd(void)
             {
                 // 20次循环都没有新数据则超时,且速度不为零(速度为零说明已到达目标点)
                 timeout =0;
-                if(vel.linear.x !=0 && vel.angular.z !=0)
+                if((int)(vel.linear.x*1000)!=0 && (int)(vel.angular.z*1000) !=0)
                 {
                     vel.linear.x = 0;
                     vel.angular.z = 0;
@@ -368,6 +369,15 @@ void UartOdomPthread::getNavcmd(void)
         vel.linear.x = 0;
         vel.angular.z = 0;
         ROS_INFO("Emerge Stop");
+
+        ctr_msg[0] &= (~KEY_START_NAV);
+        ctr_msg[0] &= (~KEY_EME_STOP);
+        ctr_msg[0] &= (~KEY_NEW_GOAL);
+        car_para.fuc = W_REGISTER;
+        m_para.SetAddressValue(car_para);
+
+        aStartPath.points.clear();
+
     }
 
     //  ROS_INFO("%d    %d",m_navPara.startNav ,m_navPara.emergeStop );
@@ -379,7 +389,7 @@ void UartOdomPthread::getNavcmd(void)
 void UartOdomPthread::CalNavCmdVel(const NavPara *nav, geometry_msgs::Twist &ctr)
 {
     // 读取上位机发送的PID参数
-    int32_t pid[6] = {20, 5, 0, 30, 5, 5};
+    int32_t pid[6] = {20, 5, 0, 50, 5, 5};
     zw::ParaGetSet para = {R_REGISTER, 6, (ParaAddress)(ADD_PID + 6), pid};
     zw::Paras m_para;
     m_para.GetAddressValue(para);
@@ -514,6 +524,7 @@ void UartOdomPthread::CalNavCmdVel(const NavPara *nav, geometry_msgs::Twist &ctr
             ldfh = idfh = 0;
             ldph = idph = 0;
             last_vx = last_az = 0;
+            if (pricnt % (3 * PCT) == 1)
             ROS_INFO("Reached angle!\n"
                      "dis_err=%6.3f/%6.3f ang_err=%6.3f/%6.3f",
                      ds, maxDisErr, dph, maxAngErr);
@@ -585,53 +596,39 @@ void UartOdomPthread::SubMapReceived(const nav_msgs::OccupancyGridConstPtr &msg)
     int mi = floor(tempGoal.x / msg->info.resolution + 0.5) + msg->info.width / 2;
     int mj = floor(tempGoal.y / msg->info.resolution + 0.5) + msg->info.height / 2;
 
+    int ox = msg->info.width / 2;
+    int oy = msg->info.height / 2;
+
+    zw::Point start(ox, oy);
+    zw::Point end(mi, mj);
+
     aStartPath.points.clear();
 
-    if (mi >= 0 && mi < msg->info.width && mj >= 0 && mj < msg->info.height)
-    {
-        std::vector<std::vector<char>> maze;
-        maze.clear();
-        maze.resize(msg->info.height, std::vector<char>(msg->info.width, -1));
+    std::vector<std::vector<char>> maze;
+    maze.clear();
+    maze.resize(msg->info.height, std::vector<char>(msg->info.width, -1));
 
-        for (int i = 0; i < msg->info.height; i++)
-            for (int j = 0; j < msg->info.width; j++)
-            {
-                maze[j][i] = msg->data[j + i * msg->info.width]; //origin down-left
-            }
+    for (int i = 0; i < msg->info.height; i++)
+        for (int j = 0; j < msg->info.width; j++)
+        {
+            maze[j][i] = msg->data[j + i * msg->info.width]; //origin down-left
+        }
+   // bool getPathflag = true;
+    if (start.x == end.x && start.y == end.y)
+        return;
+    if (maze[end.x][end.y] == zw::kOccGrid)
+    {
+        // if(fabs(end.x ==)
+
+        ROS_INFO("can not reach");
+        return;
+    }
+
+    if ( (end.x >= 0) && (end.x < msg->info.width) && (end.y >= 0) && (end.y < msg->info.height))
+    {
         zw::Astart astar;
         astar.InitAstart(maze);
-        int ox = msg->info.width / 2;
-        int oy = msg->info.height / 2;
-
-        zw::Point start(ox, oy);
-        zw::Point end(mi, mj);
-
-        //    int maxBoundx = floor(boundx / msg->info.resolution + 0.5) + msg->info.width / 2;
-        //    int minBoundx = floor(-boundx / msg->info.resolution + 0.5) + msg->info.width / 2;
-        //    int maxBoundy = floor(boundy / msg->info.resolution + 0.5) + msg->info.height /2;
-        //    int minBoundy = floor(-boundy / msg->info.resolution + 0.5) + msg->info.width / 2;
-
-        if (start.x == end.x && start.y == end.y)
-            return;
-        if (maze[end.x][end.y] == zw::kOccGrid)
-        {
-            // if(fabs(end.x ==)
-
-            ROS_INFO("can not reach");
-            return;
-        }
-
         std::list<zw::Point *> path = astar.GetPath(start, end, false);
-
-        //        ROS_INFO("path %d",(int)path.size());
-        //        for(auto &p:path)
-        //        {
-        //            ROS_INFO("%d ,%d",p->x,p->y);
-        //        }
-        //        ROS_INFO(" ");
-
-        aStartPath.header.frame_id = "map";
-        aStartPath.header.stamp = ros::Time::now();
 
         int pathSize = path.size();
         std::vector<zw::Point *> vpath;
@@ -658,7 +655,6 @@ void UartOdomPthread::SubMapReceived(const nav_msgs::OccupancyGridConstPtr &msg)
             pa.z = 0;
             aStartPath.points.push_back(pa);
         }
-
         getPath = true;
     }
     else
