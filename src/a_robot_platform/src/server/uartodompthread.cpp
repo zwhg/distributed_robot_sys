@@ -377,7 +377,6 @@ void UartOdomPthread::getNavcmd(void)
         m_para.SetAddressValue(car_para);
 
         aStartPath.points.clear();
-
     }
 
     //  ROS_INFO("%d    %d",m_navPara.startNav ,m_navPara.emergeStop );
@@ -389,7 +388,7 @@ void UartOdomPthread::getNavcmd(void)
 void UartOdomPthread::CalNavCmdVel(const NavPara *nav, geometry_msgs::Twist &ctr)
 {
     // 读取上位机发送的PID参数
-    int32_t pid[6] = {20, 5, 0, 50, 5, 5};
+    int32_t pid[6] = {20, 5, 0, 80, 5, 5};
     zw::ParaGetSet para = {R_REGISTER, 6, (ParaAddress)(ADD_PID + 6), pid};
     zw::Paras m_para;
     m_para.GetAddressValue(para);
@@ -401,7 +400,7 @@ void UartOdomPthread::CalNavCmdVel(const NavPara *nav, geometry_msgs::Twist &ctr
     // 计算本次期望位姿
     CarPose nextDest;
     bool isFinalDest;
-    if (aStartPath.points.size() > 0)
+    if (aStartPath.points.size() > 1)
     {
         // 若存在期望路径, 则设定期望位姿为下一个路径点
         nextDest.x = aStartPath.points[0].x;
@@ -473,7 +472,7 @@ void UartOdomPthread::CalNavCmdVel(const NavPara *nav, geometry_msgs::Twist &ctr
 
     if (!reachFinal)
     {
-        // 未停在最终目标位置
+        // 未停在目标位置
         if (fabs(ds) > maxDisErr)
         {
             // 若未到达期望位置
@@ -489,20 +488,24 @@ void UartOdomPthread::CalNavCmdVel(const NavPara *nav, geometry_msgs::Twist &ctr
                 idph = ldph = 0;
                 az = afz;
             }
+            reachFinalCount = 0;
         }
         else
         {
-            // 若到达期望位置, 等待平稳停车
-            reachFinalCount++;
-            if (reachFinalCount > 3)
+            // 若到达最终期望位置, 等待平稳停车
+            if(isFinalDest)
             {
-                reachFinal = true;
-                ROS_INFO("Reached position!\n"
-                        "dis_err=%6.3f/%6.3f ang_err=%6.3f/%6.3f",
-                        ds, maxDisErr, dph, maxAngErr);
+                reachFinalCount++;
+                if (reachFinalCount > 3)
+                {
+                    reachFinal = true;
+                    ROS_INFO("Reached position!\n"
+                            "dis_err=%6.3f/%6.3f ang_err=%6.3f/%6.3f",
+                            ds, maxDisErr, dph, maxAngErr);
+                }
+                vx = 0;
+                az = 0;
             }
-            vx = 0;
-            az = 0;
         }
     }
     else
@@ -628,9 +631,16 @@ void UartOdomPthread::SubMapReceived(const nav_msgs::OccupancyGridConstPtr &msg)
     {
         zw::Astart astar;
         astar.InitAstart(maze);
-        std::list<zw::Point *> path = astar.GetPath(start, end, false);
 
+        std::list<zw::Point *> path = astar.GetPath(start, end, true);
         int pathSize = path.size();
+
+        if(pathSize==0)
+        {
+            ROS_INFO("can not find a path");
+            return ;
+        }
+
         std::vector<zw::Point *> vpath;
 
         for (auto &p : path)

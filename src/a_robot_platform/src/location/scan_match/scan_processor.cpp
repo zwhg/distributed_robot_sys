@@ -88,13 +88,13 @@ void ScanProcessor::GetSubMap(float factor ,const Eigen::Vector3f& finalPose)
 
    subMap.header.stamp=ros::Time::now();
    subMap.data.clear();
-   subMap.data.resize(msize,-1);
+   subMap.data.resize(msize,kUnknownGrid);
 
    std::vector<char> tmp1 ,tmp2;
    tmp1.clear();
    tmp2.clear();
-   tmp1.resize(msize,-1);
-   tmp2.resize(msize,-1);
+   tmp1.resize(msize,kUnknownGrid);
+   tmp2.resize(msize,kUnknownGrid);
 
    for (int i = 0; i < dsize; i++)
    {
@@ -120,6 +120,30 @@ void ScanProcessor::GetSubMap(float factor ,const Eigen::Vector3f& finalPose)
            tmp1[i]=kUnknownGrid;
    }
 
+#if 1
+   int dis=0 ;
+   for(int i=0; i<msize ;i++)
+   {
+       if(tmp1[i]==kOccGrid)
+       {
+           for(int y= -submapExpandCnt; y<=submapExpandCnt; y++)
+           {
+               for(int x= -submapExpandCnt; x<=submapExpandCnt; x++)
+               {
+                   index = i+x+y*w;
+                   if(index>=0 && index<msize)
+                   {
+                        dis = floor(sqrt(x*x +y*y)+0.5);
+                        if(dis < submapExpandCnt)
+                            tmp2[index] = kOccGrid;
+                   }
+               }
+           }
+       }
+   }
+
+#else
+
    for(int k=0;k<submapExpandCnt;k++)
    {
        for(int i=0; i<msize ;i++)
@@ -128,7 +152,7 @@ void ScanProcessor::GetSubMap(float factor ,const Eigen::Vector3f& finalPose)
            if(tmp1[i]==kOccGrid)
            {
                tmp2[i]=kOccGrid;
-#if 0   //8
+#if 1   //8
                index =i-1;
                if(index >=0)
                    tmp2[index]=kOccGrid;
@@ -184,6 +208,7 @@ void ScanProcessor::GetSubMap(float factor ,const Eigen::Vector3f& finalPose)
            tmp1[i] =tmp2[i];
    }
 
+#endif
 
    for(int i=0; i<msize ;i++)
    {
