@@ -38,6 +38,7 @@ private:
   float maxUpAcc;
   float maxBackAcc;
   float fabsdfh;
+  float poseChange;
 
 
 public:

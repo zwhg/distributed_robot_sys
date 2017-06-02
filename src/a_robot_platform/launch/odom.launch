@@ -12,6 +12,7 @@
 <param name="maxUpAcc" value="1"/>
 <param name="maxBackAcc" value="-2"/>
 <param name="fabsdfh" value="0.3"/>
+<param name="poseChange" value="0.05"/>
 
 </node>
 

@@ -12,6 +12,7 @@ static sensor_msgs::PointCloud aStartPath;
 static bool getPath = false;
 static int reachFinalCount = 0;
 static bool reachFinal = false;
+static float poseChangePow2=0;
 
 inline void limit(float &v, float left, float right)
 {
@@ -108,6 +109,10 @@ void *UartOdomPthread::DoPthread(void)
             maxBackAcc = -1;
         if (!nh.getParam("fabsdfh", fabsdfh))
             fabsdfh = 0.2;
+        if (!nh.getParam("poseChange",  poseChange))
+             poseChange = 0.1;
+
+        poseChangePow2 =poseChange*poseChange;
     }
 
     ros::Subscriber key_sub = n.subscribe("cmd_vel", 2, cmd_keyCallback);
@@ -560,6 +565,15 @@ void UartOdomPthread::CalNavCmdVel(const NavPara *nav, geometry_msgs::Twist &ctr
 
 void UartOdomPthread::SubMapReceived(const nav_msgs::OccupancyGridConstPtr &msg)
 {
+    static CarPose lastCarPose={0,0,0};
+    float poseChangePow = (lastCarPose.x-m_navPara.current.x)*(lastCarPose.x-m_navPara.current.x) +
+                          (lastCarPose.y-m_navPara.current.y)*(lastCarPose.y-m_navPara.current.y);
+
+    lastCarPose = m_navPara.current ;
+
+    if(poseChangePow < poseChangePow2)
+        return ;
+
     float submap_fx = m_navPara.desired.x - m_navPara.current.x;
     float submap_fy = m_navPara.desired.y - m_navPara.current.y;
 
